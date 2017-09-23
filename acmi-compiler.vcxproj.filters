@@ -15,35 +15,14 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Acmirec.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AcmiTape.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="acmiUI.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AcmiView.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AcmiCam.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="acmihash.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Acmiloop.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="acmtpinl.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
-    <ClCompile Include="acmvwinl.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
-    <ClCompile Include="acmcminl.cpp">
-      <Filter>Header Files</Filter>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -57,18 +36,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AcmiView.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="acmiCam.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="acmictrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AcmiDrive.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="acmihash.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="codelib\tools\lists\lists.h">
@@ -87,9 +54,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="apitypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vu2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FalcEnt.h">

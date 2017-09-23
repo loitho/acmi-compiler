@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "FalcMesg.h"
-
+#include "codelib\tools\lists\lists.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -464,42 +464,42 @@ public:
 
 	// Prototype of an ACMI_GENERAL_EVENT_CALLBACK:
 	// void PoopooCB(ACMITape *tape, EventIdData id, void *eventData, void *userData);
-	void SetGeneralEventCallbacks
-	(
-		ACMI_GENERAL_EVENT_CALLBACK forwardEventCallback,
-		ACMI_GENERAL_EVENT_CALLBACK reverseEventCallback,
-		void *userData
-	);
+	//void SetGeneralEventCallbacks
+	//(
+	//	ACMI_GENERAL_EVENT_CALLBACK forwardEventCallback,
+	//	ACMI_GENERAL_EVENT_CALLBACK reverseEventCallback,
+	//	void *userData
+	//);
 
 	// Was the tape file found and opened successfully?
-	BOOL IsLoaded();
+	//BOOL IsLoaded();
 
 	// Is the tape paused?
-	BOOL IsPaused() ;
+	// IsPaused() ;
 
 	// Playback controls.
-	void Play();
-	void Pause();
+	//void Play();
+	//void Pause();
 	
 	// Step in sim time.
-	void StepTime(float numSeconds);
+	//void StepTime(float numSeconds);
 
 	// return a sim time based on pct into tape parm is
 	//float GetNewSimTime( float pct );
 	
 	// Play speed controls.
 	// This is a ratio of sim time / real time.
-	void SetPlayVelocity(float n);
-	float PlayVelocity() ;
+	//void SetPlayVelocity(float n);
+	//float PlayVelocity() ;
 
 	// Increase in play velocity per second of real time.
-	void SetPlayAcceleration(float n);
-	float PlayAcceleration() ;
+	//void SetPlayAcceleration(float n);
+	//float PlayAcceleration() ;
 
 	// This will be used to clamp play velocity.
 	// It will be clamped to (-fabs(speed) <= velocity <= fabs(speed));
-	void SetMaxPlaySpeed(float n);
-	float MaxPlaySpeed() ;
+	//void SetMaxPlaySpeed(float n);
+	//float MaxPlaySpeed() ;
 
 	// Set the read head position.  This should be a number 
 	// from 0 to 1 (0 = beginning of tape, 1 = end of tape).
@@ -508,8 +508,8 @@ public:
 	//float HeadPosition() ;
 
 	// This gives the current simulation time.
-	float SimTime() ;
-	float GetTapePercent() ;
+	//float SimTime() ;
+	//float GetTapePercent() ;
 
 	//void Update( float newSimTime );
 
@@ -553,20 +553,20 @@ public:
 		return _deltaSimTime;
 	};
 
-	void SetWingTrails( BOOL val );
+	//void SetWingTrails( BOOL val );
 
 	void SetWingTrailLength( int val )
 	{
 		_wtMaxLength = val;
 	};
 
-	void * GetTextEvents( int *count );
-	void * GetCallsignList(long *count);
+	//void * GetTextEvents( int *count );
+	//void * GetCallsignList(long *count);
 
 
 	// list of sim entities from the tape that are manipulated and drawn
 	SimTapeEntity						*_simTapeEntities;
-	ACMIEntityData *EntityData(int index);
+	//ACMIEntityData *EntityData(int index);
 
 	float GetTodOffset( void )
 	{
@@ -581,61 +581,61 @@ private:
 	static void ParseEntities ( void );
 	static void ThreadEntityPositions( ACMITapeHeader *tapeHdr );
 	static void ThreadEntityEvents( ACMITapeHeader *tapeHdr );
-	static void ImportTextEventList( FILE *fd, ACMITapeHeader *tapeHdr );
+	//static void ImportTextEventList( FILE *fd, ACMITapeHeader *tapeHdr );
 
 	// Get at the entity data.
-	ACMIEntityData *FeatureData(int index);
-	ACMIEntityPositionData *CurrentFeaturePositionHead(int i);
+	/*ACMIEntityData *FeatureData(int index);
+	ACMIEntityPositionData *CurrentFeaturePositionHead(int i);*/
 
 	// Traverse an entity's position update thread.
-	ACMIEntityPositionData *CurrentEntityPositionHead(int i);
-	ACMIEntityPositionData *CurrentEntityEventHead(int i);
-	ACMIEntityPositionData *HeadNext(ACMIEntityPositionData *current);
-	ACMIEntityPositionData *HeadPrev(ACMIEntityPositionData *current);
+	//ACMIEntityPositionData *CurrentEntityPositionHead(int i);
+	//ACMIEntityPositionData *CurrentEntityEventHead(int i);
+	//ACMIEntityPositionData *HeadNext(ACMIEntityPositionData *current);
+	//ACMIEntityPositionData *HeadPrev(ACMIEntityPositionData *current);
 
 	// Traverse an event thread.
-	ACMIEventHeader *GeneralEventData(void);
+	/*ACMIEventHeader *GeneralEventData(void);
 	ACMIEventHeader *GetGeneralEventData(int i);
 	ACMIEventHeader *Next(ACMIEventHeader *current);
-	ACMIEventHeader *Prev(ACMIEventHeader *current);
+	ACMIEventHeader *Prev(ACMIEventHeader *current);*/
 
-	ACMIEventTrailer *GeneralEventTrailer(void);
-	ACMIEventTrailer *Next(ACMIEventTrailer *current);
-	ACMIEventTrailer *Prev(ACMIEventTrailer *current);
+	//ACMIEventTrailer *GeneralEventTrailer(void);
+	//ACMIEventTrailer *Next(ACMIEventTrailer *current);
+	//ACMIEventTrailer *Prev(ACMIEventTrailer *current);
 
-	ACMIFeatEvent *CurrFeatEvent(void);
-	ACMIFeatEvent *Next(ACMIFeatEvent *current);
-	ACMIFeatEvent *Prev(ACMIFeatEvent *current);
+	//ACMIFeatEvent *CurrFeatEvent(void);
+	//ACMIFeatEvent *Next(ACMIFeatEvent *current);
+	//ACMIFeatEvent *Prev(ACMIFeatEvent *current);
 
 	// Advance heads to current sim time.
-	void AdvanceEntityPositionHead(int index);
-	void AdvanceEntityEventHead(int index);
-	void AdvanceGeneralEventHead( void );
-	void AdvanceGeneralEventHeadHeader( void );
-	void AdvanceGeneralEventHeadTrailer( void );
-	void AdvanceFeatEventHead( void );
-	void AdvanceAllHeads( void );
+	//void AdvanceEntityPositionHead(int index);
+	//void AdvanceEntityEventHead(int index);
+	//void AdvanceGeneralEventHead( void );
+	//void AdvanceGeneralEventHeadHeader( void );
+	//void AdvanceGeneralEventHeadTrailer( void );
+	//void AdvanceFeatEventHead( void );
+	//void AdvanceAllHeads( void );
 
 	// Entity setup and cleanup
-	void SetupSimTapeEntities( void );
-	void CleanupSimTapeEntities( void );
+	/*void SetupSimTapeEntities( void );
+	void CleanupSimTapeEntities( void );*/
 
 	// open the tape file and setup memory mapping
-	long OpenTapeFile( char *fname ); // returns tape length
-	void CloseTapeFile( void );
+	//long OpenTapeFile( char *fname ); // returns tape length
+	//void CloseTapeFile( void );
 
 	// event list related functions
-	void CleanupEventList( void );
-	ActiveEvent *InsertActiveEvent( ACMIEventHeader *, float dT );
-	void RemoveActiveEvent( ActiveEvent ** );
-	void UpdateActiveEvents( void );
+	//void CleanupEventList( void );
+	//ActiveEvent *InsertActiveEvent( ACMIEventHeader *, float dT );
+	//void RemoveActiveEvent( ActiveEvent ** );
+	//void UpdateActiveEvents( void );
 
 	// create/update feature drawables
-	void CreateFeatureDrawable( SimTapeEntity *feat );
-	SimBaseClass *FindComponentFeature( long leadIndex, int slot );
+	/*void CreateFeatureDrawable( SimTapeEntity *feat );
+	SimBaseClass *FindComponentFeature( long leadIndex, int slot );*/
 
 	// update tracer data
-	void UpdateTracerEvent( TracerEventData *td, float dT );
+	//void UpdateTracerEvent( TracerEventData *td, float dT );
 
 	// tape header
 	ACMITapeHeader						_tapeHdr;

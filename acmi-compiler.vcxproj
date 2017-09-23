@@ -111,23 +111,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="acmcminl.cpp" />
-    <ClCompile Include="AcmiCam.cpp" />
-    <ClCompile Include="acmihash.cpp" />
-    <ClCompile Include="Acmiloop.cpp" />
-    <ClCompile Include="Acmirec.cpp" />
     <ClCompile Include="AcmiTape.cpp" />
-    <ClCompile Include="acmiUI.cpp" />
-    <ClCompile Include="AcmiView.cpp" />
     <ClCompile Include="acmtpinl.cpp" />
-    <ClCompile Include="acmvwinl.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Downloads\FalconSPsc\FalconSP\CAMPAIGN\INCLUDE\EvtParse.h" />
-    <ClInclude Include="acmiCam.h" />
-    <ClInclude Include="acmictrl.h" />
-    <ClInclude Include="AcmiDrive.h" />
-    <ClInclude Include="acmihash.h" />
     <ClInclude Include="Acmirec.h" />
     <ClInclude Include="AcmiTape.h" />
     <ClInclude Include="AcmiUI.h" />
@@ -139,7 +128,6 @@
     <ClInclude Include="F4VU.h" />
     <ClInclude Include="FalcEnt.h" />
     <ClInclude Include="Falcmesg.h" />
-    <ClInclude Include="vu2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

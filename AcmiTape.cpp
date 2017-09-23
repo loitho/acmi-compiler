@@ -114,6 +114,11 @@ long import_count=0;
 //extern GLOBAL_ALTITUDE;
 //extern GLOBAL_HEADING;
 
+
+
+
+
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -231,6 +236,16 @@ void DeleteACMIFeatEventImportData(ACMIFeatEventImportData *data)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+inline int ACMITape::NumEntities()
+{
+	// F4Assert(_tape != NULL);
+
+	return _tapeHdr.numEntities;
+}
+
+
+
+
 ACMITape::ACMITape(char *name, RenderOTW *renderer, RViewPoint *viewPoint )
 {
 	int i, numEntities;
@@ -246,7 +261,7 @@ ACMITape::ACMITape(char *name, RenderOTW *renderer, RViewPoint *viewPoint )
 	DrawablePoled::InitializeStorage();
 	#endif
 
-	F4Assert(name != NULL);
+	//F4Assert(name != NULL);
 
 	_tape = NULL;
 	_entityReadHeads = NULL;
@@ -275,103 +290,14 @@ ACMITape::ACMITape(char *name, RenderOTW *renderer, RViewPoint *viewPoint )
 
 	// commented out if statement for quick testing....
  	// if ( Import( fullName ) )
-	{
+	
 		// create the memory mapping
-		length=OpenTapeFile( fullName );
+		//length=OpenTapeFile( fullName );
 
 		// just test
-		if ( IsLoaded() )
-		{
-			numEntities = NumEntities();
-
-			for ( i= 0; i < numEntities; i++ )
-			{
-				e = EntityData( i );
-				MonoPrint( "Entity %d: Type = %d, Id = %d, Offset = %d\n",
-							i,
-							e->type,
-							e->uniqueID,
-							e->firstPositionDataOffset );
-	
-			
-			}
-
-			// CloseTapeFile();
-		}
-		else
-		{
-			MonoPrint( "Unable to test memory mapped tape file\n" );
-		}
-	}
-
+		
 	// If it loaded, do any additional setup.
-	if(IsLoaded())
-	{
-		// Setup Callsigns...
-		callsigns=(char*)GetCallsignList(&numcalls);
-		if(((char *)callsigns - (char *)_tape) < length && numcalls > 0) // there are callsigns...
-		{
-			ACMI_Callsigns=new ACMI_CallRec[numcalls];
-			memcpy(ACMI_Callsigns,callsigns,sizeof(ACMI_CallRec)*numcalls);
-		}
-
-		numEntities = NumEntities();
-
-		// Setup entity event callbacks. and read heads
-		_entityReadHeads = new ACMIEntityReadHead[numEntities];
-		F4Assert(_entityReadHeads != NULL);
-
-		for(i = 0; i < numEntities; i++)
-		{
-			// set the read heads to the first position
-			e = EntityData( i );
-			_entityReadHeads[i].positionDataOffset = e->firstPositionDataOffset;
-			_entityReadHeads[i].eventDataOffset = e->firstEventDataOffset;
-		}
-
-		// Setup general event callbacks.
-		SetGeneralEventCallbacks
-		(
-			DefaultForwardACMIGeneralEventCallback,
-			DefaultReverseACMIGeneralEventCallback,
-			NULL
-		);
-
-		// setup the sim tape entities
-		SetupSimTapeEntities();
-
-		// create an array of ActiveEvent pointers -- 1 for every event
-		_eventList = new ActiveEvent * [ _tapeHdr.numEvents ];
-		// make sure they're null
-		memset( _eventList, 0, sizeof( ActiveEvent * ) * _tapeHdr.numEvents );
-
-		// set the first and last event trailer pointers
-		if ( _tapeHdr.numEvents == 0 )
-		{
-			_firstEventTrailer = NULL;
-			_lastEventTrailer = NULL;
-		}
-		else
-		{
-			_firstEventTrailer = (ACMIEventTrailer *)( (char *)_tape + _tapeHdr.firstEventTrailerOffset );
-			_lastEventTrailer = _firstEventTrailer + (_tapeHdr.numEvents - 1);
-		}
-
-		_generalEventReadHeadTrailer = _firstEventTrailer;
-
-		if ( _tapeHdr.numFeatEvents == 0 )
-		{
-			_firstFeatEvent = NULL;
-			_lastFeatEvent = NULL;
-		}
-		else
-		{
-			_firstFeatEvent = (ACMIFeatEvent *)( (char *)_tape + _tapeHdr.firstFeatEventOffset );
-			_lastFeatEvent = _firstFeatEvent + (_tapeHdr.numFeatEvents - 1);
-		}
-
-		_featEventReadHead = _firstFeatEvent;
-	}
+	
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -408,25 +334,25 @@ void ACMITape::Init()
 
 	if(_simTapeEntities)
 	{
-		CleanupSimTapeEntities();
+		//CleanupSimTapeEntities();
 	}
 
 	if ( _eventList )
 	{
-		CleanupEventList( );
+		//CleanupEventList( );
 	}
 
-	SetGeneralEventCallbacks
-	(
-		NULL,
-		NULL,
-		NULL
-	);
+	//SetGeneralEventCallbacks
+	//(
+	//	NULL,
+	//	NULL,
+	//	NULL
+	//);
 
 	if(_tape)
 	{
 		// close file mapping.
-		CloseTapeFile();
+		//CloseTapeFile();
 	}
 
 	_playVelocity = 0.0;
@@ -662,9 +588,9 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				else
 					tempTarget = -1;
 				// Allocate a new data node.
-				F4Assert(rawPositionData == NULL);
+				//F4Assert(rawPositionData == NULL);
 				rawPositionData = new ACMIRawPositionData;
-				F4Assert(rawPositionData != NULL);
+				//F4Assert(rawPositionData != NULL);
 		
 				// fill in raw position data
 				rawPositionData->uniqueID = genpos.uniqueID;
@@ -711,9 +637,9 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				}
 
 				// Allocate a new data node.
-				F4Assert(ehdr == NULL);
+				//F4Assert(ehdr == NULL);
 				ehdr = new ACMIEventHeader;
-				F4Assert(ehdr != NULL);
+				//F4Assert(ehdr != NULL);
 
 				// fill in data
 				ehdr->eventType = hdr.type;
@@ -744,9 +670,9 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				}
 
 				// Allocate a new data node.
-				F4Assert(ehdr == NULL);
+				//F4Assert(ehdr == NULL);
 				ehdr = new ACMIEventHeader;
-				F4Assert(ehdr != NULL);
+				//F4Assert(ehdr != NULL);
 
 				// fill in data
 				ehdr->eventType = hdr.type;
@@ -777,9 +703,9 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				}
 
 				// Allocate a new data node.
-				F4Assert(fedata == NULL);
+				//F4Assert(fedata == NULL);
 				fedata = new ACMIFeatEventImportData;
-				F4Assert(fedata != NULL);
+				//F4Assert(fedata != NULL);
 
 				// fill in data
 				fedata->uniqueID = fs.uniqueID;
@@ -807,9 +733,9 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				}
 
 				// Allocate a new data node.
-				F4Assert(ehdr == NULL);
+				//F4Assert(ehdr == NULL);
 				ehdr = new ACMIEventHeader;
-				F4Assert(ehdr != NULL);
+				//F4Assert(ehdr != NULL);
 
 				// fill in data
 				ehdr->eventType = hdr.type;
@@ -846,9 +772,9 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				}
 
 				// Allocate a new data node.
-				F4Assert(rawPositionData == NULL);
+				//F4Assert(rawPositionData == NULL);
 				rawPositionData = new ACMIRawPositionData;
-				F4Assert(rawPositionData != NULL);
+				//F4Assert(rawPositionData != NULL);
 		
 				// fill in raw position data
 				rawPositionData->uniqueID = sd.uniqueID;
@@ -881,9 +807,9 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				}
 
 				// Allocate a new data node.
-				F4Assert(rawPositionData == NULL);
+				//F4Assert(rawPositionData == NULL);
 				rawPositionData = new ACMIRawPositionData;
-				F4Assert(rawPositionData != NULL);
+				//F4Assert(rawPositionData != NULL);
 		
 				// fill in raw position data
 				rawPositionData->uniqueID = dd.uniqueID;
@@ -916,9 +842,9 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				}
 
 				// Allocate a new data node.
-				F4Assert(rawPositionData == NULL);
+				//F4Assert(rawPositionData == NULL);
 				rawPositionData = new ACMIRawPositionData;
-				F4Assert(rawPositionData != NULL);
+				//F4Assert(rawPositionData != NULL);
 		
 				// fill in raw position data
 				rawPositionData->uniqueID = featpos.uniqueID;
@@ -954,9 +880,9 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 					return FALSE;
 				}
 
-				F4Assert(Import_Callsigns == NULL);
+				//F4Assert(Import_Callsigns == NULL);
 				Import_Callsigns=new ACMI_CallRec[import_count];
-				F4Assert(Import_Callsigns != NULL);
+				//F4Assert(Import_Callsigns != NULL);
 
 				if(!fread(Import_Callsigns,import_count * sizeof(ACMI_CallRec),1,flightFile))
 				{
@@ -1038,7 +964,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 
 	// now delete the acmi.flt file
 	//remove("campaign\\save\\fltfiles\\acmi.flt");
-	remove(inFltFile);
+	//remove(inFltFile);
 				
 	return TRUE;
 }
@@ -1093,7 +1019,7 @@ void ACMITape::ParseEntities ( void )
 				importEntityInfo = new ACMIEntityData;
 				importEntityInfo->count =0;
 
-				F4Assert( importEntityInfo );
+				//F4Assert( importEntityInfo );
 				importEntityInfo->uniqueID = entityType->uniqueID;
 				importEntityInfo->type = entityType->type;
 				importEntityInfo->flags = entityType->flags;
@@ -1129,7 +1055,7 @@ void ACMITape::ParseEntities ( void )
 				importEntityInfo = new ACMIEntityData;
 				importEntityInfo->count =0;
 
-				F4Assert( importEntityInfo );
+				//F4Assert( importEntityInfo );
 				importEntityInfo->uniqueID = entityType->uniqueID;
 				importEntityInfo->type = entityType->type;
 				importEntityInfo->flags = entityType->flags;
@@ -1578,7 +1504,7 @@ void ACMITape::WriteTapeFile ( char *fname, ACMITapeHeader *tapeHdr )
 
 	// allocate the trailer list
 	importEventTrailerList = new ACMIEventTrailer[importNumEvents];
-	F4Assert( importEventTrailerList );
+	//F4Assert( importEventTrailerList );
 
 	// write out the events
 	eventListPtr = importEventList;
@@ -1629,7 +1555,7 @@ void ACMITape::WriteTapeFile ( char *fname, ACMITapeHeader *tapeHdr )
 	}
 
 	// finally import and write out the text events
-	ImportTextEventList( tapeFile, tapeHdr );
+	//ImportTextEventList( tapeFile, tapeHdr );
 
 	// normal exit
 	fclose( tapeFile );
@@ -3415,23 +3341,23 @@ error_exit:
 /*
 ** Makes sure all memory used by events is free'd up
 */
-void ACMITape::CleanupEventList( void )
-{
-	int i;
-
-	F4Assert( _eventList );
-
-	for ( i = 0; i < _tapeHdr.numEvents; i++ )
-	{
-		if ( _eventList[i] )
-		{
-			RemoveActiveEvent( &_eventList[i] );
-		}
-	}
-
-	delete [] _eventList;
-	_eventList = NULL;
-}
+//void ACMITape::CleanupEventList( void )
+//{
+//	int i;
+//
+//	F4Assert( _eventList );
+//
+//	for ( i = 0; i < _tapeHdr.numEvents; i++ )
+//	{
+//		if ( _eventList[i] )
+//		{
+//			RemoveActiveEvent( &_eventList[i] );
+//		}
+//	}
+//
+//	delete [] _eventList;
+//	_eventList = NULL;
+//}
 
 /*
 **	Takes the acmi info passed in from the tape and creates an
