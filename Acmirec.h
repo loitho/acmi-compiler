@@ -10,9 +10,9 @@
 #ifndef _ACMIREC_H_
 #define _ACMIREC_H_
 
-#include "f4thread.h"
+//#include "f4thread.h"
 #include "tchar.h"
-#include "acmi\src\include\acmihash.h"
+//#include "acmihash.h"
 
 #define RECORD_DIR "acmibin\\"
 //#define RECORD_DIR "campaign\\save\\fltfiles\\"
@@ -341,7 +341,7 @@ private:
 	FILE 				*_fd;
 
 	// we need synchronization for writes
-	F4CSECTIONHANDLE*	_csect;
+	//F4CSECTIONHANDLE*	_csect;
 
 	BOOL				_recording;
 
@@ -361,7 +361,7 @@ struct ACMI_CallRec
 
 extern ACMI_CallRec *ACMI_Callsigns;
 extern ACMIRecorder gACMIRec;
-extern ACMI_Hash    *ACMIIDTable;
+//extern ACMI_Hash    *ACMIIDTable;
 
 #endif  // _ACMIREC_H_
 

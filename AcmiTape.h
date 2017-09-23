@@ -482,7 +482,7 @@ public:
 	void StepTime(float numSeconds);
 
 	// return a sim time based on pct into tape parm is
-	float GetNewSimTime( float pct );
+	//float GetNewSimTime( float pct );
 	
 	// Play speed controls.
 	// This is a ratio of sim time / real time.
@@ -501,34 +501,34 @@ public:
 	// Set the read head position.  This should be a number 
 	// from 0 to 1 (0 = beginning of tape, 1 = end of tape).
 	// The input value will be clamped to fit this range.
-	void SetHeadPosition(float t);
-	float HeadPosition() ;
+	//void SetHeadPosition(float t);
+	//float HeadPosition() ;
 
 	// This gives the current simulation time.
 	float SimTime() ;
 	float GetTapePercent() ;
 
-	void Update( float newSimTime );
+	//void Update( float newSimTime );
 
 	// YPR interpolation
-	float AngleInterp( float begAng, float endAng, float dT );
+	//float AngleInterp( float begAng, float endAng, float dT );
 
 	// access function for sim tape entity
-	SimTapeEntity *GetSimTapeEntity( int index );
+	/*SimTapeEntity *GetSimTapeEntity( int index );*/
 
 	// does entity exist at current read head
-	BOOL IsEntityInFrame( int index );
-	void InsertEntityInFrame( int index );
-	void RemoveEntityFromFrame( int index );
+	//BOOL IsEntityInFrame( int index );
+	//void InsertEntityInFrame( int index );
+	//void RemoveEntityFromFrame( int index );
 
 	// get the entity's current radar target (entity index returned)
-	int GetEntityCurrentTarget( int index );
+	//int GetEntityCurrentTarget( int index );
 
 	// update sim tape Entities for this frame
-	void UpdateSimTapeEntities( void );
+	//void UpdateSimTapeEntities( void );
 
 	// sets the draw position and matrix for bsp update
-	void ObjectSetData(SimBaseClass*, Tpoint*, Trotation*);
+	//void ObjectSetData(SimBaseClass*, Tpoint*, Trotation*);
 
 	void SetScreenCapturing( BOOL val )
 	{

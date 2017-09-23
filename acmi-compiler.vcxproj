@@ -130,9 +130,14 @@
     <ClInclude Include="AcmiTape.h" />
     <ClInclude Include="AcmiUI.h" />
     <ClInclude Include="AcmiView.h" />
+    <ClInclude Include="apitypes.h" />
     <ClInclude Include="codelib\tools\lists\lists.h" />
     <ClInclude Include="codelib\tools\lists\omni.h" />
     <ClInclude Include="F4error.h" />
+    <ClInclude Include="F4VU.h" />
+    <ClInclude Include="FalcEnt.h" />
+    <ClInclude Include="Falcmesg.h" />
+    <ClInclude Include="vu2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

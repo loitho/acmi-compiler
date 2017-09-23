@@ -80,5 +80,20 @@
     <ClInclude Include="F4error.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Falcmesg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="F4VU.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="apitypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vu2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FalcEnt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
