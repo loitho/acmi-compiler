@@ -95,5 +95,8 @@
     <ClInclude Include="FalcEnt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\Downloads\FalconSPsc\FalconSP\CAMPAIGN\INCLUDE\EvtParse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

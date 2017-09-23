@@ -74,6 +74,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -122,6 +123,7 @@
     <ClCompile Include="acmvwinl.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\Downloads\FalconSPsc\FalconSP\CAMPAIGN\INCLUDE\EvtParse.h" />
     <ClInclude Include="acmiCam.h" />
     <ClInclude Include="acmictrl.h" />
     <ClInclude Include="AcmiDrive.h" />

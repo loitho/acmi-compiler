@@ -4,6 +4,9 @@
 // Modified SEVERAL TIMES SINCE... various people
 #pragma optimize( "", off )
 
+// STFU _CRT_SECURE_NO_WARNINGS
+#pragma warning(disable:4996)
+
 #include <windows.h>
 #include <conio.h>
 #include <stdio.h>
@@ -36,7 +39,7 @@
 #include "acmirec.h"
 //#include "sim\include\simfeat.h"
 //#include "Campaign\include\CmpGlobl.h"
-//#include "Campaign\include\evtparse.h"
+//#include "evtparse.h"
 //#include "ClassTbl.h"
 //#include "Entity.h"
 //#include "ui\include\events.h"
