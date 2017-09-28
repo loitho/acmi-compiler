@@ -440,6 +440,7 @@ public:
 	// so we don't have to pass them in.
 	static BOOL Import(char *inFltFile, char *outTapeFileName);
 	static void WriteTapeFile ( char *fname, ACMITapeHeader *tapeHdr );
+
 	
 	// Time-independent entity access.
 	int NumEntities() ;
@@ -581,7 +582,7 @@ private:
 	static void ParseEntities ( void );
 	static void ThreadEntityPositions( ACMITapeHeader *tapeHdr );
 	static void ThreadEntityEvents( ACMITapeHeader *tapeHdr );
-	//static void ImportTextEventList( FILE *fd, ACMITapeHeader *tapeHdr );
+	static void ImportTextEventList( FILE *fd, ACMITapeHeader *tapeHdr );
 
 	// Get at the entity data.
 	/*ACMIEntityData *FeatureData(int index);

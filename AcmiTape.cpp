@@ -14,6 +14,7 @@
 #include <string.h>
 #include <direct.h>
 #include <tchar.h>
+#include <iostream>
 
 /*#include "Graphics\Include\Setup.h"
 #include "Graphics\Include\drawsgmt.h"
@@ -564,6 +565,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	MonoPrint("ACMITape Import: Reading Raw Data ....\n");
 	while( fread(&hdr, sizeof( ACMIRecHeader ), 1, flightFile ) )
 	{
+		
 		// now read in the rest of the record depending on type
 		switch( hdr.type )
 		{
@@ -577,6 +579,9 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 			case ACMIRecFlarePosition:
 			case ACMIRecAircraftPosition:
 		
+
+				//std::cout << "boop" << std::endl;
+
 				// Read the data
 				if ( !fread( &genpos, sizeof( ACMIGenPositionData ), 1, flightFile ) )
 				{
@@ -591,7 +596,8 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				//F4Assert(rawPositionData == NULL);
 				rawPositionData = new ACMIRawPositionData;
 				//F4Assert(rawPositionData != NULL);
-		
+
+				//std::cout << "boop" << std::endl;
 				// fill in raw position data
 				rawPositionData->uniqueID = genpos.uniqueID;
 				rawPositionData->type = genpos.type;
@@ -1555,7 +1561,7 @@ void ACMITape::WriteTapeFile ( char *fname, ACMITapeHeader *tapeHdr )
 	}
 
 	// finally import and write out the text events
-	//ImportTextEventList( tapeFile, tapeHdr );
+	ImportTextEventList( tapeFile, tapeHdr );
 
 	// normal exit
 	fclose( tapeFile );
@@ -3818,83 +3824,84 @@ DestroyTheList( LIST * list )
 **		Reads the event file and writes out associated text events with
 **		the tape.
 */
-//void
-//ACMITape::ImportTextEventList( FILE *fd, ACMITapeHeader *tapeHdr )
-//{
-//	EventElement *cur;
-//	long ret;
-//	ACMITextEvent te;
-//	char timestr[20];
-//
-//	tapeHdr->numTextEvents = 0;
-//
-//	cur = ProcessEventListForACMI();
-//
-//	memset(&te,0,sizeof(ACMITextEvent));
-//
-//	// PJW Totally rewrote event debriefing stuff... thus the new code
-//	while ( cur )
-//	{
-//		te.intTime = cur->eventTime;
-//		GetTimeString(cur->eventTime, timestr);
-//
-//		_tcscpy(te.timeStr,timestr + 3);
-//		_tcscpy(te.msgStr,cur->eventString);
-//
-//		// KCK: Edit out some script info which is used in debreiefings
-//		_TCHAR	*strptr = _tcschr(te.msgStr,'@');
-//		if (strptr)
-//		{
-//			strptr[0] = ' ';
-//			strptr[1] = '-';
-//			strptr[2] = ' ';
-//		}
-//
-//		ret = fwrite( &te, sizeof( ACMITextEvent ), 1, fd );
-//		if ( !ret )
-//		{
-//			MonoPrint( "Error writing TAPE event element\n" );
-//			break;
-//		}
-//		tapeHdr->numTextEvents++;
-//
-//		// next one
-//		cur = cur->next;
-//
-//	} // end for events loop
-//
-//
-//	// write callsign list
-//	if(Import_Callsigns)
-//	{
-//		ret = fwrite(&import_count, sizeof(long),1, fd );
-//		if ( !ret )
-//	 		goto error_exit;
-//
-//		ret = fwrite(Import_Callsigns, import_count * sizeof(ACMI_CallRec),1, fd );
-//		if ( !ret )
-//	 		goto error_exit;
-//	}
-//
-//	// write the header again (bleck)
-//	ret = fseek( fd, 0, SEEK_SET );
-//	if ( ret )
-//	{
-//		MonoPrint( "Error seeking TAPE start\n" );
-//		goto error_exit;
-//	}
-//	ret = fwrite( tapeHdr, sizeof( ACMITapeHeader ), 1, fd );
-//	if ( !ret )
-//	{
-//		MonoPrint( "Error writing TAPE header again\n" );
-//	}
-//
-//error_exit:
-//	// free up mem
-//	// DisposeEventList(evList);
-//	ClearSortedEventList();
-//
-//}
+void
+ACMITape::ImportTextEventList( FILE *fd, ACMITapeHeader *tapeHdr )
+{
+	//EventElement *cur = NULL;
+	long ret;
+	ACMITextEvent te;
+	char timestr[20];
+
+	tapeHdr->numTextEvents = 0;
+
+	//cur = ProcessEventListForACMI();
+
+	memset(&te,0,sizeof(ACMITextEvent));
+
+	// PJW Totally rewrote event debriefing stuff... thus the new code
+	//while ( cur )
+	//{
+	//	te.intTime = cur->eventTime;
+	//	GetTimeString(cur->eventTime, timestr);
+
+	//	_tcscpy(te.timeStr,timestr + 3);
+	//	_tcscpy(te.msgStr,cur->eventString);
+
+	//	// KCK: Edit out some script info which is used in debreiefings
+	//	_TCHAR	*strptr = _tcschr(te.msgStr,'@');
+	//	if (strptr)
+	//	{
+	//		strptr[0] = ' ';
+	//		strptr[1] = '-';
+	//		strptr[2] = ' ';
+	//	}
+
+	//	ret = fwrite( &te, sizeof( ACMITextEvent ), 1, fd );
+	//	if ( !ret )
+	//	{
+	//		MonoPrint( "Error writing TAPE event element\n" );
+	//		break;
+	//	}
+	//	tapeHdr->numTextEvents++;
+
+	//	// next one
+	//	cur = cur->next;
+
+	//} // end for events loop
+
+
+	// write callsign list
+	if(Import_Callsigns)
+	{
+		ret = fwrite(&import_count, sizeof(long),1, fd );
+		if ( !ret )
+	 		goto error_exit;
+
+		ret = fwrite(Import_Callsigns, import_count * sizeof(ACMI_CallRec),1, fd );
+		if ( !ret )
+	 		goto error_exit;
+	}
+
+	// write the header again (bleck)
+	ret = fseek( fd, 0, SEEK_SET );
+	if ( ret )
+	{
+		MonoPrint( "Error seeking TAPE start\n" );
+		goto error_exit;
+	}
+	ret = fwrite( tapeHdr, sizeof( ACMITapeHeader ), 1, fd );
+	if ( !ret )
+	{
+		MonoPrint( "Error writing TAPE header again\n" );
+	}
+
+error_exit:
+	return;
+	// free up mem
+	// DisposeEventList(evList);
+	//ClearSortedEventList();
+
+}
 
 
 /*
