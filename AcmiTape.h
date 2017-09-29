@@ -561,7 +561,7 @@ public:
 		_wtMaxLength = val;
 	};
 
-	//void * GetTextEvents( int *count );
+	void * GetTextEvents( int *count );
 	//void * GetCallsignList(long *count);
 
 
@@ -583,6 +583,8 @@ private:
 	static void ThreadEntityPositions( ACMITapeHeader *tapeHdr );
 	static void ThreadEntityEvents( ACMITapeHeader *tapeHdr );
 	static void ImportTextEventList( FILE *fd, ACMITapeHeader *tapeHdr );
+
+	
 
 	// Get at the entity data.
 	/*ACMIEntityData *FeatureData(int index);

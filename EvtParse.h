@@ -22,12 +22,19 @@
 // Defines
 // ============================
 
+typedef ulong CampaignTime;
+#define CampaignSeconds   1000
+#define CampaignMinutes  60000
+#define CampaignHours  3600000
+#define CampaignDay   86400000
+
+
 #define MAX_EVENT_STRING_LEN		128			// Maximum string length of an event string
 
 // ============================
 // Event Structure
 // ============================
-
+typedef char            _TCHAR;
 class EventElement
 {
 #ifdef USE_SH_POOLS
@@ -44,6 +51,9 @@ public:
 	EventElement (void)			{};
 	~EventElement (void)		{};
 
+
+//	CampaignTime	eventTime;
+//	_TCHAR			eventString[MAX_EVENT_STRING_LEN];
 	// This data is used to build event lists
 	VU_ID			vuIdData1;
 	VU_ID			vuIdData2;

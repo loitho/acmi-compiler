@@ -24,6 +24,9 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="events.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Acmirec.h">
@@ -59,7 +62,13 @@
     <ClInclude Include="FalcEnt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\Downloads\FalconSPsc\FalconSP\CAMPAIGN\INCLUDE\EvtParse.h">
+    <ClInclude Include="EvtParse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="events.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="misseval.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

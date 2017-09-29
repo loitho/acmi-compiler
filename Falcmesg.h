@@ -1,7 +1,7 @@
 #ifndef _FALCLIB_H
 #define _FALCLIB_H
 
-//#include "F4Vu.h"
+#include "F4Vu.h"
 
 #pragma pack (1)
 
@@ -17,9 +17,9 @@ typedef struct
    ushort type;
 } EventIdData;
 
-#pragma pack ()
+//#pragma pack ()
 
-extern FILE* F4EventFile;
+//extern FILE* F4EventFile;
 
 // ==================================
 // Falcon 4 Event stuff

@@ -3,7 +3,7 @@
 #ifndef _APITYPES_H_
 #define _APITYPES_H_
 
-#include "vu2/include/vumath.h"
+//#include "vu2/include/vumath.h"
 #include "stdlib.h"
 
 #ifdef USE_SH_POOLS

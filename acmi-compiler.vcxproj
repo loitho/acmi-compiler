@@ -113,10 +113,10 @@
   <ItemGroup>
     <ClCompile Include="AcmiTape.cpp" />
     <ClCompile Include="acmtpinl.cpp" />
+    <ClCompile Include="events.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\Downloads\FalconSPsc\FalconSP\CAMPAIGN\INCLUDE\EvtParse.h" />
     <ClInclude Include="Acmirec.h" />
     <ClInclude Include="AcmiTape.h" />
     <ClInclude Include="AcmiUI.h" />
@@ -124,10 +124,13 @@
     <ClInclude Include="apitypes.h" />
     <ClInclude Include="codelib\tools\lists\lists.h" />
     <ClInclude Include="codelib\tools\lists\omni.h" />
+    <ClInclude Include="events.h" />
+    <ClInclude Include="EvtParse.h" />
     <ClInclude Include="F4error.h" />
     <ClInclude Include="F4VU.h" />
     <ClInclude Include="FalcEnt.h" />
     <ClInclude Include="Falcmesg.h" />
+    <ClInclude Include="misseval.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

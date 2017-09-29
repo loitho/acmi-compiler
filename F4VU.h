@@ -62,7 +62,7 @@ class F4CSECTIONHANDLE;
 // extern global defs
 // ====================
 
-extern VuMainThread *gMainThread;
+//extern VuMainThread *gMainThread;
 extern int NumEntities;
 extern VU_ID FalconNullId;
 extern F4CSECTIONHANDLE* vuCritical;

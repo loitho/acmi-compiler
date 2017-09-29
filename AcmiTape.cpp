@@ -1507,7 +1507,7 @@ void ACMITape::WriteTapeFile ( char *fname, ACMITapeHeader *tapeHdr )
 		posListPtr = posListPtr->next;
 	}
 
-
+	std::cout << "nb event" << importNumEvents << std::endl;
 	// allocate the trailer list
 	importEventTrailerList = new ACMIEventTrailer[importNumEvents];
 	//F4Assert( importEventTrailerList );
@@ -3836,6 +3836,8 @@ ACMITape::ImportTextEventList( FILE *fd, ACMITapeHeader *tapeHdr )
 
 	//cur = ProcessEventListForACMI();
 
+	std::cout << sizeof(ACMITextEvent) << std::endl;
+
 	memset(&te,0,sizeof(ACMITextEvent));
 
 	// PJW Totally rewrote event debriefing stuff... thus the new code
@@ -3909,18 +3911,18 @@ error_exit:
 **		returns pointer to 1st text event element and the count of
 **		elements
 */
-//void *
-//ACMITape::GetTextEvents( int *count )
-//{
-//	if (_tapeHdr.numTextEvents > 1048576) // Sanity check
-//	{
-//		count = 0;
-//		return NULL;
-//	}
-//
-//	*count = _tapeHdr.numTextEvents;
-//	return (void *)((char *)_tape + _tapeHdr.firstTextEventOffset);
-//}
+void *
+ACMITape::GetTextEvents( int *count )
+{
+	if (_tapeHdr.numTextEvents > 1048576) // Sanity check
+	{
+		count = 0;
+		return NULL;
+	}
+
+	*count = _tapeHdr.numTextEvents;
+	return (void *)((char *)_tape + _tapeHdr.firstTextEventOffset);
+}
 
 //void *ACMITape::GetCallsignList(long *count)
 //{
