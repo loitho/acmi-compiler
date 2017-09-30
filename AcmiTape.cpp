@@ -1076,6 +1076,7 @@ void ACMITape::ParseEntities ( void )
 		rawList = rawList->next;
 	}
 
+	MonoPrint("ACMITape Import: Counting ....\n");
 	// Count instances of each unique type
 	LIST* list1 = importEntityList;
 	LIST* list2;
@@ -1518,6 +1519,8 @@ void ACMITape::WriteTapeFile ( char *fname, ACMITapeHeader *tapeHdr )
 	{
 		// eventListPtr = LIST_NTH(importEventList, i);
 		eventPtr = (ACMIEventHeader *)eventListPtr->node;
+
+		//eventPtr->
 
 		// set the trailer data
 		importEventTrailerList[i].index = i;
@@ -3827,6 +3830,8 @@ DestroyTheList( LIST * list )
 void
 ACMITape::ImportTextEventList( FILE *fd, ACMITapeHeader *tapeHdr )
 {
+	// fd is tapefile vhs and tapehdr is the tape header
+
 	//EventElement *cur = NULL;
 	long ret;
 	ACMITextEvent te;
@@ -3836,9 +3841,19 @@ ACMITape::ImportTextEventList( FILE *fd, ACMITapeHeader *tapeHdr )
 
 	//cur = ProcessEventListForACMI();
 
-	std::cout << sizeof(ACMITextEvent) << std::endl;
+	std::cout << "sizeof testevent " << sizeof(ACMITextEvent) << std::endl;
 
 	memset(&te,0,sizeof(ACMITextEvent));
+
+
+	
+
+	std::cout << "offsert " << tapeHdr->firstTextEventOffset << std::endl;;
+
+
+
+
+
 
 	// PJW Totally rewrote event debriefing stuff... thus the new code
 	//while ( cur )

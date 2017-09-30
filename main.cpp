@@ -57,7 +57,7 @@ int main()
 		}
 		system("pause");
 		// get next file
-		//foundAFile = FindNextFile(findHand, &fData);
+		foundAFile = FindNextFile(findHand, &fData);
 	}
 
 	FindClose(findHand);
