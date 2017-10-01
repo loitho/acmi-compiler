@@ -1139,6 +1139,9 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 	// entity and chains them together
 
 	entityListPtr = importEntityList;
+
+	printf("addr importEntityList: %p\n", importEntityList);
+
 	for ( i = 0; i < importNumEnt; i++ )
 	{
 		// entityListPtr = LIST_NTH(importEntityList, i);
@@ -1158,10 +1161,11 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 			if ( posPtr->uniqueID != entityPtr->uniqueID )
 			{
 				// nope
+				//std::cout << "inif" << std::endl;
 				posListPtr = posListPtr->next;
 				continue;
 			}
-
+			//std::cout << "outif" << std::endl;
 			// calculate the offset of this positional record
 			currOffset = tapeHdr->timelineBlockOffset +
 					   sizeof( ACMIEntityPositionData ) * j;
@@ -1195,6 +1199,8 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 
 		entityListPtr = entityListPtr->next;
 	} // end for entity loop
+
+	printf("addr importEntityList: %p\n", importEntityList);
 
 	entityListPtr = importFeatList;
 	for ( i = 0; i < importNumFeat; i++ )
@@ -1540,7 +1546,7 @@ void ACMITape::WriteTapeFile ( char *fname, ACMITapeHeader *tapeHdr )
 		   importNumEvents,
 		   sizeof( ACMIEventTrailer ),
 		   CompareEventTrailer );
-
+	
 	for ( i = 0; i < importNumEvents; i++ )
 	{
 		ret = fwrite( &importEventTrailerList[i], sizeof( ACMIEventTrailer ), 1, tapeFile );

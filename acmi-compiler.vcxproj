@@ -131,6 +131,7 @@
     <ClInclude Include="FalcEnt.h" />
     <ClInclude Include="Falcmesg.h" />
     <ClInclude Include="misseval.h" />
+    <ClInclude Include="threading.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
