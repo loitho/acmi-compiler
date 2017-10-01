@@ -55,6 +55,7 @@
 //#include "AcmiView.h"
 //#include "AcmiUI.h"
 				
+#include "threading.h"
 
 #define MonoPrint  printf
 
@@ -1152,10 +1153,12 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 		entityPtr->firstPositionDataOffset = 0;
 
 		posListPtr = importPosList;
+
 		for ( j = 0; j < importNumPos; j++ )
 		{
+			//printf("posListPtr pos: %p\n", posListPtr);
+
 			ACMIRawPositionData *posPtr;
-			// posListPtr = LIST_NTH(importPosList, j);
 			posPtr = (ACMIRawPositionData *)posListPtr->node;
 
 			// check the id to see if this position belongs to the entity

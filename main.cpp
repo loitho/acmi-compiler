@@ -12,44 +12,12 @@
 #include <thread>
 #include <mutex>
 #include <time.h>
-#include <algorithm>
-#include <atomic>
 
-#include <string>
-#include <vector>
-
-#include <atomic>
-#include <thread>
-#include <future>
 
 #include "threading.h"
 #pragma warning(disable:4996)
 
 
-template <class F>
-void par_for(int begin, int end, F fn) {
-	std::atomic<int> idx;
-	idx = begin;
-
-	int num_cpus = std::thread::hardware_concurrency();
-	std::vector<std::future<void>> futures(num_cpus);
-
-	for (int cpu = 0; cpu != num_cpus; ++cpu) {
-		futures[cpu] = std::async(
-			std::launch::async,
-			[cpu, &idx, end, &fn]() {
-			for (;;) {
-				int i = idx++;
-				if (i >= end) break;
-				fn(i, cpu);
-			}
-		}
-		);
-	}
-	for (int cpu = 0; cpu != num_cpus; ++cpu) {
-		futures[cpu].get();
-	}
-}
 
 
 int main()
@@ -60,7 +28,7 @@ int main()
 	int i = 0;
 
 	par_for(
-		0, 20,
+		0, 10,
 		[&](int idx, int cpu) {
 
 			{
@@ -139,7 +107,7 @@ int main()
 		//exit(0); 
 		system("pause");
 		
-		// get next file
+		// get next file // Comment will loop the file search on the same file
 		foundAFile = FindNextFile(findHand, &fData);
 	}
 
