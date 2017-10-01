@@ -1127,7 +1127,7 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 	long prevOffset;
 	LIST *entityListPtr, *posListPtr, *featListPtr;
 	ACMIEntityData *entityPtr, *featPtr;
-	ACMIRawPositionData *posPtr;
+	//ACMIRawPositionData *posPtr;
 	ACMIRawPositionData *prevPosPtr;
 	ACMIFeatEventImportData *fePtr;
 	BOOL foundFirst;
@@ -1154,43 +1154,47 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 		posListPtr = importPosList;
 		for ( j = 0; j < importNumPos; j++ )
 		{
+			ACMIRawPositionData *posPtr;
 			// posListPtr = LIST_NTH(importPosList, j);
 			posPtr = (ACMIRawPositionData *)posListPtr->node;
 
 			// check the id to see if this position belongs to the entity
-			if ( posPtr->uniqueID != entityPtr->uniqueID )
+			if ( posPtr->uniqueID == entityPtr->uniqueID )
 			{
 				// nope
 				//std::cout << "inif" << std::endl;
-				posListPtr = posListPtr->next;
-				continue;
-			}
-			//std::cout << "outif" << std::endl;
-			// calculate the offset of this positional record
-			currOffset = tapeHdr->timelineBlockOffset +
-					   sizeof( ACMIEntityPositionData ) * j;
+				//posListPtr = posListPtr->next;
+				//continue;
 
-			// if it's the 1st in the chain, set the offset to it in
-			// the entity's record
-			if ( foundFirst == FALSE )
-			{
-				entityPtr->firstPositionDataOffset = currOffset;
-				foundFirst = TRUE;
-			}
+				//std::cout << "outif" << std::endl;
 
-			// thread current to previous
-			posPtr->entityPosData.prevPositionUpdateOffset = prevOffset;
-			posPtr->entityPosData.nextPositionUpdateOffset = 0;
 
-			// thread previous to current
-			if ( prevPosPtr )
-			{
-				prevPosPtr->entityPosData.nextPositionUpdateOffset = currOffset;
-			}
+				// calculate the offset of this positional record
+				currOffset = tapeHdr->timelineBlockOffset +
+					sizeof(ACMIEntityPositionData) * j;
 
-			// set vals for next time thru loop
-			prevOffset = currOffset;
-			prevPosPtr = posPtr;
+				// if it's the 1st in the chain, set the offset to it in
+				// the entity's record
+				if (foundFirst == FALSE)
+				{
+					entityPtr->firstPositionDataOffset = currOffset;
+					foundFirst = TRUE;
+				}
+
+				// thread current to previous
+				posPtr->entityPosData.prevPositionUpdateOffset = prevOffset;
+				posPtr->entityPosData.nextPositionUpdateOffset = 0;
+
+				// thread previous to current
+				if (prevPosPtr)
+				{
+					prevPosPtr->entityPosData.nextPositionUpdateOffset = currOffset;
+				}
+
+				// set vals for next time thru loop
+				prevOffset = currOffset;
+				prevPosPtr = posPtr;
+			} // End of if
 
 			// next in list
 			posListPtr = posListPtr->next;
@@ -1199,6 +1203,10 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 
 		entityListPtr = entityListPtr->next;
 	} // end for entity loop
+
+	// ------------------------------------------------------------------------------------
+	// ------------------------------------------------------------------------------------
+	// ------------------------------------------------------------------------------------
 
 	printf("addr importEntityList: %p\n", importEntityList);
 
@@ -1215,41 +1223,43 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 		for ( j = 0; j < importNumPos; j++ )
 		{
 			// posListPtr = LIST_NTH(importPosList, j);
+			ACMIRawPositionData *posPtr;
 			posPtr = (ACMIRawPositionData *)posListPtr->node;
 
 			// check the id to see if this position belongs to the entity
-			if ( posPtr->uniqueID != entityPtr->uniqueID )
+			if ( posPtr->uniqueID == entityPtr->uniqueID )
 			{
 				// nope
-				posListPtr = posListPtr->next;
-				continue;
-			}
+				//posListPtr = posListPtr->next;
+				//continue;
 
-			// calculate the offset of this positional record
-			currOffset = tapeHdr->timelineBlockOffset +
-					   sizeof( ACMIEntityPositionData ) * j;
 
-			// if it's the 1st in the chain, set the offset to it in
-			// the entity's record
-			if ( foundFirst == FALSE )
-			{
-				entityPtr->firstPositionDataOffset = currOffset;
-				foundFirst = TRUE;
-			}
+				// calculate the offset of this positional record
+				currOffset = tapeHdr->timelineBlockOffset +
+					sizeof(ACMIEntityPositionData) * j;
 
-			// thread current to previous
-			posPtr->entityPosData.prevPositionUpdateOffset = prevOffset;
-			posPtr->entityPosData.nextPositionUpdateOffset = 0;
+				// if it's the 1st in the chain, set the offset to it in
+				// the entity's record
+				if (foundFirst == FALSE)
+				{
+					entityPtr->firstPositionDataOffset = currOffset;
+					foundFirst = TRUE;
+				}
 
-			// thread previous to current
-			if ( prevPosPtr )
-			{
-				prevPosPtr->entityPosData.nextPositionUpdateOffset = currOffset;
-			}
+				// thread current to previous
+				posPtr->entityPosData.prevPositionUpdateOffset = prevOffset;
+				posPtr->entityPosData.nextPositionUpdateOffset = 0;
 
-			// set vals for next time thru loop
-			prevOffset = currOffset;
-			prevPosPtr = posPtr;
+				// thread previous to current
+				if (prevPosPtr)
+				{
+					prevPosPtr->entityPosData.nextPositionUpdateOffset = currOffset;
+				}
+
+				// set vals for next time thru loop
+				prevOffset = currOffset;
+				prevPosPtr = posPtr;
+			} // End of if 
 
 			// next in list
 			posListPtr = posListPtr->next;

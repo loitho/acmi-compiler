@@ -80,7 +80,7 @@ int main()
 
 
 	system("pause");
-	exit(0);
+	//exit(0);
 
 
 
