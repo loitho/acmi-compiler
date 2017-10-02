@@ -191,33 +191,33 @@ void ClearSortedEventList()
 // and add the messages to a window
 // This is called by ACMI Import which is also responible for
 // cleaning up the sorted list
-EventElement * ProcessEventListForACMI(void)
-{
-    FlightDataClass *flight_data;
-    PilotDataClass *pilot_data;
-    int i;//,y=0;
-
-    // Build an event list from the MissionEvaluator class
-    //flight_data = TheCampaign.MissionEvaluator->flight_data;
-	flight_data = NULL;
-    while (flight_data)
-    {
-        AddtoEventList(flight_data->root_event);
-        pilot_data = flight_data->pilot_list;
-
-        while (pilot_data)
-        {
-            for (i = 0; i < pilot_data->weapon_types; i++)
-                AddtoEventList(pilot_data->weapon_data[i].root_event);
-
-            pilot_data = pilot_data->next_pilot;
-        }
-
-        flight_data = flight_data->next_flight;
-    }
-
-    return SortedEventList;
-}
+//EventElement * ProcessEventListForACMI(void)
+//{
+//    FlightDataClass *flight_data;
+//    PilotDataClass *pilot_data;
+//    int i;//,y=0;
+//
+//    // Build an event list from the MissionEvaluator class
+//    //flight_data = TheCampaign.MissionEvaluator->flight_data;
+//	flight_data = NULL;
+//   /* while (flight_data)
+//    {
+//        AddtoEventList(flight_data->root_event);
+//        pilot_data = flight_data->pilot_list;
+//
+//        while (pilot_data)
+//        {
+//            for (i = 0; i < pilot_data->weapon_types; i++)
+//                AddtoEventList(pilot_data->weapon_data[i].root_event);
+//
+//            pilot_data = pilot_data->next_pilot;
+//        }
+//
+//        flight_data = flight_data->next_flight;
+//    }*/
+//
+//    return SortedEventList;
+//}
 
 /*
 ** This is called by the ACMI UI where the events are being read off

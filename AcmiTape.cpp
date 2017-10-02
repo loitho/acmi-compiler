@@ -1121,6 +1121,7 @@ void ACMITape::ParseEntities ( void )
 **		Now, we're going to have to setup the offset pointers to do the
 **		file mapping.  Each entity chains back and forth thru its position
 **		list.
+**      Entity and Position Lists
 */
 void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 {
@@ -1143,6 +1144,8 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 
 	printf("addr importEntityList: %p\n", importEntityList);
 
+	std::mutex posListMtx;
+
 	for ( i = 0; i < importNumEnt; i++ )
 	{
 		// entityListPtr = LIST_NTH(importEntityList, i);
@@ -1153,6 +1156,9 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 		entityPtr->firstPositionDataOffset = 0;
 
 		posListPtr = importPosList;
+
+
+
 
 		for ( j = 0; j < importNumPos; j++ )
 		{
@@ -1178,6 +1184,7 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 
 				// if it's the 1st in the chain, set the offset to it in
 				// the entity's record
+				// Set everytime and check and use which offset is the lowest
 				if (foundFirst == FALSE)
 				{
 					entityPtr->firstPositionDataOffset = currOffset;
@@ -3865,14 +3872,11 @@ ACMITape::ImportTextEventList( FILE *fd, ACMITapeHeader *tapeHdr )
 	memset(&te,0,sizeof(ACMITextEvent));
 
 
-	
-
 	std::cout << "offsert " << tapeHdr->firstTextEventOffset << std::endl;;
 
-
-
-
-
+	/*
+	** Don't care about the folowing stuff, it's only used by Falcon ACMI viewer
+	*/
 
 	// PJW Totally rewrote event debriefing stuff... thus the new code
 	//while ( cur )
