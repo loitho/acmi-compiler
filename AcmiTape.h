@@ -582,6 +582,7 @@ private:
 	static void ParseEntities ( void );
 	static void ThreadEntityPositions( ACMITapeHeader *tapeHdr );
 	static void ThreadEntityEvents( ACMITapeHeader *tapeHdr );
+	static void ThreadEntityEvents2(ACMITapeHeader *tapeHdr);
 	static void ImportTextEventList( FILE *fd, ACMITapeHeader *tapeHdr );
 
 	

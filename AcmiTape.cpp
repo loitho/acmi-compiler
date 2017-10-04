@@ -56,6 +56,7 @@
 //#include "AcmiUI.h"
 				
 #include "threading.h"
+#include <vector>
 
 #define MonoPrint  printf
 
@@ -80,7 +81,12 @@ LIST *importEntityList;
 LIST *importFeatList;
 LIST *importPosList;
 LIST *importEventList;
+
+
 LIST *importEntEventList;
+std::vector<ACMIRawPositionData> importEntEventVec;
+
+
 LIST *importEntityListEnd;
 LIST *importFeatListEnd;
 LIST *importPosListEnd;
@@ -257,6 +263,7 @@ ACMITape::ACMITape(char *name, RenderOTW *renderer, RViewPoint *viewPoint )
 	char *callsigns=NULL;
 	long numcalls=0;
 
+	std::cout << "test acmi tape started" << std::endl;
 
 	// initialize storage for drawable poled objects
 	#ifdef USE_SH_POOLS
@@ -319,6 +326,8 @@ ACMITape::~ACMITape()
 	#ifdef USE_SH_POOLS
 	DrawablePoled::ReleaseStorage();
 	#endif
+
+	OutputDebugString("TEST-DEBUG");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -382,11 +391,9 @@ void ACMITape::Init()
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-BOOL ReadRawACMIPositionData
-(
+BOOL ReadRawACMIPositionData(
 	FILE *flightFile,
-	ACMIRawPositionData &rawPositionData
-)
+	ACMIRawPositionData &rawPositionData)
 {
 	int
 		result;
@@ -530,7 +537,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	ACMIDOFData dd;
 	ACMIFeatureStatusData fs;
 		
-
+	
 	// zero our counters
 	importNumFeat = 0;
 	importNumPos = 0;
@@ -541,6 +548,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 
 	// zero out position list
 	importFeatList = NULL;
+	//vector <> importFeatVec;
 	importFeatEventList = NULL;
 	importPosList = NULL;
 	importEventList = NULL;
@@ -563,6 +571,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 
 	begTime = -1.0;
 	endTime = 0.0;
+	//OutputDebugString("TEST-DEBUG\n");
 	MonoPrint("ACMITape Import: Reading Raw Data ....\n");
 	while( fread(&hdr, sizeof( ACMIRecHeader ), 1, flightFile ) )
 	{
@@ -627,6 +636,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 
 																																
 				// Append our new position data.
+
 				importPosList = AppendToEndOfList(importPosList, &importPosListEnd, rawPositionData);
 				rawPositionData = NULL;
 		
@@ -795,6 +805,9 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				rawPositionData->entityPosData.switchData.switchVal = sd.switchVal;
 				rawPositionData->entityPosData.switchData.prevSwitchVal = sd.prevSwitchVal;
 				
+				
+				importEntEventVec.push_back(*rawPositionData);
+
 				// Append our new position data.
 				importEntEventList = AppendToEndOfList(importEntEventList, &importEntEventListEnd, rawPositionData);
 				rawPositionData = NULL;
@@ -830,6 +843,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				rawPositionData->entityPosData.dofData.DOFVal = dd.DOFVal;
 				rawPositionData->entityPosData.dofData.prevDOFVal = dd.prevDOFVal;
 				
+				importEntEventVec.push_back(*rawPositionData);
 				// Append our new position data.
 				importEntEventList = AppendToEndOfList(importEntEventList, &importEntEventListEnd, rawPositionData);
 				rawPositionData = NULL;
@@ -951,7 +965,19 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 
 	// set up the chain offsets of entity events
 	MonoPrint("ACMITape Import: Threading Entity Events ....\n");
-	ThreadEntityEvents( &tapeHdr );
+	
+	clock_t t;
+	
+
+	t = clock();
+	//ThreadEntityEvents2(&tapeHdr);
+	t = clock() - t;
+	printf("VECTOR : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+
+	t = clock();
+	ThreadEntityEvents(&tapeHdr);
+	t = clock() - t;
+	printf("ARRAY : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 
 	// Calculate size of .vhs file.
 	tapeHdr.fileSize = tapeHdr.timelineBlockOffset +
@@ -1123,6 +1149,9 @@ void ACMITape::ParseEntities ( void )
 **		list.
 **      Entity and Position Lists
 */
+
+
+
 void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 {
 	int i, j;
@@ -1168,13 +1197,13 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 			posPtr = (ACMIRawPositionData *)posListPtr->node;
 
 			// check the id to see if this position belongs to the entity
-			if ( posPtr->uniqueID == entityPtr->uniqueID )
+			if (posPtr->uniqueID != entityPtr->uniqueID)
 			{
 				// nope
 				//std::cout << "inif" << std::endl;
-				//posListPtr = posListPtr->next;
-				//continue;
-
+				posListPtr = posListPtr->next;
+				continue;
+			}
 				//std::cout << "outif" << std::endl;
 
 
@@ -1204,7 +1233,7 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 				// set vals for next time thru loop
 				prevOffset = currOffset;
 				prevPosPtr = posPtr;
-			} // End of if
+			
 
 			// next in list
 			posListPtr = posListPtr->next;
@@ -1342,7 +1371,7 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 **		file mapping.  Each entity chains back and forth thru its position
 **		list.
 */
-void ACMITape::ThreadEntityEvents ( ACMITapeHeader *tapeHdr )
+void ACMITape::ThreadEntityEvents(ACMITapeHeader *tapeHdr)
 {
 	int i, j;
 	long prevOffset;
@@ -1359,7 +1388,7 @@ void ACMITape::ThreadEntityEvents ( ACMITapeHeader *tapeHdr )
 	// entity and chains them together
 
 	entityListPtr = importEntityList;
-	for ( i = 0; i < importNumEnt; i++ )
+	for (i = 0; i < importNumEnt; i++)
 	{
 		// entityListPtr = LIST_NTH(importEntityList, i);
 		entityPtr = (ACMIEntityData *)entityListPtr->node;
@@ -1369,13 +1398,13 @@ void ACMITape::ThreadEntityEvents ( ACMITapeHeader *tapeHdr )
 		entityPtr->firstEventDataOffset = 0;
 
 		posListPtr = importEntEventList;
-		for ( j = 0; j < importNumEntEvents; j++ )
+		for (j = 0; j < importNumEntEvents; j++)
 		{
 			// posListPtr = LIST_NTH(importPosList, j);
 			posPtr = (ACMIRawPositionData *)posListPtr->node;
 
 			// check the id to see if this position belongs to the entity
-			if ( posPtr->uniqueID != entityPtr->uniqueID )
+			if (posPtr->uniqueID != entityPtr->uniqueID)
 			{
 				// nope
 				posListPtr = posListPtr->next;
@@ -1384,11 +1413,11 @@ void ACMITape::ThreadEntityEvents ( ACMITapeHeader *tapeHdr )
 
 			// calculate the offset of this positional record
 			currOffset = tapeHdr->firstEntEventOffset +
-					   sizeof( ACMIEntityPositionData ) * j;
+				sizeof(ACMIEntityPositionData) * j;
 
 			// if it's the 1st in the chain, set the offset to it in
 			// the entity's record
-			if ( foundFirst == FALSE )
+			if (foundFirst == FALSE)
 			{
 				entityPtr->firstEventDataOffset = currOffset;
 				foundFirst = TRUE;
@@ -1399,7 +1428,7 @@ void ACMITape::ThreadEntityEvents ( ACMITapeHeader *tapeHdr )
 			posPtr->entityPosData.nextPositionUpdateOffset = 0;
 
 			// thread previous to current
-			if ( prevPosPtr )
+			if (prevPosPtr)
 			{
 				prevPosPtr->entityPosData.nextPositionUpdateOffset = currOffset;
 			}
@@ -1415,8 +1444,95 @@ void ACMITape::ThreadEntityEvents ( ACMITapeHeader *tapeHdr )
 
 		entityListPtr = entityListPtr->next;
 	} // end for entity loop
+}
+
+void ACMITape::ThreadEntityEvents2(ACMITapeHeader *tapeHdr)
+{
+	int i, j;
+	long prevOffset;
+	LIST *entityListPtr, *posListPtr;
+	ACMIEntityData *entityPtr;
+	ACMIRawPositionData *posPtr;
+	ACMIRawPositionData *prevPosPtr;
+	BOOL foundFirst;
+	long currOffset;
+
+	int calc = 0;
+	// we run an outer and inner loop here.
+	// the outer loops steps thru each entity
+	// the inner loop searches each position update for one owned by the
+	// entity and chains them together
+
+	std::cout << "nb:importNumEntEvents:" << importNumEntEvents << std::endl;
+	std::cout << "nb:importNumEntvector:" << importEntEventVec.size() << std::endl;
+
+	entityListPtr = importEntityList;
+	for (i = 0; i < importNumEnt; i++)
+	{
+		// entityListPtr = LIST_NTH(importEntityList, i);
+		entityPtr = (ACMIEntityData *)entityListPtr->node;
+		foundFirst = FALSE;
+		prevOffset = 0;
+		prevPosPtr = NULL;
+		entityPtr->firstEventDataOffset = 0;
+
+		posListPtr = importEntEventList;
+
+		prevOffset = 0;
+		int prevPosVec = -1;
+		for (j = 0; j < importNumEntEvents; j++)
+		{
+			// posListPtr = LIST_NTH(importPosList, j);
+			//posPtr = (ACMIRawPositionData *)posListPtr->node;
+
+			// check the id to see if this position belongs to the entity
+			if (importEntEventVec[j].uniqueID != entityPtr->uniqueID)
+			{
+				// nope
+				//posListPtr = posListPtr->next;
+				continue;
+			}
+			calc++;
+			// calculate the offset of this positional record
+			currOffset = tapeHdr->firstEntEventOffset +
+				sizeof(ACMIEntityPositionData) * j;
+
+			// if it's the 1st in the chain, set the offset to it in
+			// the entity's record
+			if (foundFirst == FALSE)
+			{
+				entityPtr->firstEventDataOffset = currOffset;
+				foundFirst = TRUE;
+			}
+
+			// thread current to previous
+			importEntEventVec[j].entityPosData.prevPositionUpdateOffset = prevOffset;
+			importEntEventVec[j].entityPosData.nextPositionUpdateOffset = 0;
+
+			// thread previous to current
+			if (prevPosVec != -1)
+			{
+				importEntEventVec[prevPosVec].entityPosData.nextPositionUpdateOffset = currOffset;
+				//prevPosPtr->entityPosData.nextPositionUpdateOffset = currOffset;
+			}
+
+			// set vals for next time thru loop
+			prevOffset = currOffset;
+			prevPosVec = j;
+			//prevPosPtr = posPtr;
+
+			// next in list
+			//posListPtr = posListPtr->next;
+
+		}
+		
 
 
+
+		entityListPtr = entityListPtr->next;
+	} // end for entity loop
+
+	std::cout << "vector calc : " << calc << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3772,7 +3888,6 @@ error_exit:
  * append new node to end of list
  * caller should cast returned value to appropriate type
  */
-
 LIST *
 AppendToEndOfList( LIST * list, LIST **end, void * node )
 {

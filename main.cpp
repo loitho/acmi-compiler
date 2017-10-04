@@ -18,37 +18,33 @@
 #pragma warning(disable:4996)
 
 
-
-
 int main()
 {
-	std::mutex mtx;
+	//std::mutex mtx;
 
-	std::cout << std::thread::hardware_concurrency() << std::endl;
-	int i = 0;
+	//std::cout << std::thread::hardware_concurrency() << std::endl;
+	//int i = 0;
 
-	par_for(
-		0, 10,
-		[&](int idx, int cpu) {
+	//par_for(
+	//	0, 10,
+	//	[&](int idx, int cpu) {
 
-			{
-				auto lock = std::unique_lock<std::mutex>(mtx); // equivalent to mtx.lock();
-				//... //protected stuff
-				printf("task %d running on cpu %d\n", idx, cpu);
-				printf("i : %d\n", i++);
-			}  // <---- however you leave this brace, equivalent to mtx.unlock();
-		
-		//printf("task %d running on cpu %d\n", idx, cpu);
-		//Sleep(3);
-	//	std::cout << "i:" << i << std::endl;
-	//	i++;
+	//		{
+	//			auto lock = std::unique_lock<std::mutex>(mtx); // equivalent to mtx.lock();
+	//			//... //protected stuff
+	//			printf("task %d running on cpu %d\n", idx, cpu);
+	//			printf("i : %d\n", i++);
+	//		}  // <---- however you leave this brace, equivalent to mtx.unlock();
+	//	
+	//	//printf("task %d running on cpu %d\n", idx, cpu);
+	//	//Sleep(3);
+	////	std::cout << "i:" << i << std::endl;
+	////	i++;
 
-	}
-	);
+	//}
+	//);
 
 
-	system("pause");
-	//exit(0);
 
 
 
