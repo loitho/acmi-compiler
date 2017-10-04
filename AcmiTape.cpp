@@ -970,7 +970,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	
 
 	t = clock();
-	//ThreadEntityEvents2(&tapeHdr);
+	ThreadEntityEvents2(&tapeHdr);
 	t = clock() - t;
 	printf("VECTOR : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 
