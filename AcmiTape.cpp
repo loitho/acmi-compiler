@@ -1486,12 +1486,11 @@ void ACMITape::ThreadEntityEvents2(ACMITapeHeader *tapeHdr)
 			//posPtr = (ACMIRawPositionData *)posListPtr->node;
 
 			// check the id to see if this position belongs to the entity
-			if (importEntEventVec[j].uniqueID != entityPtr->uniqueID)
+			if (importEntEventVec[j].uniqueID == entityPtr->uniqueID)
 			{
 				// nope
 				//posListPtr = posListPtr->next;
-				continue;
-			}
+			
 			calc++;
 			// calculate the offset of this positional record
 			currOffset = tapeHdr->firstEntEventOffset +
@@ -1520,7 +1519,8 @@ void ACMITape::ThreadEntityEvents2(ACMITapeHeader *tapeHdr)
 			prevOffset = currOffset;
 			prevPosVec = j;
 			//prevPosPtr = posPtr;
-
+			
+			} //end of if
 			// next in list
 			//posListPtr = posListPtr->next;
 
