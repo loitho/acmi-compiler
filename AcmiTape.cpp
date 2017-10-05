@@ -78,6 +78,8 @@ long tempTarget; // for missile lock.
 
 // these are for raw data import
 LIST *importEntityList;
+std::vector<ACMIEntityData> importEntityVec;
+
 LIST *importFeatList;
 LIST *importPosList;
 LIST *importEventList;
@@ -807,7 +809,6 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				
 				
 				importEntEventVec.push_back(*rawPositionData);
-
 				// Append our new position data.
 				importEntEventList = AppendToEndOfList(importEntEventList, &importEntEventListEnd, rawPositionData);
 				rawPositionData = NULL;
@@ -1095,6 +1096,7 @@ void ACMITape::ParseEntities ( void )
 // remove				importEntityInfo->teamColor = entityType->entityPosData.teamColor;
 // remove				strcpy((importEntityInfo->label), (char*) entityType->entityPosData.label);
 
+				importEntityVec.push_back(*importEntityInfo);
 				importEntityList = AppendToEndOfList(importEntityList, &importEntityListEnd, importEntityInfo);
 				importNumEnt++;
 			}
@@ -1466,15 +1468,21 @@ void ACMITape::ThreadEntityEvents2(ACMITapeHeader *tapeHdr)
 	std::cout << "nb:importNumEntEvents:" << importNumEntEvents << std::endl;
 	std::cout << "nb:importNumEntvector:" << importEntEventVec.size() << std::endl;
 
+	std::cout << "nb:importNumEnt   :" << importNumEnt << std::endl;
+	std::cout << "nb:importEntvector:" << importEntityVec.size() << std::endl;
+
+
 	entityListPtr = importEntityList;
 	for (i = 0; i < importNumEnt; i++)
 	{
 		// entityListPtr = LIST_NTH(importEntityList, i);
-		entityPtr = (ACMIEntityData *)entityListPtr->node;
+		importEntityVec[i];
+		//entityPtr = (ACMIEntityData *)entityListPtr->node;
 		foundFirst = FALSE;
 		prevOffset = 0;
 		prevPosPtr = NULL;
-		entityPtr->firstEventDataOffset = 0;
+		//entityPtr->firstEventDataOffset = 0;
+		importEntityVec[i].firstEventDataOffset = 0;
 
 		posListPtr = importEntEventList;
 
@@ -1486,7 +1494,7 @@ void ACMITape::ThreadEntityEvents2(ACMITapeHeader *tapeHdr)
 			//posPtr = (ACMIRawPositionData *)posListPtr->node;
 
 			// check the id to see if this position belongs to the entity
-			if (importEntEventVec[j].uniqueID == entityPtr->uniqueID)
+			if (importEntEventVec[j].uniqueID == importEntityVec[i].uniqueID)
 			{
 				// nope
 				//posListPtr = posListPtr->next;
@@ -1500,7 +1508,7 @@ void ACMITape::ThreadEntityEvents2(ACMITapeHeader *tapeHdr)
 			// the entity's record
 			if (foundFirst == FALSE)
 			{
-				entityPtr->firstEventDataOffset = currOffset;
+				importEntityVec[i].firstEventDataOffset = currOffset;
 				foundFirst = TRUE;
 			}
 
@@ -1529,7 +1537,7 @@ void ACMITape::ThreadEntityEvents2(ACMITapeHeader *tapeHdr)
 
 
 
-		entityListPtr = entityListPtr->next;
+		//entityListPtr = entityListPtr->next;
 	} // end for entity loop
 
 	std::cout << "vector calc : " << calc << std::endl;
