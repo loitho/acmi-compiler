@@ -636,9 +636,9 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				rawPositionData->entityPosData.posData.yaw = genpos.yaw;
 				rawPositionData->entityPosData.posData.radarTarget= tempTarget;
 
-																																
+																		
+				
 				// Append our new position data.
-
 				importPosList = AppendToEndOfList(importPosList, &importPosListEnd, rawPositionData);
 				rawPositionData = NULL;
 		
@@ -991,7 +991,9 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	// Open a writecopy file mapping.
 	// Write out file in .vhs format.
 	MonoPrint("ACMITape Import: Writing Tape File ....\n");
-	WriteTapeFile( outTapeFileName, &tapeHdr );
+	//WriteTapeFile( outTapeFileName, &tapeHdr );
+	MonoPrint("ACMITape Import: Writing Tape File ....\n");
+	WriteTapeFile2(outTapeFileName, &tapeHdr);
 
 	// Cleanup import data.
 	CleanupACMIImportPositionData ( flightFile, rawPositionData );
@@ -1484,7 +1486,7 @@ void ACMITape::ThreadEntityEvents2(ACMITapeHeader *tapeHdr)
 		//entityPtr->firstEventDataOffset = 0;
 		importEntityVec[i].firstEventDataOffset = 0;
 
-		posListPtr = importEntEventList;
+		//posListPtr = importEntEventList;
 
 		prevOffset = 0;
 		int prevPosVec = -1;
@@ -1730,6 +1732,176 @@ error_exit:
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+
+
+void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
+{
+	int i, j;
+	LIST *entityListPtr, *posListPtr, *eventListPtr;
+	ACMIEntityData *entityPtr;
+	ACMIEventHeader *eventPtr;
+	ACMIRawPositionData *posPtr;
+	ACMIFeatEventImportData *fePtr;
+	FILE *tapeFile;
+	long ret;
+
+	tapeFile = fopen(fname, "wb");
+	if (tapeFile == NULL)
+	{
+		MonoPrint("Error opening new tape file\n");
+		return;
+	}
+
+	// write the header
+	ret = fwrite(tapeHdr, sizeof(ACMITapeHeader), 1, tapeFile);
+	if (!ret)
+		goto error_exit;
+
+
+	// write out the entities
+	entityListPtr = importEntityList;
+	for (i = 0; i < importNumEnt; i++)
+	{
+		// entityListPtr = LIST_NTH(importEntityList, i);
+		entityPtr = (ACMIEntityData *)entityListPtr->node;
+
+		ret = fwrite(entityPtr, sizeof(ACMIEntityData), 1, tapeFile);
+		if (!ret)
+			goto error_exit;
+		entityListPtr = entityListPtr->next;
+	} // end for entity loop
+
+	  // write out the features
+	entityListPtr = importFeatList;
+	for (i = 0; i < importNumFeat; i++)
+	{
+		// entityListPtr = LIST_NTH(importEntityList, i);
+		entityPtr = (ACMIEntityData *)entityListPtr->node;
+
+		ret = fwrite(entityPtr, sizeof(ACMIEntityData), 1, tapeFile);
+		if (!ret)
+			goto error_exit;
+		entityListPtr = entityListPtr->next;
+	} // end for entity loop
+
+	  // write out the entitiy positions
+	posListPtr = importPosList;
+	for (i = 0; i < importNumPos; i++)
+	{
+		// posListPtr = LIST_NTH(importPosList, i);
+		posPtr = (ACMIRawPositionData *)posListPtr->node;
+
+		// we now want to do a "fixup" of the radar targets.  These are
+		// currently in "uniqueIDs" and we want to convert them into
+		// an index into the entity list
+		if (posPtr->entityPosData.posData.radarTarget != -1)
+		{
+			entityListPtr = importEntityList;
+			for (j = 0; j < importNumEnt; j++)
+			{
+				entityPtr = (ACMIEntityData *)entityListPtr->node;
+
+				if (posPtr->entityPosData.posData.radarTarget == entityPtr->uniqueID)
+				{
+					posPtr->entityPosData.posData.radarTarget = j;
+					break;
+				}
+
+				entityListPtr = entityListPtr->next;
+			} // end for entity loop
+
+			  // did we find it?
+			if (j == importNumEnt)
+			{
+				// nope
+				posPtr->entityPosData.posData.radarTarget = -1;
+			}
+		} // end if there's a radar target
+
+		ret = fwrite(&posPtr->entityPosData, sizeof(ACMIEntityPositionData), 1, tapeFile);
+		if (!ret)
+			goto error_exit;
+
+		posListPtr = posListPtr->next;
+	}
+
+	// write out the entitiy events
+	for (i = 0; i < importNumEntEvents; i++)
+	{
+		ret = fwrite(&(importEntEventVec[i].entityPosData), sizeof(ACMIEntityPositionData), 1, tapeFile);
+		if (!ret)
+			goto error_exit;
+	}
+
+	std::cout << "nb event" << importNumEvents << std::endl;
+	// allocate the trailer list
+	importEventTrailerList = new ACMIEventTrailer[importNumEvents];
+	//F4Assert( importEventTrailerList );
+
+	// write out the events
+	eventListPtr = importEventList;
+	for (i = 0; i < importNumEvents; i++)
+	{
+		// eventListPtr = LIST_NTH(importEventList, i);
+		eventPtr = (ACMIEventHeader *)eventListPtr->node;
+
+		//eventPtr->
+
+		// set the trailer data
+		importEventTrailerList[i].index = i;
+		importEventTrailerList[i].timeEnd = eventPtr->timeEnd;
+
+		ret = fwrite(eventPtr, sizeof(ACMIEventHeader), 1, tapeFile);
+		if (!ret)
+			goto error_exit;
+
+		eventListPtr = eventListPtr->next;
+
+	} // end for events loop
+
+	  // now sort the trailers in ascending order by endTime and
+	  // write them out
+	qsort(importEventTrailerList,
+		importNumEvents,
+		sizeof(ACMIEventTrailer),
+		CompareEventTrailer);
+
+	for (i = 0; i < importNumEvents; i++)
+	{
+		ret = fwrite(&importEventTrailerList[i], sizeof(ACMIEventTrailer), 1, tapeFile);
+		if (!ret)
+			goto error_exit;
+
+	} // end for events loop
+
+	  // write out the feature events
+	posListPtr = importFeatEventList;
+	for (i = 0; i < importNumFeatEvents; i++)
+	{
+		// posListPtr = LIST_NTH(importPosList, i);
+		fePtr = (ACMIFeatEventImportData *)posListPtr->node;
+
+		ret = fwrite(&fePtr->data, sizeof(ACMIFeatEvent), 1, tapeFile);
+		if (!ret)
+			goto error_exit;
+
+		posListPtr = posListPtr->next;
+	}
+
+	// finally import and write out the text events
+	ImportTextEventList(tapeFile, tapeHdr);
+
+	// normal exit
+	fclose(tapeFile);
+	return;
+
+error_exit:
+	MonoPrint("Error writing new tape file\n");
+	if (tapeFile)
+		fclose(tapeFile);
+	return;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

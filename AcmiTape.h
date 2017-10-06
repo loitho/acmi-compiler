@@ -440,6 +440,7 @@ public:
 	// so we don't have to pass them in.
 	static BOOL Import(char *inFltFile, char *outTapeFileName);
 	static void WriteTapeFile ( char *fname, ACMITapeHeader *tapeHdr );
+	static void WriteTapeFile2 (char *fname, ACMITapeHeader *tapeHdr);
 
 	
 	// Time-independent entity access.
