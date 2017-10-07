@@ -2,7 +2,7 @@
 // Originally written by Jim DiZoglio (x257) as ACMIView class
 // last modified: 9/25/97	Michael P. Songy
 // Modified SEVERAL TIMES SINCE... various people
-#pragma optimize( "", off )
+//#pragma optimize( "", off )
 
 // STFU _CRT_SECURE_NO_WARNINGS
 #pragma warning(disable:4996)
@@ -1472,22 +1472,19 @@ void ACMITape::ThreadEntityEvents2(ACMITapeHeader *tapeHdr)
 	std::cout << "nb:importEntvector:" << importEntityVec.size() << std::endl;
 
 
-	entityListPtr = importEntityList;
+	//entityListPtr = importEntityList;
+
+	// Threadable
 	for (i = 0; i < importNumEnt; i++)
 	{
-		// entityListPtr = LIST_NTH(importEntityList, i);
-		importEntityVec[i];
-		//entityPtr = (ACMIEntityData *)entityListPtr->node;
+		
 		foundFirst = FALSE;
 		prevOffset = 0;
 		prevPosPtr = NULL;
-		//entityPtr->firstEventDataOffset = 0;
 		importEntityVec[i].firstEventDataOffset = 0;
 
-		posListPtr = importEntEventList;
-
-		prevOffset = 0;
 		int prevPosVec = -1;
+
 		for (j = 0; j < importNumEntEvents; j++)
 		{
 			// posListPtr = LIST_NTH(importPosList, j);
@@ -1520,24 +1517,14 @@ void ACMITape::ThreadEntityEvents2(ACMITapeHeader *tapeHdr)
 			if (prevPosVec != -1)
 			{
 				importEntEventVec[prevPosVec].entityPosData.nextPositionUpdateOffset = currOffset;
-				//prevPosPtr->entityPosData.nextPositionUpdateOffset = currOffset;
 			}
 
 			// set vals for next time thru loop
 			prevOffset = currOffset;
 			prevPosVec = j;
-			//prevPosPtr = posPtr;
-			
-			} //end of if
-			// next in list
-			//posListPtr = posListPtr->next;
-
-		}
 		
-
-
-
-		//entityListPtr = entityListPtr->next;
+			} //end of if
+		}
 	} // end for entity loop
 
 	std::cout << "vector calc : " << calc << std::endl;
