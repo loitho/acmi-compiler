@@ -13,10 +13,10 @@
 #include <mutex>
 #include <time.h>
 
-
 #include "threading.h"
 #pragma warning(disable:4996)
 
+#define _ITERATOR_DEBUG_LEVEL 0
 
 int main()
 {
@@ -30,27 +30,24 @@ int main()
 
 	//par_for(
 	//	0, 10,
-	//	[&](int idx, int cpu) {
+	//	[&](int idx, int cpu)
+	//{
 
-	//		{
-	//			auto lock = std::unique_lock<std::mutex>(mtx); // equivalent to mtx.lock();
-	//			//... //protected stuff
-	//			printf("task %d running on cpu %d\n", idx, cpu);
-	//			printf("i : %d\n", i++);
-	//		}  // <---- however you leave this brace, equivalent to mtx.unlock();
-	//	
-	//	//printf("task %d running on cpu %d\n", idx, cpu);
-	//	//Sleep(3);
-	////	std::cout << "i:" << i << std::endl;
-	////	i++;
+	//	{
+	//		auto lock = std::unique_lock<std::mutex>(mtx); // equivalent to mtx.lock();
+	//		//... //protected stuff
+	//		printf("task %d running on cpu %d\n", idx, cpu);
+	//		printf("i : %d\n", i++);
+	//	}  // <---- however you leave this brace, equivalent to mtx.unlock();
 
-	//}
-	//);
+	//printf("task %d running on cpu %d\n", idx, cpu);
+	//Sleep(3);
+	//	std::cout << "i:" << i << std::endl;
+	//	i++;
 
-
-
-
-
+	//});
+	
+	//Console::SetBufferSize(80, 80);
 
 
 

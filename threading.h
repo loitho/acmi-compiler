@@ -11,11 +11,14 @@
 #include <future>
 
 template <class F>
-void par_for(int begin, int end, F fn) {
+void par_for(int begin, int end, F fn, int num_cpus = 0) {
 	std::atomic<int> idx;
 	idx = begin;
 
-	int num_cpus = std::thread::hardware_concurrency();
+	// Adding manual option to modify the number of threads
+	if (num_cpus == 0)
+		num_cpus = std::thread::hardware_concurrency();
+
 	std::vector<std::future<void>> futures(num_cpus);
 
 	for (int cpu = 0; cpu != num_cpus; ++cpu) {
