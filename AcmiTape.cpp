@@ -1137,7 +1137,7 @@ void ACMITape::ParseEntities ( void )
 		}
 		list1 = list1->next;
 	}
-
+	MonoPrint("ACMITape Import: Counting ended ....\n");
 
 
 }
@@ -1466,7 +1466,7 @@ void ACMITape::ThreadEntityEvents2(ACMITapeHeader *tapeHdr)
 
 	par_for(0, importNumEnt, [&](int i, int cpu)
 	{
-		printf("task %d running on cpu %d\n", i, cpu);
+		//printf("task %d running on cpu %d\n", i, cpu);
 	
 	// Threadable
 	//for (i = 0; i < importNumEnt; i++)

@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Git Files">
+      <UniqueIdentifier>{eb9116ca-00cf-43f7-9018-f31adca36335}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AcmiTape.cpp">
@@ -74,5 +77,16 @@
     <ClInclude Include="threading.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".gitignore">
+      <Filter>Git Files</Filter>
+    </None>
+    <None Include=".gitattributes">
+      <Filter>Git Files</Filter>
+    </None>
+    <None Include="README.md">
+      <Filter>Git Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
