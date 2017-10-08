@@ -50,7 +50,7 @@ int main()
 	//Console::SetBufferSize(80, 80);
 
 
-
+	std::cout << "int" << sizeof(int) << std::endl;
 
 
 

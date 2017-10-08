@@ -81,7 +81,11 @@ LIST *importEntityList;
 std::vector<ACMIEntityData> importEntityVec;
 
 LIST *importFeatList;
+std::vector<ACMIEntityData> importFeatVec;
+
 LIST *importPosList;
+std::vector<ACMIRawPositionData> importPosVec;
+
 LIST *importEventList;
 
 
@@ -638,7 +642,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				rawPositionData->entityPosData.posData.radarTarget= tempTarget;
 
 																		
-				
+				importPosVec.push_back(*rawPositionData);
 				// Append our new position data.
 				importPosList = AppendToEndOfList(importPosList, &importPosListEnd, rawPositionData);
 				rawPositionData = NULL;
@@ -886,6 +890,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				rawPositionData->entityPosData.posData.pitch = featpos.pitch;
 				rawPositionData->entityPosData.posData.yaw = featpos.yaw;
 				
+				importPosVec.push_back(*rawPositionData);
 				// Append our new position data.
 				importPosList = AppendToEndOfList(importPosList, &importPosListEnd, rawPositionData);
 				rawPositionData = NULL;
@@ -960,15 +965,28 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	tapeHdr.totPlayTime = endTime - begTime;
 	tapeHdr.startTime =  begTime;
 
+	clock_t t;
 
 	// set up the chain offsets of entity positions
 	MonoPrint("ACMITape Import: Threading Positions ....\n");
-	ThreadEntityPositions( &tapeHdr );
+	
+	t = clock();
+	ThreadEntityPositions2(&tapeHdr);
+	t = clock() - t;
+	printf("VECTOR : thread entity It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+	
+	
+	t = clock();
+	ThreadEntityPositions(&tapeHdr);
+	t = clock() - t;
+	printf("ARRAY : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+
+
 
 	// set up the chain offsets of entity events
 	MonoPrint("ACMITape Import: Threading Entity Events ....\n");
 	
-	clock_t t;
+	
 	
 
 	t = clock();
@@ -1063,6 +1081,9 @@ void ACMITape::ParseEntities ( void )
 				importEntityInfo->leadIndex = entityType->leadIndex;
 				importEntityInfo->specialFlags = entityType->specialFlags;
 				importEntityInfo->slot = entityType->slot;
+
+				importFeatVec.push_back(*importEntityInfo);
+
 				importFeatList = AppendToEndOfList(importFeatList, &importFeatListEnd, importEntityInfo);
 				importNumFeat++;
 			}
@@ -1365,6 +1386,231 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 
 
 }
+
+
+
+
+
+
+void ACMITape::ThreadEntityPositions2(ACMITapeHeader *tapeHdr)
+{
+	int i, j;
+	long prevOffset;
+	LIST *entityListPtr, *posListPtr, *featListPtr;
+	ACMIEntityData *entityPtr, *featPtr;
+	//ACMIRawPositionData *posPtr;
+	ACMIRawPositionData *prevPosPtr;
+	ACMIFeatEventImportData *fePtr;
+	BOOL foundFirst;
+	long currOffset;
+
+	// we run an outer and inner loop here.
+	// the outer loops steps thru each entity
+	// the inner loop searches each position update for one owned by the
+	// entity and chains them together
+
+	entityListPtr = importEntityList;
+	
+	std::cout << "nb:importNumPos:" << importNumPos << std::endl;
+	std::cout << "nb:importPosVec:" << importPosVec.size() << std::endl;
+
+	std::cout << "nb:importNumEnt   :" << importNumEnt << std::endl;
+	std::cout << "nb:importEntvector:" << importEntityVec.size() << std::endl;
+
+
+
+	printf("addr importEntityList: %p\n", importEntityList);
+
+	std::mutex posListMtx;
+
+	for (i = 0; i < importNumEnt; i++)
+	{
+		// entityListPtr = LIST_NTH(importEntityList, i);
+		//entityPtr = (ACMIEntityData *)entityListPtr->node;
+		//foundFirst = FALSE;
+		//prevOffset = 0;
+		//prevPosPtr = NULL;
+		//entityPtr->firstPositionDataOffset = 0;
+		//posListPtr = importPosList;
+
+		long currOffset;
+		BOOL foundFirst = FALSE;
+		long prevOffset = 0;
+		ACMIRawPositionData *prevPosPtr = NULL;
+		importEntityVec[i].firstPositionDataOffset = 0;
+		int prevPosVec = -1;
+
+		for (j = 0; j < importNumPos; j++)
+		{
+
+			// check the id to see if this position belongs to the entity
+			if (importPosVec[j].uniqueID == importEntityVec[i].uniqueID)
+			{
+
+				// calculate the offset of this positional record
+				currOffset = tapeHdr->timelineBlockOffset +
+					sizeof(ACMIEntityPositionData) * j;
+
+				// if it's the 1st in the chain, set the offset to it in
+				// the entity's record
+				// Set everytime and check and use which offset is the lowest
+				if (foundFirst == FALSE)
+				{
+					importEntityVec[i].firstPositionDataOffset = currOffset;
+					foundFirst = TRUE;
+				}
+
+				// thread current to previous
+				importPosVec[j].entityPosData.prevPositionUpdateOffset = prevOffset;
+				importPosVec[j].entityPosData.nextPositionUpdateOffset = 0;
+
+				// thread previous to current
+				if (prevPosVec != -1)
+				{
+					importPosVec[prevPosVec].entityPosData.nextPositionUpdateOffset = currOffset;
+				}
+
+				// set vals for next time thru loop
+				prevOffset = currOffset;
+				prevPosVec = j;
+
+			} //end of if
+
+		} // end for position loop
+
+	} // end for entity loop
+
+	  // ------------------------------------------------------------------------------------
+	  // ------------------------------------------------------------------------------------
+	  // ------------------------------------------------------------------------------------
+
+	  // we run an outer and inner loop here.
+	  // the outer loops steps thru each Feature
+	  // the inner loop searches each position update for one owned by the
+	  // Feature and chains them together
+
+	printf("addr importEntityList: %p\n", importEntityList);
+
+	entityListPtr = importFeatList;
+	importFeatVec;
+
+	for (i = 0; i < importNumFeat; i++)
+	{
+		//importFeatVec
+		entityPtr = (ACMIEntityData *)entityListPtr->node;
+		foundFirst = FALSE;
+		prevOffset = 0;
+		prevPosPtr = NULL;
+		entityPtr->firstPositionDataOffset = 0;
+
+		posListPtr = importPosList;
+		//importPosVec;
+
+		long currOffset;
+		BOOL foundFirst = FALSE;
+		long prevOffset = 0;
+		ACMIRawPositionData *prevPosPtr = NULL;
+		importFeatVec[i].firstPositionDataOffset = 0;
+		int prevPosVec = -1;
+
+
+		for (j = 0; j < importNumPos; j++)
+		{	
+			// check the id to see if this position belongs to the entity
+			//if (posPtr->uniqueID == entityPtr->uniqueID)
+			if (importPosVec[j].uniqueID == importFeatVec[i].uniqueID)
+			{
+				// calculate the offset of this positional record
+				currOffset = tapeHdr->timelineBlockOffset +
+					sizeof(ACMIEntityPositionData) * j;
+
+				// if it's the 1st in the chain, set the offset to it in
+				// the entity's record
+				if (foundFirst == FALSE)
+				{
+					importFeatVec[i].firstPositionDataOffset = currOffset;
+					foundFirst = TRUE;
+				}
+
+				// thread current to previous
+				importPosVec[j].entityPosData.prevPositionUpdateOffset = prevOffset;
+				importPosVec[j].entityPosData.nextPositionUpdateOffset = 0;
+
+				// thread previous to current
+				if (prevPosVec != -1)
+				{
+					importPosVec[prevPosVec].entityPosData.nextPositionUpdateOffset = currOffset;
+				}
+
+				// set vals for next time thru loop
+				prevOffset = currOffset;
+				prevPosVec = j;
+			} // End of if 
+
+		} // end for position loop
+
+		  // while we're doing the features, for each one, go thru the
+		  // feature event list looking for our unique ID in the events
+		  // and setting the index value of our feature in the event
+		posListPtr = importFeatEventList;
+		for (j = 0; j < importNumFeatEvents; j++)
+		{
+			// posListPtr = LIST_NTH(importPosList, j);
+			fePtr = (ACMIFeatEventImportData *)posListPtr->node;
+
+			// check the id to see if this event belongs to the entity
+			if (fePtr->uniqueID == entityPtr->uniqueID)
+			{
+				fePtr->data.index = i;
+			}
+
+			// next in list
+			posListPtr = posListPtr->next;
+
+		} // end for feature event loop
+
+		  // now go thru the feature list again and find lead unique ID's and
+		  // change them to indices into the list
+
+		  // actually NOW, go through and just make sure they exist... otherwise, clear
+		if (entityPtr->leadIndex != -1)
+		{
+			featListPtr = importFeatList;
+			for (j = 0; j < importNumFeat; j++)
+			{
+				// we don't compare ourselves
+				if (j != i)
+				{
+					featPtr = (ACMIEntityData *)featListPtr->node;
+					if (entityPtr->leadIndex == featPtr->uniqueID)
+					{
+						entityPtr->leadIndex = j;
+						break;
+					}
+
+				}
+				// next in list
+				featListPtr = featListPtr->next;
+			}
+
+			// if we're gone thru the whole list and haven't found
+			// a lead index, we're in trouble.  To protect, set the
+			// lead index to -1
+			if (j == importNumFeat)
+			{
+				entityPtr->leadIndex = -1;
+			}
+		}
+
+		entityListPtr = entityListPtr->next;
+	} // end for feature entity loop
+
+
+}
+
+
+
+
 
 /*
 ** Description:
