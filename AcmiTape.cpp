@@ -92,13 +92,15 @@ LIST *importEventList;
 LIST *importEntEventList;
 std::vector<ACMIRawPositionData> importEntEventVec;
 
+LIST *importFeatEventList;
+std::vector<ACMIFeatEventImportData> importFeatEventVec;
+
 
 LIST *importEntityListEnd;
 LIST *importFeatListEnd;
 LIST *importPosListEnd;
 LIST *importEventListEnd;
 LIST *importEntEventListEnd;
-LIST *importFeatEventList;
 LIST *importFeatEventListEnd;
 int importNumPos;
 int importNumEnt;
@@ -738,7 +740,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				fedata->data.newStatus = fs.newStatus;
 				fedata->data.prevStatus = fs.prevStatus;
 
-				
+				importFeatEventVec.push_back(*fedata);
 				// Append our new data.
 				importFeatEventList = AppendToEndOfList(importFeatEventList, &importFeatEventListEnd, fedata );
 				fedata = NULL;
@@ -777,7 +779,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				ehdr->type = msfx.type;
 				ehdr->scale = msfx.scale;
 
-				
+				std::cout << "IMPOOOOOOOOOOOOOOOOORTE EVENT LIST WAAAAAT" << std::endl;
 				// Append our new data.
 				importEventList = AppendToEndOfList(importEventList, &importEventListEnd, ehdr );
 				ehdr = NULL;
@@ -1394,22 +1396,22 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 
 void ACMITape::ThreadEntityPositions2(ACMITapeHeader *tapeHdr)
 {
-	int i, j;
-	long prevOffset;
-	LIST *entityListPtr, *posListPtr, *featListPtr;
-	ACMIEntityData *entityPtr, *featPtr;
-	//ACMIRawPositionData *posPtr;
-	ACMIRawPositionData *prevPosPtr;
-	ACMIFeatEventImportData *fePtr;
-	BOOL foundFirst;
-	long currOffset;
+	//int i, j;
+	//long prevOffset;
+	//LIST *entityListPtr, *posListPtr, *featListPtr;
+	//ACMIEntityData *entityPtr, *featPtr;
+	////ACMIRawPositionData *posPtr;
+	//ACMIRawPositionData *prevPosPtr;
+	//ACMIFeatEventImportData *fePtr;
+	//BOOL foundFirst;
+	//long currOffset;
 
 	// we run an outer and inner loop here.
 	// the outer loops steps thru each entity
 	// the inner loop searches each position update for one owned by the
 	// entity and chains them together
 
-	entityListPtr = importEntityList;
+	//entityListPtr = importEntityList;
 	
 	std::cout << "nb:importNumPos:" << importNumPos << std::endl;
 	std::cout << "nb:importPosVec:" << importPosVec.size() << std::endl;
@@ -1423,7 +1425,7 @@ void ACMITape::ThreadEntityPositions2(ACMITapeHeader *tapeHdr)
 
 	std::mutex posListMtx;
 
-	for (i = 0; i < importNumEnt; i++)
+	for (int i = 0; i < importNumEnt; i++)
 	{
 		// entityListPtr = LIST_NTH(importEntityList, i);
 		//entityPtr = (ACMIEntityData *)entityListPtr->node;
@@ -1440,7 +1442,7 @@ void ACMITape::ThreadEntityPositions2(ACMITapeHeader *tapeHdr)
 		importEntityVec[i].firstPositionDataOffset = 0;
 		int prevPosVec = -1;
 
-		for (j = 0; j < importNumPos; j++)
+		for (int j = 0; j < importNumPos; j++)
 		{
 
 			// check the id to see if this position belongs to the entity
@@ -1491,19 +1493,19 @@ void ACMITape::ThreadEntityPositions2(ACMITapeHeader *tapeHdr)
 
 	printf("addr importEntityList: %p\n", importEntityList);
 
-	entityListPtr = importFeatList;
-	importFeatVec;
+	//entityListPtr = importFeatList;
+	//importFeatVec;
 
-	for (i = 0; i < importNumFeat; i++)
+	for (int i = 0; i < importNumFeat; i++)
 	{
 		//importFeatVec
-		entityPtr = (ACMIEntityData *)entityListPtr->node;
+		/*entityPtr = (ACMIEntityData *)entityListPtr->node;
 		foundFirst = FALSE;
 		prevOffset = 0;
 		prevPosPtr = NULL;
 		entityPtr->firstPositionDataOffset = 0;
 
-		posListPtr = importPosList;
+		posListPtr = importPosList;*/
 		//importPosVec;
 
 		long currOffset;
@@ -1514,7 +1516,7 @@ void ACMITape::ThreadEntityPositions2(ACMITapeHeader *tapeHdr)
 		int prevPosVec = -1;
 
 
-		for (j = 0; j < importNumPos; j++)
+		for (int j = 0; j < importNumPos; j++)
 		{	
 			// check the id to see if this position belongs to the entity
 			//if (posPtr->uniqueID == entityPtr->uniqueID)
@@ -1552,45 +1554,54 @@ void ACMITape::ThreadEntityPositions2(ACMITapeHeader *tapeHdr)
 		  // while we're doing the features, for each one, go thru the
 		  // feature event list looking for our unique ID in the events
 		  // and setting the index value of our feature in the event
-		posListPtr = importFeatEventList;
-		for (j = 0; j < importNumFeatEvents; j++)
+
+		//importFeatEventVec
+		//posListPtr = importFeatEventList;
+
+		//importFeatVec[i]
+		for (int j = 0; j < importNumFeatEvents; j++)
 		{
 			// posListPtr = LIST_NTH(importPosList, j);
-			fePtr = (ACMIFeatEventImportData *)posListPtr->node;
+			//fePtr = (ACMIFeatEventImportData *)posListPtr->node;
 
 			// check the id to see if this event belongs to the entity
-			if (fePtr->uniqueID == entityPtr->uniqueID)
+			//if (fePtr->uniqueID == entityPtr->uniqueID)
+			if (importFeatEventVec[j].uniqueID == importFeatVec[i].uniqueID)
 			{
-				fePtr->data.index = i;
+				importFeatEventVec[j].data.index = i;
 			}
-
 			// next in list
-			posListPtr = posListPtr->next;
+			//posListPtr = posListPtr->next;
 
 		} // end for feature event loop
 
 		  // now go thru the feature list again and find lead unique ID's and
 		  // change them to indices into the list
 
+		//importFeatVec
 		  // actually NOW, go through and just make sure they exist... otherwise, clear
-		if (entityPtr->leadIndex != -1)
+		if (importFeatVec[i].leadIndex != -1)
 		{
-			featListPtr = importFeatList;
+			
+			//importFeatVec
+
+			// 
+			int j;
 			for (j = 0; j < importNumFeat; j++)
 			{
 				// we don't compare ourselves
 				if (j != i)
 				{
-					featPtr = (ACMIEntityData *)featListPtr->node;
-					if (entityPtr->leadIndex == featPtr->uniqueID)
+					//featPtr = (ACMIEntityData *)featListPtr->node;
+					if (importFeatVec[i].leadIndex == importFeatVec[j].uniqueID)
 					{
-						entityPtr->leadIndex = j;
+						importFeatVec[i].leadIndex = j;
 						break;
 					}
 
 				}
 				// next in list
-				featListPtr = featListPtr->next;
+				//featListPtr = featListPtr->next;
 			}
 
 			// if we're gone thru the whole list and haven't found
@@ -1598,11 +1609,11 @@ void ACMITape::ThreadEntityPositions2(ACMITapeHeader *tapeHdr)
 			// lead index to -1
 			if (j == importNumFeat)
 			{
-				entityPtr->leadIndex = -1;
+				importFeatVec[i].leadIndex = -1;
 			}
 		}
 
-		entityListPtr = entityListPtr->next;
+		//entityListPtr = entityListPtr->next;
 	} // end for feature entity loop
 
 
@@ -1978,7 +1989,7 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 		goto error_exit;
 
 
-	// write out the entities
+	// write out the entities // Can't switch to VEC ATM
 	entityListPtr = importEntityList;
 	for (i = 0; i < importNumEnt; i++)
 	{
@@ -1991,17 +2002,19 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 		entityListPtr = entityListPtr->next;
 	} // end for entity loop
 
-	  // write out the features
-	entityListPtr = importFeatList;
+
+
+	 // write out the features
+	//entityListPtr = importFeatList;
 	for (i = 0; i < importNumFeat; i++)
 	{
 		// entityListPtr = LIST_NTH(importEntityList, i);
-		entityPtr = (ACMIEntityData *)entityListPtr->node;
+		//entityPtr = (ACMIEntityData *)entityListPtr->node;
 
-		ret = fwrite(entityPtr, sizeof(ACMIEntityData), 1, tapeFile);
+		ret = fwrite(&importFeatVec[i], sizeof(ACMIEntityData), 1, tapeFile);
 		if (!ret)
 			goto error_exit;
-		entityListPtr = entityListPtr->next;
+		//entityListPtr = entityListPtr->next;
 	} // end for entity loop
 
 	  // write out the entitiy positions
@@ -2056,16 +2069,15 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 	std::cout << "nb event" << importNumEvents << std::endl;
 	// allocate the trailer list
 	importEventTrailerList = new ACMIEventTrailer[importNumEvents];
-	//F4Assert( importEventTrailerList );
 
-	// write out the events
+
+	// write out the events // not done ATM
 	eventListPtr = importEventList;
 	for (i = 0; i < importNumEvents; i++)
 	{
 		// eventListPtr = LIST_NTH(importEventList, i);
 		eventPtr = (ACMIEventHeader *)eventListPtr->node;
 
-		//eventPtr->
 
 		// set the trailer data
 		importEventTrailerList[i].index = i;
@@ -2094,14 +2106,14 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 
 	} // end for events loop
 
-	  // write out the feature events
+	// write out the feature events
 	posListPtr = importFeatEventList;
 	for (i = 0; i < importNumFeatEvents; i++)
 	{
 		// posListPtr = LIST_NTH(importPosList, i);
 		fePtr = (ACMIFeatEventImportData *)posListPtr->node;
-
-		ret = fwrite(&fePtr->data, sizeof(ACMIFeatEvent), 1, tapeFile);
+		
+		ret = fwrite(&importFeatEventVec[i].data, sizeof(ACMIFeatEvent), 1, tapeFile);
 		if (!ret)
 			goto error_exit;
 
