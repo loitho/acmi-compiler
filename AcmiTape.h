@@ -581,6 +581,7 @@ private:
 
 	// These are used for importation.
 	static void ParseEntities ( void );
+	static void ParseEntities2 (void);
 	static void ThreadEntityPositions( ACMITapeHeader *tapeHdr );
 	static void ThreadEntityPositions2(ACMITapeHeader *tapeHdr);
 

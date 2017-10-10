@@ -87,7 +87,7 @@ LIST *importPosList;
 std::vector<ACMIRawPositionData> importPosVec;
 
 LIST *importEventList;
-
+std::vector<ACMIEventHeader> importEventVec;
 
 LIST *importEntEventList;
 std::vector<ACMIRawPositionData> importEntEventVec;
@@ -936,10 +936,23 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				endTime = hdr.time;
 		}
 	}
-
+	clock_t t;
 	// build the importEntityList
 	MonoPrint("ACMITape Import: Parsing Entities ....\n");
+	t = clock();
 	ParseEntities();
+	t = clock() - t;
+	printf("ARRAY : thread entity It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+
+
+	MonoPrint("ACMITape Import: Parsing Entities2 ....\n");
+	t = clock();
+	//ParseEntities2();
+	t = clock() - t;
+	printf("VECTOR : thread entity It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+
+
+
 
 	// setup the tape header
 	tapeHdr.fileID = 'TAPE';
@@ -967,7 +980,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	tapeHdr.totPlayTime = endTime - begTime;
 	tapeHdr.startTime =  begTime;
 
-	clock_t t;
+	
 
 	// set up the chain offsets of entity positions
 	MonoPrint("ACMITape Import: Threading Positions ....\n");
@@ -1058,21 +1071,34 @@ void ACMITape::ParseEntities ( void )
 		{
 			// look for existing entity
 			entityPtr = importFeatList;
-			for (i = 0; i < importNumFeat; i++)
+			if (entityPtr != NULL)
+				importEntityInfo = (ACMIEntityData *)entityPtr->node;
+			else
+				importEntityInfo = NULL;
+
+			for (i = 0; (
+				i < importNumFeat && 	
+				importEntityInfo != NULL && 
+				entityType->uniqueID != importEntityInfo->uniqueID); i++)
 			{
 				// entityPtr = LIST_NTH(importEntityList, i);
-				importEntityInfo = ( ACMIEntityData * )entityPtr->node;
-				if(entityType->uniqueID == importEntityInfo->uniqueID)
+				//importEntityInfo = ( ACMIEntityData * )entityPtr->node;
+			/*	if(entityType->uniqueID == importEntityInfo->uniqueID)
 				{
 					break;
-				}
+				}*/
 	
 				entityPtr = entityPtr->next;
+				if (entityPtr != NULL)
+					importEntityInfo = (ACMIEntityData *)entityPtr->node;
+				else
+					importEntityInfo = NULL;
 			}
 	
 			// create new import entity record
 			if(i == importNumFeat)
 			{
+				//std::cout << "NOOP" << std::endl;
 				importEntityInfo = new ACMIEntityData;
 				importEntityInfo->count =0;
 
@@ -1168,6 +1194,154 @@ void ACMITape::ParseEntities ( void )
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+
+void ACMITape::ParseEntities2(void)
+{
+	int
+		i = 0,
+		count = 0;
+
+	LIST
+		*entityPtr,
+		*rawList;
+
+	ACMIRawPositionData
+		*entityType;
+
+	ACMIEntityData
+		*importEntityInfo;
+
+	importEntityList = NULL;
+
+	rawList = importPosList;
+	//importPosVec
+	for (count = 0; count < importNumPos; count++)
+	{
+		// rawList = LIST_NTH(importPosList, count);
+		
+		// importPosVec
+		entityType = (ACMIRawPositionData *)rawList->node;
+
+
+
+		if (importPosVec[count].flags & ENTITY_FLAG_FEATURE)
+		{
+			// look for existing entity
+			//importFeatVec
+			entityPtr = importFeatList;
+			for (i = 0; i < importNumFeat; i++)
+			{
+				// entityPtr = LIST_NTH(importEntityList, i);
+				//importFeatVec
+				importEntityInfo = (ACMIEntityData *)entityPtr->node;
+				if (importPosVec[count].uniqueID == importFeatVec[i].uniqueID)
+				{
+					break;
+				}
+
+				entityPtr = entityPtr->next;
+			}
+			
+			// create new import entity record
+			if (i == importNumFeat)
+			{
+				ACMIEntityData* importEntityInfo = new ACMIEntityData;
+				importEntityInfo->count = 0;
+
+				//F4Assert( importEntityInfo );
+				importEntityInfo->uniqueID = entityType->uniqueID;
+				importEntityInfo->type = entityType->type;
+				importEntityInfo->flags = entityType->flags;
+				importEntityInfo->leadIndex = entityType->leadIndex;
+				importEntityInfo->specialFlags = entityType->specialFlags;
+				importEntityInfo->slot = entityType->slot;
+
+				importFeatVec.push_back(*importEntityInfo);
+
+				importFeatList = AppendToEndOfList(importFeatList, &importFeatListEnd, importEntityInfo);
+				importNumFeat++;
+			}
+		}
+		else
+		{
+			// not a feature
+
+			// look for existing entity
+			entityPtr = importEntityList;
+
+			for (i = 0; i < importNumEnt; i++)
+			{
+				// entityPtr = LIST_NTH(importEntityList, i);
+				importEntityInfo = (ACMIEntityData *)entityPtr->node;
+				if (entityType->uniqueID == importEntityInfo->uniqueID)
+				{
+					break;
+				}
+
+				entityPtr = entityPtr->next;
+			}
+
+			// create new import entity record
+			if (i == importNumEnt)
+			{
+				importEntityInfo = new ACMIEntityData;
+				importEntityInfo->count = 0;
+
+				//F4Assert( importEntityInfo );
+				importEntityInfo->uniqueID = entityType->uniqueID;
+				importEntityInfo->type = entityType->type;
+				importEntityInfo->flags = entityType->flags;
+				// remove				importEntityInfo->teamColor = entityType->entityPosData.teamColor;
+				// remove				strcpy((importEntityInfo->label), (char*) entityType->entityPosData.label);
+
+				importEntityVec.push_back(*importEntityInfo);
+				importEntityList = AppendToEndOfList(importEntityList, &importEntityListEnd, importEntityInfo);
+				importNumEnt++;
+			}
+		}
+
+		rawList = rawList->next;
+	}
+
+	MonoPrint("ACMITape Import: Counting ....\n");
+	// Count instances of each unique type
+	LIST* list1 = importEntityList;
+	LIST* list2;
+	ACMIEntityData* thing1;
+	ACMIEntityData* thing2;
+	int objCount;
+
+	while (list1)
+	{
+		thing1 = (ACMIEntityData*)list1->node;
+		if (thing1->count == 0)
+		{
+			thing1->count = 1;
+			objCount = 2;
+			list2 = list1->next;
+			while (list2)
+			{
+				thing2 = (ACMIEntityData*)list2->node;
+				if (thing2->type == thing1->type && thing2->count == 0)
+				{
+					thing2->count = objCount;
+					objCount++;
+				}
+				list2 = list2->next;
+			}
+		}
+		list1 = list1->next;
+	}
+	MonoPrint("ACMITape Import: Counting ended ....\n");
+
+
+}
+
+
+
+
+
+
 
 /*
 ** Description:
