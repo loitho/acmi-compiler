@@ -2287,7 +2287,7 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 			importEventTrailerVec[i].timeEnd = importEventVec[i].timeEnd;
 
 
-			ret = fwrite(eventPtr, sizeof(ACMIEventHeader), 1, tapeFile);
+			ret = fwrite(&importEventVec[i], sizeof(ACMIEventHeader), 1, tapeFile);
 			if (!ret)
 				throw "error_exit";
 
