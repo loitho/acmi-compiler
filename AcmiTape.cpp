@@ -2153,6 +2153,33 @@ error_exit:
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+bool myfunction(const ACMIEventTrailer& i, const ACMIEventTrailer& j)
+{
+	
+	//return (i.timeEnd < j.timeEnd);
+
+	/*if (i.timeEnd < j.timeEnd)
+		return -1;*/
+	if (i.timeEnd > j.timeEnd)
+		return 1;
+	else
+		return 0;
+
+
+}
+
+int CompareEventTrailer(const ACMIEventTrailer& i, const ACMIEventTrailer& j)
+{
+	//ACMIEventTrailer *t1 = (ACMIEventTrailer *)p1;
+	//ACMIEventTrailer *t2 = (ACMIEventTrailer *)p2;
+
+	if (i.timeEnd < j.timeEnd)
+		return -1;
+	else if (i.timeEnd > j.timeEnd)
+		return 1;
+	else
+		return 0;
+}
 
 
 void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
@@ -2295,16 +2322,37 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 
 		} // end for events loop
 
+		/*for (auto i : importEventTrailerVec)
+			std::cout << "index: " << i.index << "\t time: " << i.timeEnd << std::endl;*/
+
 		  // now sort the trailers in ascending order by endTime and
 		  // write them out
 		qsort(importEventTrailerList,
 			importNumEvents,
 			sizeof(ACMIEventTrailer),
 			CompareEventTrailer);
+		
+		// Using qsort because sort and sort_stable don't output the same exact result
+		// Don't know if it's a problem I use that for now.
+		qsort(&importEventTrailerVec[0],
+			importEventTrailerVec.size(),
+			sizeof(ACMIEventTrailer),
+			CompareEventTrailer);
+		//std::sort(importEventTrailerVec.begin(), importEventTrailerVec.end(), myfunction);
+
+		//std::reverse(importEventTrailerVec.begin(), importEventTrailerVec.end());  
 
 		for (i = 0; i < importNumEvents; i++)
 		{
-			ret = fwrite(&importEventTrailerList[i], sizeof(ACMIEventTrailer), 1, tapeFile);
+	/*		std::cout << "VEEC: index: " << importEventTrailerVec[i].index << "\t time: " << importEventTrailerVec[i].timeEnd << std::endl;
+			std::cout << "LIST: index: " << importEventTrailerList[i].index << "\t time: " << importEventTrailerList[i].timeEnd << std::endl;
+
+			if (importEventTrailerVec[i].index != importEventTrailerList[i].index)
+				std::cout << "INCORRECT" << std::endl << std::endl;
+			else
+				std::cout << std::endl;*/
+
+			ret = fwrite(&importEventTrailerVec[i], sizeof(ACMIEventTrailer), 1, tapeFile);
 			if (!ret)
 				throw "error_exit";
 
@@ -2333,6 +2381,7 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 		return;
 	}
 }
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
