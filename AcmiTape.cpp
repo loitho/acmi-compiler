@@ -948,7 +948,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 
 	MonoPrint("ACMITape Import: Parsing Entities2 ....\n");
 	t = clock();
-	//ParseEntities2();
+	ParseEntities2();
 	t = clock() - t;
 	printf("VECTOR : thread entity It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 
@@ -1218,7 +1218,8 @@ void ACMITape::ParseEntities2(void)
 
 	//rawList = importPosList;
 	//importPosVec
-	for (count = 0; count < importNumPos; count++)
+	//for (count = 0; count < importNumPos; count++)
+	for (count = 0; count < importPosVec.size(); count++)
 	{
 		// rawList = LIST_NTH(importPosList, count);
 		
@@ -1232,7 +1233,8 @@ void ACMITape::ParseEntities2(void)
 			// look for existing entity
 			//importFeatVec
 			//entityPtr = importFeatList;
-			for (i = 0; i < importNumFeat; i++)
+			//for (i = 0; i < importNumFeat; i++)
+			for (i = 0; i < importFeatVec.size(); i++)
 			{
 				// entityPtr = LIST_NTH(importEntityList, i);
 				//importFeatVec
@@ -1246,7 +1248,8 @@ void ACMITape::ParseEntities2(void)
 			}
 			
 			// create new import entity record
-			if (i == importNumFeat)
+			//if (i == importNumFeat)
+			if (i == importFeatVec.size())
 			{
 				ACMIEntityData* importEntityInfo = new ACMIEntityData;
 				importEntityInfo->count = 0;
@@ -1262,7 +1265,7 @@ void ACMITape::ParseEntities2(void)
 				importFeatVec.push_back(*importEntityInfo);
 
 				//importFeatList = AppendToEndOfList(importFeatList, &importFeatListEnd, importEntityInfo);
-				importNumFeat++;
+				//importNumFeat++;
 			}
 		}
 		else
@@ -1272,8 +1275,8 @@ void ACMITape::ParseEntities2(void)
 			// look for existing entity
 			//importEntityVec;
 			//entityPtr = importEntityList;
-
-			for (i = 0; i < importNumEnt; i++)
+			//for (i = 0; i < importNumEnt; i++)
+			for (i = 0; i < importEntityVec.size(); i++)
 			{
 				// entityPtr = LIST_NTH(importEntityList, i);
 				//importEntityInfo = (ACMIEntityData *)entityPtr->node;
@@ -1286,7 +1289,7 @@ void ACMITape::ParseEntities2(void)
 			}
 
 			// create new import entity record
-			if (i == importNumEnt)
+			if (i == importEntityVec.size())
 			{
 				ACMIEntityData* importEntityInfo = new ACMIEntityData;
 				importEntityInfo->count = 0;
@@ -1300,7 +1303,7 @@ void ACMITape::ParseEntities2(void)
 
 				importEntityVec.push_back(*importEntityInfo);
 				//importEntityList = AppendToEndOfList(importEntityList, &importEntityListEnd, importEntityInfo);
-				importNumEnt++;
+				//importNumEnt++;
 			}
 		}
 
@@ -2211,12 +2214,13 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 
 		// write out the entities // Can't switch to VEC ATM
 		entityListPtr = importEntityList;
+		//importEntityVec
 		for (i = 0; i < importNumEnt; i++)
 		{
 			// entityListPtr = LIST_NTH(importEntityList, i);
 			entityPtr = (ACMIEntityData *)entityListPtr->node;
 
-			ret = fwrite(entityPtr, sizeof(ACMIEntityData), 1, tapeFile);
+			ret = fwrite(&importEntityVec[i], sizeof(ACMIEntityData), 1, tapeFile);
 			if (!ret)
 				throw "error_exit";
 			entityListPtr = entityListPtr->next;
@@ -2239,6 +2243,7 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 
 		  // write out the entitiy positions
 		posListPtr = importPosList;
+		//importPosVec;
 		for (i = 0; i < importNumPos; i++)
 		{
 			// posListPtr = LIST_NTH(importPosList, i);
@@ -2298,7 +2303,7 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 		std::cout <<"importEventVec" << importEventVec.size() << std::endl;
 		std::cout <<"importNumEvents" << importNumEvents << std::endl;
 
-		// write out the events // not done ATM
+		// write out the events 
 		eventListPtr = importEventList;
 		for (i = 0; i < importNumEvents; i++)
 		{
