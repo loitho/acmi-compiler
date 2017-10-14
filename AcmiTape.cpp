@@ -1499,8 +1499,6 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 
 
 
-
-
 void ACMITape::ThreadEntityPositions2(ACMITapeHeader *tapeHdr)
 {
 	// we run an outer and inner loop here.
@@ -1510,8 +1508,11 @@ void ACMITape::ThreadEntityPositions2(ACMITapeHeader *tapeHdr)
 
 
 
+	int importEntityVecSize = importEntityVec.size();
+	int importPosVecSize = importPosVec.size();
+	int importFeatVecSize = importFeatVec.size();
 
-	for (int i = 0; i < importNumEnt; i++)
+	for (int i = 0; i < importEntityVecSize; i++)
 	{
 		long currOffset;
 		BOOL foundFirst = FALSE;
@@ -1520,7 +1521,7 @@ void ACMITape::ThreadEntityPositions2(ACMITapeHeader *tapeHdr)
 		importEntityVec[i].firstPositionDataOffset = 0;
 		int prevPosVec = -1;
 
-		for (int j = 0; j < importNumPos; j++)
+		for (int j = 0; j < importPosVecSize; j++)
 		{
 
 			// check the id to see if this position belongs to the entity
@@ -1567,7 +1568,11 @@ void ACMITape::ThreadEntityPositions2(ACMITapeHeader *tapeHdr)
 	// the outer loops steps thru each Feature
 	// the inner loop searches each position update for one owned by the
 	// Feature and chains them together
-	for (int i = 0; i < importNumFeat; i++)
+
+
+
+
+	for (int i = 0; i < importFeatVecSize; i++)
 	{
 		long currOffset;
 		BOOL foundFirst = FALSE;
@@ -1577,7 +1582,7 @@ void ACMITape::ThreadEntityPositions2(ACMITapeHeader *tapeHdr)
 		int prevPosVec = -1;
 
 
-		for (int j = 0; j < importNumPos; j++)
+		for (int j = 0; j < importPosVecSize; j++)
 		{	
 			// check the id to see if this position belongs to the entity
 			if (importPosVec[j].uniqueID == importFeatVec[i].uniqueID)
@@ -1629,11 +1634,13 @@ void ACMITape::ThreadEntityPositions2(ACMITapeHeader *tapeHdr)
 		// now go thru the feature list again and find lead unique ID's and
 		// change them to indices into the list
 		// actually NOW, go through and just make sure they exist... otherwise, clear
+
+
 		if (importFeatVec[i].leadIndex != -1)
 		{
 
 			int j;
-			for (j = 0; j < importNumFeat; j++)
+			for (j = 0; j < importFeatVecSize; j++)
 			{
 				// we don't compare ourselves
 				if (j != i)
@@ -1643,8 +1650,8 @@ void ACMITape::ThreadEntityPositions2(ACMITapeHeader *tapeHdr)
 						importFeatVec[i].leadIndex = j;
 						break;
 					}
-
 				}
+
 			}
 
 			// if we're gone thru the whole list and haven't found
