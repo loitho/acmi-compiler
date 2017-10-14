@@ -68,22 +68,11 @@ long tempTarget; // for missile lock.
 
 // these are for raw data import
 LIST *importEntityList;
-std::vector<ACMIEntityData> importEntityVec;
-
 LIST *importFeatList;
-std::vector<ACMIEntityData> importFeatVec;
-
 LIST *importPosList;
-std::vector<ACMIRawPositionData> importPosVec;
-
 LIST *importEventList;
-std::vector<ACMIEventHeader> importEventVec;
-
 LIST *importEntEventList;
-std::vector<ACMIRawPositionData> importEntEventVec;
-
 LIST *importFeatEventList;
-std::vector<ACMIFeatEventImportData> importFeatEventVec;
 
 
 LIST *importEntityListEnd;
@@ -637,7 +626,6 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				rawPositionData->entityPosData.posData.radarTarget= tempTarget;
 
 																		
-				importPosVec.push_back(*rawPositionData);
 				// Append our new position data.
 				importPosList = AppendToEndOfList(importPosList, &importPosListEnd, rawPositionData);
 				rawPositionData = NULL;
@@ -672,7 +660,6 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				ehdr->dy = tracer.dy;
 				ehdr->dz = tracer.dz;
 
-				importEventVec.push_back(*ehdr);
 				// Append our new data.
 				importEventList = AppendToEndOfList(importEventList, &importEventListEnd, ehdr );
 				ehdr = NULL;
@@ -704,7 +691,6 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				ehdr->type = sfx.type;
 				ehdr->scale = sfx.scale;
 
-				importEventVec.push_back(*ehdr);
 				// Append our new data.
 				importEventList = AppendToEndOfList(importEventList, &importEventListEnd, ehdr );
 				ehdr = NULL;
@@ -733,7 +719,6 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				fedata->data.newStatus = fs.newStatus;
 				fedata->data.prevStatus = fs.prevStatus;
 
-				importFeatEventVec.push_back(*fedata);
 				// Append our new data.
 				importFeatEventList = AppendToEndOfList(importFeatEventList, &importFeatEventListEnd, fedata );
 				fedata = NULL;
@@ -772,7 +757,6 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				ehdr->type = msfx.type;
 				ehdr->scale = msfx.scale;
 
-				importEventVec.push_back(*ehdr);
 				// Append our new data.
 				importEventList = AppendToEndOfList(importEventList, &importEventListEnd, ehdr );
 				ehdr = NULL;
@@ -808,7 +792,6 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				rawPositionData->entityPosData.switchData.prevSwitchVal = sd.prevSwitchVal;
 				
 				
-				importEntEventVec.push_back(*rawPositionData);
 				// Append our new position data.
 				importEntEventList = AppendToEndOfList(importEntEventList, &importEntEventListEnd, rawPositionData);
 				rawPositionData = NULL;
@@ -844,7 +827,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				rawPositionData->entityPosData.dofData.DOFVal = dd.DOFVal;
 				rawPositionData->entityPosData.dofData.prevDOFVal = dd.prevDOFVal;
 				
-				importEntEventVec.push_back(*rawPositionData);
+				
 				// Append our new position data.
 				importEntEventList = AppendToEndOfList(importEntEventList, &importEntEventListEnd, rawPositionData);
 				rawPositionData = NULL;
@@ -885,7 +868,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				rawPositionData->entityPosData.posData.pitch = featpos.pitch;
 				rawPositionData->entityPosData.posData.yaw = featpos.yaw;
 				
-				importPosVec.push_back(*rawPositionData);
+				
 				// Append our new position data.
 				importPosList = AppendToEndOfList(importPosList, &importPosListEnd, rawPositionData);
 				rawPositionData = NULL;
@@ -938,15 +921,6 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	MonoPrint("ARRAY : thread entity It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 
 
-	MonoPrint("ACMITape Import: Parsing Entities2 ....\n");
-	t = clock();
-	ParseEntities2();
-	t = clock() - t;
-	MonoPrint("VECTOR : thread entity It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
-
-
-
-
 	// setup the tape header
 	tapeHdr.fileID = 'TAPE';
 	tapeHdr.numEntities = importNumEnt;
@@ -979,12 +953,6 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	MonoPrint("ACMITape Import: Threading Positions ....\n");
 	
 	t = clock();
-	ThreadEntityPositions2(&tapeHdr);
-	t = clock() - t;
-	MonoPrint("VECTOR : thread entity It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
-	
-	
-	t = clock();
 	ThreadEntityPositions(&tapeHdr);
 	t = clock() - t;
 	MonoPrint("ARRAY : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
@@ -994,14 +962,6 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	// set up the chain offsets of entity events
 	MonoPrint("ACMITape Import: Threading Entity Events ....\n");
 	
-	
-	
-
-	t = clock();
-	ThreadEntityEvents2(&tapeHdr);
-	t = clock() - t;
-	MonoPrint("VECTOR : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
-
 	t = clock();
 	ThreadEntityEvents(&tapeHdr);
 	t = clock() - t;
@@ -1018,9 +978,8 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	// Open a writecopy file mapping.
 	// Write out file in .vhs format.
 	MonoPrint("ACMITape Import: Writing Tape File ....\n");
-	//WriteTapeFile( outTapeFileName, &tapeHdr );
-	MonoPrint("ACMITape Import: Writing Tape File ....\n");
-	WriteTapeFile2(outTapeFileName, &tapeHdr);
+	WriteTapeFile( outTapeFileName, &tapeHdr );
+
 
 	// Cleanup import data.
 	CleanupACMIImportPositionData ( flightFile, rawPositionData );
@@ -1041,8 +1000,8 @@ void ACMITape::ParseEntities ( void )
 	int
 		i = 0,
 		count = 0;
-	
-	LIST			
+
+	LIST
 		*entityPtr,
 		*rawList;
 
@@ -1055,56 +1014,43 @@ void ACMITape::ParseEntities ( void )
 	importEntityList = NULL;
 
 	rawList = importPosList;
+
 	for (count = 0; count < importNumPos; count++)
 	{
 		// rawList = LIST_NTH(importPosList, count);
 		entityType = (ACMIRawPositionData *)rawList->node;
 
-		if ( entityType->flags & ENTITY_FLAG_FEATURE )
+		if (entityType->flags & ENTITY_FLAG_FEATURE)
 		{
 			// look for existing entity
 			entityPtr = importFeatList;
-			if (entityPtr != NULL)
-				importEntityInfo = (ACMIEntityData *)entityPtr->node;
-			else
-				importEntityInfo = NULL;
 
-			for (i = 0; (
-				i < importNumFeat && 	
-				importEntityInfo != NULL && 
-				entityType->uniqueID != importEntityInfo->uniqueID); i++)
+			for (i = 0; i < importNumFeat; i++)
 			{
 				// entityPtr = LIST_NTH(importEntityList, i);
-				//importEntityInfo = ( ACMIEntityData * )entityPtr->node;
-			/*	if(entityType->uniqueID == importEntityInfo->uniqueID)
+				importEntityInfo = (ACMIEntityData *)entityPtr->node;
+
+				if (entityType->uniqueID == importEntityInfo->uniqueID)
 				{
 					break;
-				}*/
-	
-				entityPtr = entityPtr->next;
-				if (entityPtr != NULL)
-					importEntityInfo = (ACMIEntityData *)entityPtr->node;
-				else
-					importEntityInfo = NULL;
-			}
-	
-			// create new import entity record
-			if(i == importNumFeat)
-			{
-				//std::cout << "NOOP" << std::endl;
-				importEntityInfo = new ACMIEntityData;
-				importEntityInfo->count =0;
+				}
 
-				//F4Assert( importEntityInfo );
+				entityPtr = entityPtr->next;
+			}
+
+			// create new import entity record
+			if (i == importNumFeat)
+			{
+				importEntityInfo = new ACMIEntityData;
+				importEntityInfo->count = 0;
+
+				//F4Assert(importEntityInfo);
 				importEntityInfo->uniqueID = entityType->uniqueID;
 				importEntityInfo->type = entityType->type;
 				importEntityInfo->flags = entityType->flags;
 				importEntityInfo->leadIndex = entityType->leadIndex;
 				importEntityInfo->specialFlags = entityType->specialFlags;
 				importEntityInfo->slot = entityType->slot;
-
-				importFeatVec.push_back(*importEntityInfo);
-
 				importFeatList = AppendToEndOfList(importFeatList, &importFeatListEnd, importEntityInfo);
 				importNumFeat++;
 			}
@@ -1119,29 +1065,29 @@ void ACMITape::ParseEntities ( void )
 			for (i = 0; i < importNumEnt; i++)
 			{
 				// entityPtr = LIST_NTH(importEntityList, i);
-				importEntityInfo = ( ACMIEntityData * )entityPtr->node;
-				if(entityType->uniqueID == importEntityInfo->uniqueID)
+				importEntityInfo = (ACMIEntityData *)entityPtr->node;
+
+				if (entityType->uniqueID == importEntityInfo->uniqueID)
 				{
 					break;
 				}
-	
+
 				entityPtr = entityPtr->next;
 			}
-	
+
 			// create new import entity record
-			if(i == importNumEnt)
+			if (i == importNumEnt)
 			{
 				importEntityInfo = new ACMIEntityData;
-				importEntityInfo->count =0;
+				importEntityInfo->count = 0;
 
-				//F4Assert( importEntityInfo );
+				//F4Assert(importEntityInfo);
 				importEntityInfo->uniqueID = entityType->uniqueID;
 				importEntityInfo->type = entityType->type;
 				importEntityInfo->flags = entityType->flags;
-// remove				importEntityInfo->teamColor = entityType->entityPosData.teamColor;
-// remove				strcpy((importEntityInfo->label), (char*) entityType->entityPosData.label);
+				// remove importEntityInfo->teamColor = entityType->entityPosData.teamColor;
+				// remove strcpy((importEntityInfo->label), (char*) entityType->entityPosData.label);
 
-				importEntityVec.push_back(*importEntityInfo);
 				importEntityList = AppendToEndOfList(importEntityList, &importEntityListEnd, importEntityInfo);
 				importNumEnt++;
 			}
@@ -1150,7 +1096,6 @@ void ACMITape::ParseEntities ( void )
 		rawList = rawList->next;
 	}
 
-	MonoPrint("ACMITape Import: Counting ....\n");
 	// Count instances of each unique type
 	LIST* list1 = importEntityList;
 	LIST* list2;
@@ -1158,188 +1103,42 @@ void ACMITape::ParseEntities ( void )
 	ACMIEntityData* thing2;
 	int objCount;
 
+MonoPrint("ACMITape Import: Counting ....\n");
+
 	while (list1)
 	{
 		thing1 = (ACMIEntityData*)list1->node;
+
 		if (thing1->count == 0)
 		{
 			thing1->count = 1;
 			objCount = 2;
 			list2 = list1->next;
+
 			while (list2)
 			{
 				thing2 = (ACMIEntityData*)list2->node;
+
 				if (thing2->type == thing1->type && thing2->count == 0)
 				{
 					thing2->count = objCount;
-					objCount ++;
+					objCount++;
 				}
+
 				list2 = list2->next;
 			}
 		}
+
 		list1 = list1->next;
 	}
-	MonoPrint("ACMITape Import: Counting ended ....\n");
+MonoPrint("ACMITape Import: Counting ended ....\n");
+
+
+
 }
-
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
-void ACMITape::ParseEntities2(void)
-{
-	int
-		i = 0,
-		count = 0;
-
-	//LIST
-	//	*entityPtr,
-	//	*rawList;
-
-	//ACMIRawPositionData
-	//	*entityType;
-
-	//ACMIEntityData
-	//	*importEntityInfo;
-
-	//importEntityList = NULL;
-
-	//rawList = importPosList;
-	//importPosVec
-	//for (count = 0; count < importNumPos; count++)
-	for (count = 0; count < importPosVec.size(); count++)
-	{
-		// rawList = LIST_NTH(importPosList, count);
-		
-		// importPosVec
-		//entityType = (ACMIRawPositionData *)rawList->node;
-
-
-
-		if (importPosVec[count].flags & ENTITY_FLAG_FEATURE)
-		{
-			// look for existing entity
-			//importFeatVec
-			//entityPtr = importFeatList;
-			//for (i = 0; i < importNumFeat; i++)
-			for (i = 0; i < importFeatVec.size(); i++)
-			{
-				// entityPtr = LIST_NTH(importEntityList, i);
-				//importFeatVec
-				//importEntityInfo = (ACMIEntityData *)entityPtr->node;
-				if (importPosVec[count].uniqueID == importFeatVec[i].uniqueID)
-				{
-					break;
-				}
-
-				//entityPtr = entityPtr->next;
-			}
-			
-			// create new import entity record
-			//if (i == importNumFeat)
-			if (i == importFeatVec.size())
-			{
-				ACMIEntityData* importEntityInfo = new ACMIEntityData;
-				importEntityInfo->count = 0;
-
-				//F4Assert( importEntityInfo );
-				importEntityInfo->uniqueID = importPosVec[count].uniqueID;
-				importEntityInfo->type = importPosVec[count].type;
-				importEntityInfo->flags = importPosVec[count].flags;
-				importEntityInfo->leadIndex = importPosVec[count].leadIndex;
-				importEntityInfo->specialFlags = importPosVec[count].specialFlags;
-				importEntityInfo->slot = importPosVec[count].slot;
-
-				importFeatVec.push_back(*importEntityInfo);
-
-				//importFeatList = AppendToEndOfList(importFeatList, &importFeatListEnd, importEntityInfo);
-				//importNumFeat++;
-			}
-		}
-		else
-		{
-			// not a feature
-
-			// look for existing entity
-			//importEntityVec;
-			//entityPtr = importEntityList;
-			//for (i = 0; i < importNumEnt; i++)
-			for (i = 0; i < importEntityVec.size(); i++)
-			{
-				// entityPtr = LIST_NTH(importEntityList, i);
-				//importEntityInfo = (ACMIEntityData *)entityPtr->node;
-				if (importPosVec[count].uniqueID == importEntityVec[i].uniqueID)
-				{
-					break;
-				}
-
-				//entityPtr = entityPtr->next;
-			}
-
-			// create new import entity record
-			if (i == importEntityVec.size())
-			{
-				ACMIEntityData* importEntityInfo = new ACMIEntityData;
-				importEntityInfo->count = 0;
-
-				//F4Assert( importEntityInfo );
-				importEntityInfo->uniqueID = importPosVec[count].uniqueID;
-				importEntityInfo->type = importPosVec[count].type;
-				importEntityInfo->flags = importPosVec[count].flags;
-				// remove				importEntityInfo->teamColor = entityType->entityPosData.teamColor;
-				// remove				strcpy((importEntityInfo->label), (char*) entityType->entityPosData.label);
-
-				importEntityVec.push_back(*importEntityInfo);
-				//importEntityList = AppendToEndOfList(importEntityList, &importEntityListEnd, importEntityInfo);
-				//importNumEnt++;
-			}
-		}
-
-		//rawList = rawList->next;
-	}
-
-	MonoPrint("ACMITape Import: Counting ....\n");
-	// Count instances of each unique type
-	//LIST* list1 = importEntityList;
-	//LIST* list2;
-	//ACMIEntityData* thing1;
-	//ACMIEntityData* thing2;
-	int objCount;
-
-	//importEntityList
-	//importEntityVec
-	i = 0;
-	int j = 0;
-	int entitynum = importEntityVec.size();
-	while (i < entitynum)
-	{
-		
-		//thing1 = (ACMIEntityData*)list1->node;
-		if (importEntityVec[i].count == 0)
-		{
-			importEntityVec[i].count = 1;
-			objCount = 2;
-
-			j = i + 1;
-			//list2 = list1->next;
-			while (j < entitynum)
-			{
-				//thing2 = (ACMIEntityData*)list2->node;
-
-				if (importEntityVec[j].type == importEntityVec[i].type && importEntityVec[j].count == 0)
-				{
-					importEntityVec[j].count = objCount;
-					objCount++;
-				}
-				j++; 
-				//list2 = list2->next;
-			}
-		}
-		i++;
-	}
-	MonoPrint("ACMITape Import: Counting ended ....\n");
-}
-
 
 
 
@@ -1564,228 +1363,6 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 
 
 
-
-
-
-void ACMITape::ThreadEntityPositions2(ACMITapeHeader *tapeHdr)
-{
-	//int i, j;
-	//long prevOffset;
-	//LIST *entityListPtr, *posListPtr, *featListPtr;
-	//ACMIEntityData *entityPtr, *featPtr;
-	////ACMIRawPositionData *posPtr;
-	//ACMIRawPositionData *prevPosPtr;
-	//ACMIFeatEventImportData *fePtr;
-	//BOOL foundFirst;
-	//long currOffset;
-
-	// we run an outer and inner loop here.
-	// the outer loops steps thru each entity
-	// the inner loop searches each position update for one owned by the
-	// entity and chains them together
-
-	//entityListPtr = importEntityList;
-	
-	std::mutex posListMtx;
-
-	for (int i = 0; i < importNumEnt; i++)
-	{
-		// entityListPtr = LIST_NTH(importEntityList, i);
-		//entityPtr = (ACMIEntityData *)entityListPtr->node;
-		//foundFirst = FALSE;
-		//prevOffset = 0;
-		//prevPosPtr = NULL;
-		//entityPtr->firstPositionDataOffset = 0;
-		//posListPtr = importPosList;
-
-		long currOffset;
-		BOOL foundFirst = FALSE;
-		long prevOffset = 0;
-		ACMIRawPositionData *prevPosPtr = NULL;
-		importEntityVec[i].firstPositionDataOffset = 0;
-		int prevPosVec = -1;
-
-		for (int j = 0; j < importNumPos; j++)
-		{
-
-			// check the id to see if this position belongs to the entity
-			if (importPosVec[j].uniqueID == importEntityVec[i].uniqueID)
-			{
-
-				// calculate the offset of this positional record
-				currOffset = tapeHdr->timelineBlockOffset +
-					sizeof(ACMIEntityPositionData) * j;
-
-				// if it's the 1st in the chain, set the offset to it in
-				// the entity's record
-				// Set everytime and check and use which offset is the lowest
-				if (foundFirst == FALSE)
-				{
-					importEntityVec[i].firstPositionDataOffset = currOffset;
-					foundFirst = TRUE;
-				}
-
-				// thread current to previous
-				importPosVec[j].entityPosData.prevPositionUpdateOffset = prevOffset;
-				importPosVec[j].entityPosData.nextPositionUpdateOffset = 0;
-
-				// thread previous to current
-				if (prevPosVec != -1)
-				{
-					importPosVec[prevPosVec].entityPosData.nextPositionUpdateOffset = currOffset;
-				}
-
-				// set vals for next time thru loop
-				prevOffset = currOffset;
-				prevPosVec = j;
-
-			} //end of if
-
-		} // end for position loop
-
-	} // end for entity loop
-
-	  // ------------------------------------------------------------------------------------
-	  // ------------------------------------------------------------------------------------
-	  // ------------------------------------------------------------------------------------
-
-	  // we run an outer and inner loop here.
-	  // the outer loops steps thru each Feature
-	  // the inner loop searches each position update for one owned by the
-	  // Feature and chains them together
-
-	printf("addr importEntityList: %p\n", importEntityList);
-
-	//entityListPtr = importFeatList;
-	//importFeatVec;
-
-	for (int i = 0; i < importNumFeat; i++)
-	{
-		//importFeatVec
-		/*entityPtr = (ACMIEntityData *)entityListPtr->node;
-		foundFirst = FALSE;
-		prevOffset = 0;
-		prevPosPtr = NULL;
-		entityPtr->firstPositionDataOffset = 0;
-
-		posListPtr = importPosList;*/
-		//importPosVec;
-
-		long currOffset;
-		BOOL foundFirst = FALSE;
-		long prevOffset = 0;
-		ACMIRawPositionData *prevPosPtr = NULL;
-		importFeatVec[i].firstPositionDataOffset = 0;
-		int prevPosVec = -1;
-
-
-		for (int j = 0; j < importNumPos; j++)
-		{	
-			// check the id to see if this position belongs to the entity
-			//if (posPtr->uniqueID == entityPtr->uniqueID)
-			if (importPosVec[j].uniqueID == importFeatVec[i].uniqueID)
-			{
-				// calculate the offset of this positional record
-				currOffset = tapeHdr->timelineBlockOffset +
-					sizeof(ACMIEntityPositionData) * j;
-
-				// if it's the 1st in the chain, set the offset to it in
-				// the entity's record
-				if (foundFirst == FALSE)
-				{
-					importFeatVec[i].firstPositionDataOffset = currOffset;
-					foundFirst = TRUE;
-				}
-
-				// thread current to previous
-				importPosVec[j].entityPosData.prevPositionUpdateOffset = prevOffset;
-				importPosVec[j].entityPosData.nextPositionUpdateOffset = 0;
-
-				// thread previous to current
-				if (prevPosVec != -1)
-				{
-					importPosVec[prevPosVec].entityPosData.nextPositionUpdateOffset = currOffset;
-				}
-
-				// set vals for next time thru loop
-				prevOffset = currOffset;
-				prevPosVec = j;
-			} // End of if 
-
-		} // end for position loop
-
-		  // while we're doing the features, for each one, go thru the
-		  // feature event list looking for our unique ID in the events
-		  // and setting the index value of our feature in the event
-
-		//importFeatEventVec
-		//posListPtr = importFeatEventList;
-
-		//importFeatVec[i]
-		for (int j = 0; j < importNumFeatEvents; j++)
-		{
-			// posListPtr = LIST_NTH(importPosList, j);
-			//fePtr = (ACMIFeatEventImportData *)posListPtr->node;
-
-			// check the id to see if this event belongs to the entity
-			//if (fePtr->uniqueID == entityPtr->uniqueID)
-			if (importFeatEventVec[j].uniqueID == importFeatVec[i].uniqueID)
-			{
-				importFeatEventVec[j].data.index = i;
-			}
-			// next in list
-			//posListPtr = posListPtr->next;
-
-		} // end for feature event loop
-
-		  // now go thru the feature list again and find lead unique ID's and
-		  // change them to indices into the list
-
-		//importFeatVec
-		  // actually NOW, go through and just make sure they exist... otherwise, clear
-		if (importFeatVec[i].leadIndex != -1)
-		{
-			
-			//importFeatVec
-
-			// 
-			int j;
-			for (j = 0; j < importNumFeat; j++)
-			{
-				// we don't compare ourselves
-				if (j != i)
-				{
-					//featPtr = (ACMIEntityData *)featListPtr->node;
-					if (importFeatVec[i].leadIndex == importFeatVec[j].uniqueID)
-					{
-						importFeatVec[i].leadIndex = j;
-						break;
-					}
-
-				}
-				// next in list
-				//featListPtr = featListPtr->next;
-			}
-
-			// if we're gone thru the whole list and haven't found
-			// a lead index, we're in trouble.  To protect, set the
-			// lead index to -1
-			if (j == importNumFeat)
-			{
-				importFeatVec[i].leadIndex = -1;
-			}
-		}
-
-		//entityListPtr = entityListPtr->next;
-	} // end for feature entity loop
-
-
-}
-
-
-
-
-
 /*
 ** Description:
 **		At this point importEntList and importPosList should be populated.
@@ -1868,66 +1445,6 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader *tapeHdr)
 	} // end for entity loop
 }
 
-void ACMITape::ThreadEntityEvents2(ACMITapeHeader *tapeHdr)
-{
-	int calc = 0;
-	// we run an outer and inner loop here.
-	// the outer loops steps thru each entity
-	// the inner loop searches each position update for one owned by the
-	// entity and chains them together
-
-	par_for(0, importNumEnt, [&](int i, int cpu)
-	{
-		//printf("task %d running on cpu %d\n", i, cpu);
-	
-	// Threadable
-	//for (i = 0; i < importNumEnt; i++)
-	//{
-		long currOffset;
-		BOOL foundFirst = FALSE;
-		long prevOffset = 0;
-		ACMIRawPositionData *prevPosPtr = NULL;
-		importEntityVec[i].firstEventDataOffset = 0;
-
-		int prevPosVec = -1;
-
-		for (int j = 0; j < importNumEntEvents; j++)
-		{
-
-			// check the id to see if this position belongs to the entity
-			if (importEntEventVec[j].uniqueID == importEntityVec[i].uniqueID)
-			{
-			calc++;
-			// calculate the offset of this positional record
-			currOffset = tapeHdr->firstEntEventOffset +
-				sizeof(ACMIEntityPositionData) * j;
-
-			// if it's the 1st in the chain, set the offset to it in
-			// the entity's record
-			if (foundFirst == FALSE)
-			{
-				importEntityVec[i].firstEventDataOffset = currOffset;
-				foundFirst = TRUE;
-			}
-
-			// thread current to previous
-			importEntEventVec[j].entityPosData.prevPositionUpdateOffset = prevOffset;
-			importEntEventVec[j].entityPosData.nextPositionUpdateOffset = 0;
-
-			// thread previous to current
-			if (prevPosVec != -1)
-			{
-				importEntEventVec[prevPosVec].entityPosData.nextPositionUpdateOffset = currOffset;
-			}
-
-			// set vals for next time thru loop
-			prevOffset = currOffset;
-			prevPosVec = j;
-		
-			} //end of if
-		}
-	});// end for entity loop
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -2144,138 +1661,6 @@ int CompareEventTrailer(const ACMIEventTrailer& i, const ACMIEventTrailer& j)
 }
 
 
-void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
-{
-	FILE *tapeFile;
-	try {
-
-		int i, j;
-	
-		long ret;
-
-		tapeFile = fopen(fname, "wb");
-		if (tapeFile == NULL)
-		{
-			MonoPrint("Error opening new tape file\n");
-			return;
-		}
-
-		// write the header
-		ret = fwrite(tapeHdr, sizeof(ACMITapeHeader), 1, tapeFile);
-		if (!ret)
-			throw "error_exit";
-
-
-		// write out the entities 
-		for (i = 0; i < importNumEnt; i++)
-		{
-			ret = fwrite(&importEntityVec[i], sizeof(ACMIEntityData), 1, tapeFile);
-			if (!ret)
-				throw "error_exit";
-		} // end for entity loop
-
-
-
-		 // write out the features
-		for (i = 0; i < importNumFeat; i++)
-		{
-			ret = fwrite(&importFeatVec[i], sizeof(ACMIEntityData), 1, tapeFile);
-			if (!ret)
-				throw "error_exit";
-		} // end for entity loop
-
-		// write out the entitiy positions
-		for (i = 0; i < importNumPos; i++)
-		{
-			// we now want to do a "fixup" of the radar targets.  These are
-			// currently in "uniqueIDs" and we want to convert them into
-			// an index into the entity list
-			if (importPosVec[i].entityPosData.posData.radarTarget != -1)
-			{
-				for (j = 0; j < importNumEnt; j++)
-				{
-					if (importPosVec[i].entityPosData.posData.radarTarget == importEntityVec[j].uniqueID)
-					{
-						importPosVec[i].entityPosData.posData.radarTarget = j;
-						break;
-					}
-				} // end for entity loop
-
-				  // did we find it?
-				if (j == importNumEnt)
-				{
-					// nope
-					importPosVec[i].entityPosData.posData.radarTarget = -1;
-				}
-
-			} // end if there's a radar target
-
-			ret = fwrite(&importPosVec[i].entityPosData, sizeof(ACMIEntityPositionData), 1, tapeFile);
-			if (!ret)
-				throw "error_exit";
-		}
-
-		// write out the entitiy events
-		for (i = 0; i < importNumEntEvents; i++)
-		{
-			ret = fwrite(&(importEntEventVec[i].entityPosData), sizeof(ACMIEntityPositionData), 1, tapeFile);
-			if (!ret)
-				throw "error_exit";
-		}
-
-		// allocate the trailer list
-		std::vector<ACMIEventTrailer> importEventTrailerVec(importNumEvents);
-
-		// write out the events 
-		for (i = 0; i < importNumEvents; i++)
-		{
-			// set the trailer data
-			importEventTrailerVec[i].index = i;
-			importEventTrailerVec[i].timeEnd = importEventVec[i].timeEnd;
-
-			ret = fwrite(&importEventVec[i], sizeof(ACMIEventHeader), 1, tapeFile);
-			if (!ret)
-				throw "error_exit";
-		} // end for events loop
-		
-		// Using qsort because sort and sort_stable don't output the same exact result
-		// Don't know if it's a problem I use that for now.
-		qsort(&importEventTrailerVec[0],
-			importEventTrailerVec.size(),
-			sizeof(ACMIEventTrailer),
-			CompareEventTrailer);
-
-		for (i = 0; i < importNumEvents; i++)
-		{
-			ret = fwrite(&importEventTrailerVec[i], sizeof(ACMIEventTrailer), 1, tapeFile);
-			if (!ret)
-				throw "error_exit";
-
-		} // end for events loop
-
-		// write out the feature events
-		for (i = 0; i < importNumFeatEvents; i++)
-		{
-			ret = fwrite(&importFeatEventVec[i].data, sizeof(ACMIFeatEvent), 1, tapeFile);
-			if (!ret)
-				throw "error_exit";
-		}
-
-		// finally import and write out the text events
-		ImportTextEventList(tapeFile, tapeHdr);
-
-		// normal exit
-		fclose(tapeFile);
-		return;
-	} catch (const std::exception& e) {
-
-
-		MonoPrint("Error writing new tape file\n");
-		if (tapeFile)
-			fclose(tapeFile);
-		return;
-	}
-}
 
 
 
