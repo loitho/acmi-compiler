@@ -1159,7 +1159,7 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 	long prevOffset;
 	LIST *entityListPtr, *posListPtr, *featListPtr;
 	ACMIEntityData *entityPtr, *featPtr;
-	//ACMIRawPositionData *posPtr;
+	ACMIRawPositionData *posPtr;
 	ACMIRawPositionData *prevPosPtr;
 	ACMIFeatEventImportData *fePtr;
 	BOOL foundFirst;
@@ -1172,7 +1172,7 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 
 	entityListPtr = importEntityList;
 
-	for ( i = 0; i < importNumEnt; i++ )
+	for (i = 0; i < importNumEnt; i++)
 	{
 		// entityListPtr = LIST_NTH(importEntityList, i);
 		entityPtr = (ACMIEntityData *)entityListPtr->node;
@@ -1183,54 +1183,44 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 
 		posListPtr = importPosList;
 
-
-
-
-		for ( j = 0; j < importNumPos; j++ )
+		for (j = 0; j < importNumPos; j++)
 		{
-			//printf("posListPtr pos: %p\n", posListPtr);
-
-			ACMIRawPositionData *posPtr;
+			// posListPtr = LIST_NTH(importPosList, j);
 			posPtr = (ACMIRawPositionData *)posListPtr->node;
 
 			// check the id to see if this position belongs to the entity
 			if (posPtr->uniqueID != entityPtr->uniqueID)
 			{
 				// nope
-				//std::cout << "inif" << std::endl;
 				posListPtr = posListPtr->next;
 				continue;
 			}
-				//std::cout << "outif" << std::endl;
 
+			// calculate the offset of this positional record
+			currOffset = tapeHdr->timelineBlockOffset +
+				sizeof(ACMIEntityPositionData) * j;
 
-				// calculate the offset of this positional record
-				currOffset = tapeHdr->timelineBlockOffset +
-					sizeof(ACMIEntityPositionData) * j;
+			// if it's the 1st in the chain, set the offset to it in
+			// the entity's record
+			if (foundFirst == FALSE)
+			{
+				entityPtr->firstPositionDataOffset = currOffset;
+				foundFirst = TRUE;
+			}
 
-				// if it's the 1st in the chain, set the offset to it in
-				// the entity's record
-				// Set everytime and check and use which offset is the lowest
-				if (foundFirst == FALSE)
-				{
-					entityPtr->firstPositionDataOffset = currOffset;
-					foundFirst = TRUE;
-				}
+			// thread current to previous
+			posPtr->entityPosData.prevPositionUpdateOffset = prevOffset;
+			posPtr->entityPosData.nextPositionUpdateOffset = 0;
 
-				// thread current to previous
-				posPtr->entityPosData.prevPositionUpdateOffset = prevOffset;
-				posPtr->entityPosData.nextPositionUpdateOffset = 0;
+			// thread previous to current
+			if (prevPosPtr)
+			{
+				prevPosPtr->entityPosData.nextPositionUpdateOffset = currOffset;
+			}
 
-				// thread previous to current
-				if (prevPosPtr)
-				{
-					prevPosPtr->entityPosData.nextPositionUpdateOffset = currOffset;
-				}
-
-				// set vals for next time thru loop
-				prevOffset = currOffset;
-				prevPosPtr = posPtr;
-			
+			// set vals for next time thru loop
+			prevOffset = currOffset;
+			prevPosPtr = posPtr;
 
 			// next in list
 			posListPtr = posListPtr->next;
@@ -1240,14 +1230,9 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 		entityListPtr = entityListPtr->next;
 	} // end for entity loop
 
-	// ------------------------------------------------------------------------------------
-	// ------------------------------------------------------------------------------------
-	// ------------------------------------------------------------------------------------
-
-	printf("addr importEntityList: %p\n", importEntityList);
-
 	entityListPtr = importFeatList;
-	for ( i = 0; i < importNumFeat; i++ )
+
+	for (i = 0; i < importNumFeat; i++)
 	{
 		entityPtr = (ACMIEntityData *)entityListPtr->node;
 		foundFirst = FALSE;
@@ -1256,63 +1241,63 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 		entityPtr->firstPositionDataOffset = 0;
 
 		posListPtr = importPosList;
-		for ( j = 0; j < importNumPos; j++ )
+
+		for (j = 0; j < importNumPos; j++)
 		{
 			// posListPtr = LIST_NTH(importPosList, j);
-			ACMIRawPositionData *posPtr;
 			posPtr = (ACMIRawPositionData *)posListPtr->node;
 
 			// check the id to see if this position belongs to the entity
-			if ( posPtr->uniqueID == entityPtr->uniqueID )
+			if (posPtr->uniqueID != entityPtr->uniqueID)
 			{
 				// nope
-				//posListPtr = posListPtr->next;
-				//continue;
+				posListPtr = posListPtr->next;
+				continue;
+			}
 
+			// calculate the offset of this positional record
+			currOffset = tapeHdr->timelineBlockOffset +
+				sizeof(ACMIEntityPositionData) * j;
 
-				// calculate the offset of this positional record
-				currOffset = tapeHdr->timelineBlockOffset +
-					sizeof(ACMIEntityPositionData) * j;
+			// if it's the 1st in the chain, set the offset to it in
+			// the entity's record
+			if (foundFirst == FALSE)
+			{
+				entityPtr->firstPositionDataOffset = currOffset;
+				foundFirst = TRUE;
+			}
 
-				// if it's the 1st in the chain, set the offset to it in
-				// the entity's record
-				if (foundFirst == FALSE)
-				{
-					entityPtr->firstPositionDataOffset = currOffset;
-					foundFirst = TRUE;
-				}
+			// thread current to previous
+			posPtr->entityPosData.prevPositionUpdateOffset = prevOffset;
+			posPtr->entityPosData.nextPositionUpdateOffset = 0;
 
-				// thread current to previous
-				posPtr->entityPosData.prevPositionUpdateOffset = prevOffset;
-				posPtr->entityPosData.nextPositionUpdateOffset = 0;
+			// thread previous to current
+			if (prevPosPtr)
+			{
+				prevPosPtr->entityPosData.nextPositionUpdateOffset = currOffset;
+			}
 
-				// thread previous to current
-				if (prevPosPtr)
-				{
-					prevPosPtr->entityPosData.nextPositionUpdateOffset = currOffset;
-				}
-
-				// set vals for next time thru loop
-				prevOffset = currOffset;
-				prevPosPtr = posPtr;
-			} // End of if 
+			// set vals for next time thru loop
+			prevOffset = currOffset;
+			prevPosPtr = posPtr;
 
 			// next in list
 			posListPtr = posListPtr->next;
 
 		} // end for position loop
 
-		// while we're doing the features, for each one, go thru the
-		// feature event list looking for our unique ID in the events
-		// and setting the index value of our feature in the event
+		  // while we're doing the features, for each one, go thru the
+		  // feature event list looking for our unique ID in the events
+		  // and setting the index value of our feature in the event
 		posListPtr = importFeatEventList;
-		for ( j = 0; j < importNumFeatEvents; j++ )
+
+		for (j = 0; j < importNumFeatEvents; j++)
 		{
 			// posListPtr = LIST_NTH(importPosList, j);
 			fePtr = (ACMIFeatEventImportData *)posListPtr->node;
 
 			// check the id to see if this event belongs to the entity
-			if ( fePtr->uniqueID == entityPtr->uniqueID )
+			if (fePtr->uniqueID == entityPtr->uniqueID)
 			{
 				fePtr->data.index = i;
 			}
@@ -1322,26 +1307,29 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 
 		} // end for feature event loop
 
-		// now go thru the feature list again and find lead unique ID's and
-		// change them to indices into the list
+		  // now go thru the feature list again and find lead unique ID's and
+		  // change them to indices into the list
 
-		// actually NOW, go through and just make sure they exist... otherwise, clear
-		if ( entityPtr->leadIndex != -1)
+		  // actually NOW, go through and just make sure they exist... otherwise, clear
+		if (entityPtr->leadIndex != -1)
 		{
 			featListPtr = importFeatList;
-			for ( j = 0; j < importNumFeat; j++ )
+
+			for (j = 0; j < importNumFeat; j++)
 			{
 				// we don't compare ourselves
-				if ( j != i )
+				if (j != i)
 				{
 					featPtr = (ACMIEntityData *)featListPtr->node;
-					if ( entityPtr->leadIndex == featPtr->uniqueID )
+
+					if (entityPtr->leadIndex == featPtr->uniqueID)
 					{
 						entityPtr->leadIndex = j;
 						break;
 					}
-	
+
 				}
+
 				// next in list
 				featListPtr = featListPtr->next;
 			}
@@ -1349,7 +1337,7 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 			// if we're gone thru the whole list and haven't found
 			// a lead index, we're in trouble.  To protect, set the
 			// lead index to -1
-			if ( j == importNumFeat )
+			if (j == importNumFeat)
 			{
 				entityPtr->leadIndex = -1;
 			}
@@ -1357,6 +1345,7 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 
 		entityListPtr = entityListPtr->next;
 	} // end for feature entity loop
+
 
 
 }
@@ -1667,148 +1656,6 @@ int CompareEventTrailer(const ACMIEventTrailer& i, const ACMIEventTrailer& j)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
-//BOOL ACMITape::GetEntityPosition
-//(
-//	int index,
-//	float &x,
-//	float &y,
-//	float &z,
-//	float &yaw,
-//	float &pitch,
-//	float &roll,
-//	float &speed,
-//	float &turnrate,
-//	float &turnradius
-//)
-//{
-//	float
-//		deltaTime;
-//
-//	float dx, dy, dz;
-//	float dx1, dy1, dz1;
-//
-//	ACMIEntityPositionData
-//		*pos1,
-//		*pos2,
-//		*pos3;
-//
-//	// init speed to 0.0
-//	speed = 0.0f;
-//	turnrate = 0.0f;
-//	turnradius = 0.0f;
-//
-//	F4Assert(index >= 0 && index < NumEntities());
-//
-//	pos1 = CurrentEntityPositionHead(index);
-//
-//	// If there is not at least 1 positional update, the entity doesn't exist.
-//	F4Assert(pos1 != NULL);
-//
-//	if(pos1->time > _simTime)
-//	{
-//		x = pos1->posData.x;
-//		y = pos1->posData.y;
-//		z = pos1->posData.z;
-//		yaw = pos1->posData.yaw;
-//		pitch = pos1->posData.pitch;
-//		roll = pos1->posData.roll;
-//		return FALSE;
-//	}
-//
-//	pos2 = HeadNext(pos1);
-//	if(pos2 == NULL)
-//	{
-//		x = pos1->posData.x;
-//		y = pos1->posData.y;
-//		z = pos1->posData.z;
-//		yaw = pos1->posData.yaw;
-//		pitch = pos1->posData.pitch;
-//		roll = pos1->posData.roll;
-//		return FALSE;		
-//	}
-//	else
-//	{
-//   	pos3 = HeadPrev(pos1);
-//		F4Assert(pos1->time <= _simTime);
-//		F4Assert(pos2->time > _simTime);
-//
-//		dx = pos2->posData.x - pos1->posData.x;
-//		dy = pos2->posData.y - pos1->posData.y;
-//		dz = pos2->posData.z - pos1->posData.z;
-//
-//		// Interpolate.
-//		deltaTime = 
-//		(
-//			(_simTime - pos1->time) /
-//			(pos2->time - pos1->time)
-//		);
-//
-//		x = 
-//		(
-//			pos1->posData.x + dx * deltaTime
-//		);
-//
-//		y = 
-//		(
-//			pos1->posData.y + dy * deltaTime
-//		);
-//
-//		z = 
-//		(
-//			pos1->posData.z + dz * deltaTime
-//		);
-//
-//		yaw = AngleInterp( pos1->posData.yaw, pos2->posData.yaw, deltaTime );
-//		pitch = AngleInterp( pos1->posData.pitch, pos2->posData.pitch, deltaTime );
-//		roll = AngleInterp( pos1->posData.roll, pos2->posData.roll, deltaTime );
-//
-//		// get the average speed
-//		speed = (float)sqrt( dx * dx + dy * dy + dz * dz ) / ( pos2->time - pos1->time );
-//		float dAng = pos2->posData.yaw - pos1->posData.yaw;
-//		if ( fabs( dAng ) > 180.0f * DTR )
-//		{
-//			if ( dAng >= 0.0f )
-//				dAng -= 360.0f * DTR;
-//			else
-//				dAng += 360.0f * DTR;
-//
-//		}
-//
-//      if (pos3)
-//      {
-//		   dx1 = pos1->posData.x - pos3->posData.x;
-//		   dy1 = pos1->posData.y - pos3->posData.y;
-//		   dz1 = pos1->posData.z - pos3->posData.z;
-//
-//         // Turn rate = solid angle delta between velocity vectors
-//         turnrate = (float)acos ((dx*dx1 + dy*dy1 + dz*dz1)/
-//            (float)sqrt((dx*dx + dy*dy + dz*dz) * (dx1*dx1 + dy1*dy1 + dz1*dz1)));
-//         turnrate *= RTD / ( pos2->time - pos1->time );
-////		   turnrate = RTD * fabs( dAng ) / ( pos2->time - pos1->time );
-//
-//		   if ( turnrate != 0.0f )
-//		   {
-//			   // sec to turn 360 deg
-//			   float secs = 360.0f/turnrate;
-//
-//			   // get circumference
-//			   float circum = speed * secs;
-//
-//			   // now we get turn radius ( circum = 2 * PI * R )
-//			   turnradius = circum/( 2.0f * PI );
-//		   }
-//      }
-//      else
-//      {
-//         turnrate = 0.0F;
-//         turnradius = 0.0F;
-//      }
-//	}
-//
-//	return TRUE;
-//}
-
 
 
 /*
