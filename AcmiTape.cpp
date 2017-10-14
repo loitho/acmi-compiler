@@ -58,7 +58,11 @@
 #include "threading.h"
 #include <vector>
 
-#define MonoPrint  printf
+#if _DEBUG
+	#define MonoPrint  printf
+#else
+	#define MonoPrint  NULL
+#endif 
 //extern ACMIView			*acmiView;
 
 
@@ -301,6 +305,9 @@ ACMITape::ACMITape(char *name, RenderOTW *renderer, RViewPoint *viewPoint )
 	// edg note on hack: right now, ALWAYS do an import from the acmi.flt
 	// file to convert to a tape file.  Later we'll probably want to import
 	// right after an ACMIU record session to get into .vhs format
+
+	// LOL, how fun is it to read that nearly 20 years after and the code is still the same x)
+
 	//strcpy( fullName, "campaign\\save\\fltfiles\\" );
 	strcpy( fullName, "acmibin\\" );
 	strcat( fullName, name );
@@ -941,14 +948,14 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	t = clock();
 	ParseEntities();
 	t = clock() - t;
-	printf("ARRAY : thread entity It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+	MonoPrint("ARRAY : thread entity It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 
 
 	MonoPrint("ACMITape Import: Parsing Entities2 ....\n");
 	t = clock();
 	ParseEntities2();
 	t = clock() - t;
-	printf("VECTOR : thread entity It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+	MonoPrint("VECTOR : thread entity It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 
 
 
@@ -987,13 +994,13 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	t = clock();
 	ThreadEntityPositions2(&tapeHdr);
 	t = clock() - t;
-	printf("VECTOR : thread entity It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+	MonoPrint("VECTOR : thread entity It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 	
 	
 	t = clock();
 	ThreadEntityPositions(&tapeHdr);
 	t = clock() - t;
-	printf("ARRAY : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+	MonoPrint("ARRAY : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 
 
 
@@ -1006,12 +1013,12 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	t = clock();
 	ThreadEntityEvents2(&tapeHdr);
 	t = clock() - t;
-	printf("VECTOR : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+	MonoPrint("VECTOR : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 
 	t = clock();
 	ThreadEntityEvents(&tapeHdr);
 	t = clock() - t;
-	printf("ARRAY : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+	MonoPrint("ARRAY : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 
 	// Calculate size of .vhs file.
 	tapeHdr.fileSize = tapeHdr.timelineBlockOffset +
@@ -1186,10 +1193,6 @@ void ACMITape::ParseEntities ( void )
 		list1 = list1->next;
 	}
 	MonoPrint("ACMITape Import: Counting ended ....\n");
-
-	std::cout << "importNumFeat " << importNumFeat << std::endl;
-	std::cout << "objCount " << objCount << std::endl;
-	std::cout << "importNumEnt " << importNumEnt << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1348,10 +1351,6 @@ void ACMITape::ParseEntities2(void)
 		i++;
 	}
 	MonoPrint("ACMITape Import: Counting ended ....\n");
-	std::cout << "importNumFeat " << importNumFeat << std::endl;
-	std::cout << "objCount " << objCount << std::endl;
-	std::cout << "importNumEnt " << importNumEnt << std::endl;
-
 }
 
 
@@ -1386,10 +1385,6 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 	// entity and chains them together
 
 	entityListPtr = importEntityList;
-
-	printf("addr importEntityList: %p\n", importEntityList);
-
-	std::mutex posListMtx;
 
 	for ( i = 0; i < importNumEnt; i++ )
 	{
@@ -1604,16 +1599,6 @@ void ACMITape::ThreadEntityPositions2(ACMITapeHeader *tapeHdr)
 
 	//entityListPtr = importEntityList;
 	
-	std::cout << "nb:importNumPos:" << importNumPos << std::endl;
-	std::cout << "nb:importPosVec:" << importPosVec.size() << std::endl;
-
-	std::cout << "nb:importNumEnt   :" << importNumEnt << std::endl;
-	std::cout << "nb:importEntvector:" << importEntityVec.size() << std::endl;
-
-
-
-	printf("addr importEntityList: %p\n", importEntityList);
-
 	std::mutex posListMtx;
 
 	for (int i = 0; i < importNumEnt; i++)
@@ -1904,14 +1889,6 @@ void ACMITape::ThreadEntityEvents2(ACMITapeHeader *tapeHdr)
 	// the inner loop searches each position update for one owned by the
 	// entity and chains them together
 
-	std::cout << "nb:importNumEntEvents:" << importNumEntEvents << std::endl;
-	std::cout << "nb:importNumEntvector:" << importEntEventVec.size() << std::endl;
-
-	std::cout << "nb:importNumEnt   :" << importNumEnt << std::endl;
-	std::cout << "nb:importEntvector:" << importEntityVec.size() << std::endl;
-
-	
-
 	par_for(0, importNumEnt, [&](int i, int cpu)
 	{
 		//printf("task %d running on cpu %d\n", i, cpu);
@@ -1963,8 +1940,6 @@ void ACMITape::ThreadEntityEvents2(ACMITapeHeader *tapeHdr)
 			} //end of if
 		}
 	});// end for entity loop
-
-	std::cout << "vector calc : " << calc << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2082,7 +2057,6 @@ void ACMITape::WriteTapeFile ( char *fname, ACMITapeHeader *tapeHdr )
 		posListPtr = posListPtr->next;
 	}
 
-	std::cout << "nb event" << importNumEvents << std::endl;
 	// allocate the trailer list
 	importEventTrailerList = new ACMIEventTrailer[importNumEvents];
 	//F4Assert( importEventTrailerList );
@@ -2264,11 +2238,6 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 
 		// allocate the trailer list
 		std::vector<ACMIEventTrailer> importEventTrailerVec(importNumEvents);
-
-
-		std::cout <<"importEventTrailerVec" << importEventTrailerVec.size() << std::endl;
-		std::cout <<"importEventVec" << importEventVec.size() << std::endl;
-		std::cout <<"importNumEvents" << importNumEvents << std::endl;
 
 		// write out the events 
 		for (i = 0; i < importNumEvents; i++)
@@ -2555,22 +2524,9 @@ void
 ACMITape::ImportTextEventList( FILE *fd, ACMITapeHeader *tapeHdr )
 {
 	// fd is tapefile vhs and tapehdr is the tape header
-
-	//EventElement *cur = NULL;
 	long ret;
-	//ACMITextEvent te;
-	//char timestr[20];
 
 	tapeHdr->numTextEvents = 0;
-
-	//cur = ProcessEventListForACMI();
-
-	std::cout << "sizeof testevent " << sizeof(ACMITextEvent) << std::endl;
-
-	//memset(&te,0,sizeof(ACMITextEvent));
-
-
-	std::cout << "offsert " << tapeHdr->firstTextEventOffset << std::endl;;
 
 	/*
 	** Don't care about the folowing stuff, it's only used by Falcon ACMI viewer
@@ -2635,10 +2591,6 @@ ACMITape::ImportTextEventList( FILE *fd, ACMITapeHeader *tapeHdr )
 
 error_exit:
 	return;
-	// free up mem
-	// DisposeEventList(evList);
-	//ClearSortedEventList();
-
 }
 
 
