@@ -59,7 +59,6 @@
 #include <vector>
 
 #define MonoPrint  printf
-#define _ITERATOR_DEBUG_LEVEL 0
 //extern ACMIView			*acmiView;
 
 
@@ -779,7 +778,6 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				ehdr->type = msfx.type;
 				ehdr->scale = msfx.scale;
 
-				std::cout << "IMPOOOOOOOOOOOOOOOOORTE EVENT LIST WAAAAAT" << std::endl;
 				importEventVec.push_back(*ehdr);
 				// Append our new data.
 				importEventList = AppendToEndOfList(importEventList, &importEventListEnd, ehdr );
@@ -2191,12 +2189,7 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 	try {
 
 		int i, j;
-		LIST *entityListPtr, *posListPtr, *eventListPtr;
-		ACMIEntityData *entityPtr;
-		ACMIEventHeader *eventPtr;
-		ACMIRawPositionData *posPtr;
-		ACMIFeatEventImportData *fePtr;
-		
+	
 		long ret;
 
 		tapeFile = fopen(fname, "wb");
@@ -2212,75 +2205,53 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 			throw "error_exit";
 
 
-		// write out the entities // Can't switch to VEC ATM
-		entityListPtr = importEntityList;
-		//importEntityVec
+		// write out the entities 
 		for (i = 0; i < importNumEnt; i++)
 		{
-			// entityListPtr = LIST_NTH(importEntityList, i);
-			entityPtr = (ACMIEntityData *)entityListPtr->node;
-
 			ret = fwrite(&importEntityVec[i], sizeof(ACMIEntityData), 1, tapeFile);
 			if (!ret)
 				throw "error_exit";
-			entityListPtr = entityListPtr->next;
 		} // end for entity loop
 
 
 
 		 // write out the features
-		//entityListPtr = importFeatList;
 		for (i = 0; i < importNumFeat; i++)
 		{
-			// entityListPtr = LIST_NTH(importEntityList, i);
-			//entityPtr = (ACMIEntityData *)entityListPtr->node;
-
 			ret = fwrite(&importFeatVec[i], sizeof(ACMIEntityData), 1, tapeFile);
 			if (!ret)
 				throw "error_exit";
-			//entityListPtr = entityListPtr->next;
 		} // end for entity loop
 
-		  // write out the entitiy positions
-		posListPtr = importPosList;
-		//importPosVec;
+		// write out the entitiy positions
 		for (i = 0; i < importNumPos; i++)
 		{
-			// posListPtr = LIST_NTH(importPosList, i);
-			posPtr = (ACMIRawPositionData *)posListPtr->node;
-
 			// we now want to do a "fixup" of the radar targets.  These are
 			// currently in "uniqueIDs" and we want to convert them into
 			// an index into the entity list
-			if (posPtr->entityPosData.posData.radarTarget != -1)
+			if (importPosVec[i].entityPosData.posData.radarTarget != -1)
 			{
-				entityListPtr = importEntityList;
 				for (j = 0; j < importNumEnt; j++)
 				{
-					entityPtr = (ACMIEntityData *)entityListPtr->node;
-
-					if (posPtr->entityPosData.posData.radarTarget == entityPtr->uniqueID)
+					if (importPosVec[i].entityPosData.posData.radarTarget == importEntityVec[j].uniqueID)
 					{
-						posPtr->entityPosData.posData.radarTarget = j;
+						importPosVec[i].entityPosData.posData.radarTarget = j;
 						break;
 					}
-
-					entityListPtr = entityListPtr->next;
 				} // end for entity loop
 
 				  // did we find it?
 				if (j == importNumEnt)
 				{
 					// nope
-					posPtr->entityPosData.posData.radarTarget = -1;
+					importPosVec[i].entityPosData.posData.radarTarget = -1;
 				}
+
 			} // end if there's a radar target
 
-			ret = fwrite(&posPtr->entityPosData, sizeof(ACMIEntityPositionData), 1, tapeFile);
+			ret = fwrite(&importPosVec[i].entityPosData, sizeof(ACMIEntityPositionData), 1, tapeFile);
 			if (!ret)
 				throw "error_exit";
-
-			posListPtr = posListPtr->next;
 		}
 
 		// write out the entitiy events
@@ -2291,12 +2262,8 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 				throw "error_exit";
 		}
 
-		std::cout << "nb event" << importNumEvents << std::endl;
 		// allocate the trailer list
-
-
-		importEventTrailerList = new ACMIEventTrailer[importNumEvents];
-		std::vector<ACMIEventTrailer> importEventTrailerVec = std::vector<ACMIEventTrailer>(importNumEvents);
+		std::vector<ACMIEventTrailer> importEventTrailerVec(importNumEvents);
 
 
 		std::cout <<"importEventTrailerVec" << importEventTrailerVec.size() << std::endl;
@@ -2304,38 +2271,16 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 		std::cout <<"importNumEvents" << importNumEvents << std::endl;
 
 		// write out the events 
-		eventListPtr = importEventList;
 		for (i = 0; i < importNumEvents; i++)
 		{
-			// eventListPtr = LIST_NTH(importEventList, i);
-			eventPtr = (ACMIEventHeader *)eventListPtr->node;
-
-
 			// set the trailer data
-			importEventTrailerList[i].index = i;
-			importEventTrailerList[i].timeEnd = eventPtr->timeEnd;
-
 			importEventTrailerVec[i].index = i;
 			importEventTrailerVec[i].timeEnd = importEventVec[i].timeEnd;
-
 
 			ret = fwrite(&importEventVec[i], sizeof(ACMIEventHeader), 1, tapeFile);
 			if (!ret)
 				throw "error_exit";
-
-			eventListPtr = eventListPtr->next;
-
 		} // end for events loop
-
-		/*for (auto i : importEventTrailerVec)
-			std::cout << "index: " << i.index << "\t time: " << i.timeEnd << std::endl;*/
-
-		  // now sort the trailers in ascending order by endTime and
-		  // write them out
-		qsort(importEventTrailerList,
-			importNumEvents,
-			sizeof(ACMIEventTrailer),
-			CompareEventTrailer);
 		
 		// Using qsort because sort and sort_stable don't output the same exact result
 		// Don't know if it's a problem I use that for now.
@@ -2343,20 +2288,9 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 			importEventTrailerVec.size(),
 			sizeof(ACMIEventTrailer),
 			CompareEventTrailer);
-		//std::sort(importEventTrailerVec.begin(), importEventTrailerVec.end(), myfunction);
-
-		//std::reverse(importEventTrailerVec.begin(), importEventTrailerVec.end());  
 
 		for (i = 0; i < importNumEvents; i++)
 		{
-	/*		std::cout << "VEEC: index: " << importEventTrailerVec[i].index << "\t time: " << importEventTrailerVec[i].timeEnd << std::endl;
-			std::cout << "LIST: index: " << importEventTrailerList[i].index << "\t time: " << importEventTrailerList[i].timeEnd << std::endl;
-
-			if (importEventTrailerVec[i].index != importEventTrailerList[i].index)
-				std::cout << "INCORRECT" << std::endl << std::endl;
-			else
-				std::cout << std::endl;*/
-
 			ret = fwrite(&importEventTrailerVec[i], sizeof(ACMIEventTrailer), 1, tapeFile);
 			if (!ret)
 				throw "error_exit";
@@ -2364,7 +2298,6 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 		} // end for events loop
 
 		// write out the feature events
-		//posListPtr = importFeatEventList;
 		for (i = 0; i < importNumFeatEvents; i++)
 		{
 			ret = fwrite(&importFeatEventVec[i].data, sizeof(ACMIFeatEvent), 1, tapeFile);
@@ -2379,7 +2312,8 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 		fclose(tapeFile);
 		return;
 	} catch (const std::exception& e) {
-	error_exit:
+
+
 		MonoPrint("Error writing new tape file\n");
 		if (tapeFile)
 			fclose(tapeFile);
@@ -2624,8 +2558,8 @@ ACMITape::ImportTextEventList( FILE *fd, ACMITapeHeader *tapeHdr )
 
 	//EventElement *cur = NULL;
 	long ret;
-	ACMITextEvent te;
-	char timestr[20];
+	//ACMITextEvent te;
+	//char timestr[20];
 
 	tapeHdr->numTextEvents = 0;
 
@@ -2633,7 +2567,7 @@ ACMITape::ImportTextEventList( FILE *fd, ACMITapeHeader *tapeHdr )
 
 	std::cout << "sizeof testevent " << sizeof(ACMITextEvent) << std::endl;
 
-	memset(&te,0,sizeof(ACMITextEvent));
+	//memset(&te,0,sizeof(ACMITextEvent));
 
 
 	std::cout << "offsert " << tapeHdr->firstTextEventOffset << std::endl;;
