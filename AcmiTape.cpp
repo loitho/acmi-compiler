@@ -16,19 +16,6 @@
 #include <tchar.h>
 #include <iostream>
 
-/*#include "Graphics\Include\Setup.h"
-#include "Graphics\Include\drawsgmt.h"
-#include "Graphics\Include\drawtrcr.h"
-#include "Graphics\Include\rViewpnt.h"
-#include "Graphics\Include\draw2d.h"
-#include "Graphics\Include\drawBSP.h"
-#include "Graphics\Include\drawpole.h"
-#include "Graphics\Include\drawplat.h"
-#include "Graphics\Include\drawbrdg.h"
-#include "Graphics\Include\renderow.h"
-#include "falclib.h"
-#include "fsound.h"
-#include "Graphics\Include\grTypes.h"					*/				
 
 #include "codelib\tools\lists\lists.h"
 //#include "debuggr.h"
