@@ -21,3 +21,7 @@ So, what did I do ?
 - Removed *continue*  that are both slow and make the code less readable
 - Removed useless function that are only here for the ACMI Viewer in Falcon
 - Added thread support for heavy task parallelization 
+
+## Things be aware if you want to modify this code
+
+- Building in Debug in Visual Studio will make the code slower because VS add a lot of debugging stuff to the vector (it's nearly **25 times slower** ) So use *release* if you want to evaluate your code performance
