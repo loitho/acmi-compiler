@@ -919,7 +919,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	// build the importEntityList
 	MonoPrint("ACMITape Import: Parsing Entities ....\n");
 	t = clock();
-	ParseEntities();
+	//ParseEntities();
 	t = clock() - t;
 	MonoPrint("ARRAY : thread entity It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 
@@ -931,31 +931,36 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	MonoPrint("VECTOR : thread entity It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 
 
-
+	int importEntityVecSize = importEntityVec.size();		// importNumEnt
+	int importPosVecSize = importPosVec.size();				// importNumPos
+	int importFeatVecSize = importFeatVec.size();			// importNumFeat
+	int importEntEventVecSize = importEntEventVec.size();	// importNumEntEvents
+	int importFeatEventVecSize = importFeatEventVec.size();	// importNumFeatEvents
+	int importEventVecSize = importEventVec.size();			// importNumEvents
 
 	// setup the tape header
 	tapeHdr.fileID = 'TAPE';
-	tapeHdr.numEntities = importNumEnt;
-	tapeHdr.numFeat = importNumFeat;
+	tapeHdr.numEntities = importEntityVecSize;
+	tapeHdr.numFeat = importFeatVecSize;
 	tapeHdr.entityBlockOffset = sizeof( ACMITapeHeader );
 	tapeHdr.featBlockOffset = tapeHdr.entityBlockOffset +
-								  sizeof( ACMIEntityData ) * importNumEnt;
+								  sizeof( ACMIEntityData ) * importEntityVecSize;
 	tapeHdr.timelineBlockOffset = tapeHdr.featBlockOffset +
-								  sizeof( ACMIEntityData ) * importNumFeat;
+								  sizeof( ACMIEntityData ) * importFeatVecSize;
 	tapeHdr.firstEntEventOffset = tapeHdr.timelineBlockOffset +
-								  sizeof( ACMIEntityPositionData ) * importNumPos;
+								  sizeof( ACMIEntityPositionData ) * importPosVecSize;
 	tapeHdr.firstGeneralEventOffset = tapeHdr.firstEntEventOffset +
-								  sizeof( ACMIEntityPositionData ) * importNumEntEvents;
+								  sizeof( ACMIEntityPositionData ) * importEntEventVecSize;
 	tapeHdr.firstEventTrailerOffset = tapeHdr.firstGeneralEventOffset +
-								  sizeof( ACMIEventHeader ) * importNumEvents;
+								  sizeof( ACMIEventHeader ) * importEventVecSize;
 	tapeHdr.firstFeatEventOffset = tapeHdr.firstEventTrailerOffset +
-								  sizeof( ACMIEventTrailer ) * importNumEvents;
+								  sizeof( ACMIEventTrailer ) * importEventVecSize;
 	tapeHdr.firstTextEventOffset = tapeHdr.firstFeatEventOffset +
-								  sizeof( ACMIFeatEvent ) * importNumFeatEvents;
-	tapeHdr.numEntityPositions = importNumPos;
-	tapeHdr.numEvents = importNumEvents;
-	tapeHdr.numFeatEvents = importNumFeatEvents;
-	tapeHdr.numEntEvents = importNumEntEvents;
+								  sizeof( ACMIFeatEvent ) * importFeatEventVecSize;
+	tapeHdr.numEntityPositions = importPosVecSize;
+	tapeHdr.numEvents = importEventVecSize;
+	tapeHdr.numFeatEvents = importFeatEventVecSize;
+	tapeHdr.numEntEvents = importEntEventVecSize;
 	tapeHdr.totPlayTime = endTime - begTime;
 	tapeHdr.startTime =  begTime;
 
@@ -971,7 +976,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	
 	
 	t = clock();
-	ThreadEntityPositions(&tapeHdr);
+	//ThreadEntityPositions(&tapeHdr);
 	t = clock() - t;
 	MonoPrint("ARRAY : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 
@@ -989,7 +994,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	MonoPrint("VECTOR : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 
 	t = clock();
-	ThreadEntityEvents(&tapeHdr);
+	//ThreadEntityEvents(&tapeHdr);
 	t = clock() - t;
 	MonoPrint("ARRAY : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 
@@ -1003,7 +1008,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 
 	// Open a writecopy file mapping.
 	// Write out file in .vhs format.
-	MonoPrint("ACMITape Import: Writing Tape File ....\n");
+	//MonoPrint("ACMITape Import: Writing Tape File ....\n");
 	//WriteTapeFile( outTapeFileName, &tapeHdr );
 	MonoPrint("ACMITape Import: Writing Tape File ....\n");
 	WriteTapeFile2(outTapeFileName, &tapeHdr);
@@ -1498,19 +1503,16 @@ void ACMITape::ThreadEntityPositions ( ACMITapeHeader *tapeHdr )
 
 
 
-
 void ACMITape::ThreadEntityPositions2(ACMITapeHeader *tapeHdr)
 {
 	// we run an outer and inner loop here.
 	// the outer loops steps thru each entity
 	// the inner loop searches each position update for one owned by the
 	// entity and chains them together
-
-
-
-	int importEntityVecSize = importEntityVec.size();
-	int importPosVecSize = importPosVec.size();
-	int importFeatVecSize = importFeatVec.size();
+	int importEntityVecSize = importEntityVec.size();	// importNumEnt
+	int importPosVecSize = importPosVec.size();			// importNumPos
+	int importFeatVecSize = importFeatVec.size();		// importNumFeat
+	int importEntEventVecSize = importEntEventVec.size(); // importNumEntEvents
 
 	for (int i = 0; i < importEntityVecSize; i++)
 	{
@@ -1620,7 +1622,9 @@ void ACMITape::ThreadEntityPositions2(ACMITapeHeader *tapeHdr)
 		  // feature event list looking for our unique ID in the events
 		  // and setting the index value of our feature in the event
 
-		for (int j = 0; j < importNumFeatEvents; j++)
+		int importFeatEventVecSize = importFeatEventVec.size();
+
+		for (int j = 0; j < importFeatEventVecSize; j++)
 		{
 
 			// check the id to see if this event belongs to the entity
@@ -1657,7 +1661,7 @@ void ACMITape::ThreadEntityPositions2(ACMITapeHeader *tapeHdr)
 			// if we're gone thru the whole list and haven't found
 			// a lead index, we're in trouble.  To protect, set the
 			// lead index to -1
-			if (j == importNumFeat)
+			if (j == importFeatVecSize)
 			{
 				importFeatVec[i].leadIndex = -1;
 			}
@@ -2100,9 +2104,13 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 		}
 
 		// allocate the trailer list
-		std::vector<ACMIEventTrailer> importEventTrailerVec(importNumEvents);
 
+		
 		int importEventVecSize = importEventVec.size();
+
+		std::vector<ACMIEventTrailer> importEventTrailerVec(importEventVecSize);
+
+		
 
 		// write out the events 
 		for (i = 0; i < importEventVecSize; i++)
