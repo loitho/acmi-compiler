@@ -974,29 +974,14 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	t = clock() - t;
 	MonoPrint("VECTOR : thread entity It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 	
-	
-	t = clock();
-	//ThreadEntityPositions(&tapeHdr);
-	t = clock() - t;
-	MonoPrint("ARRAY : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
-
-
 
 	// set up the chain offsets of entity events
 	MonoPrint("ACMITape Import: Threading Entity Events ....\n");
-	
-	
-	
-
 	t = clock();
 	ThreadEntityEvents2(&tapeHdr);
 	t = clock() - t;
 	MonoPrint("VECTOR : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 
-	t = clock();
-	//ThreadEntityEvents(&tapeHdr);
-	t = clock() - t;
-	MonoPrint("ARRAY : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 
 	// Calculate size of .vhs file.
 	tapeHdr.fileSize = tapeHdr.timelineBlockOffset +
@@ -1514,8 +1499,14 @@ void ACMITape::ThreadEntityPositions2(ACMITapeHeader *tapeHdr)
 	int importFeatVecSize = importFeatVec.size();		// importNumFeat
 	int importEntEventVecSize = importEntEventVec.size(); // importNumEntEvents
 
-	for (int i = 0; i < importEntityVecSize; i++)
+
+
+
+	//for (int i = 0; i < importEntityVecSize; i++)
+	//{
+	par_for(0, importEntityVecSize, [&](int i, int cpu)
 	{
+
 		long currOffset;
 		BOOL foundFirst = FALSE;
 		long prevOffset = 0;
@@ -1560,7 +1551,7 @@ void ACMITape::ThreadEntityPositions2(ACMITapeHeader *tapeHdr)
 
 		} // end for position loop
 
-	} // end for entity loop
+	}); // end for threaded entity loop
 
 	  // ------------------------------------------------------------------------------------
 	  // ------------------------------------------------------------------------------------
@@ -1769,7 +1760,11 @@ void ACMITape::ThreadEntityEvents2(ACMITapeHeader *tapeHdr)
 	int importFeatVecSize = importFeatVec.size(); // importNumFeat
 	int importEntEventVecSize = importEntEventVec.size(); // importNumEntEvents
 
-	// Now threadded 
+	/*  Now threadded 
+	** Reason we do not need mutex is the outer loop get a different entity each time
+	** and the inner loop is only going to link together the position that are owned by the entity
+	** So each thread will never try to link data that belongs to another thread
+	*/
 	par_for(0, importEntityVecSize, [&](int i, int cpu)
 	{
 		long currOffset;
