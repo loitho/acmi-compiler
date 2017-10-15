@@ -15,6 +15,9 @@
 
 #include "AcmiTape.h"
 #include "threading.h"
+
+
+// STFU _CRT_SECURE_NO_WARNINGS
 #pragma warning(disable:4996)
 
 #define _ITERATOR_DEBUG_LEVEL 0
