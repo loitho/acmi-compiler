@@ -2092,7 +2092,7 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 		}
 
 		// write out the entitiy events
-		for (i = 0; i < importNumEntEvents; i++)
+		for (i = 0; i < importEntEventVecSize; i++)
 		{
 			ret = fwrite(&(importEntEventVec[i].entityPosData), sizeof(ACMIEntityPositionData), 1, tapeFile);
 			if (!ret)
@@ -2102,8 +2102,10 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 		// allocate the trailer list
 		std::vector<ACMIEventTrailer> importEventTrailerVec(importNumEvents);
 
+		int importEventVecSize = importEventVec.size();
+
 		// write out the events 
-		for (i = 0; i < importNumEvents; i++)
+		for (i = 0; i < importEventVecSize; i++)
 		{
 			// set the trailer data
 			importEventTrailerVec[i].index = i;
@@ -2123,7 +2125,9 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 			sizeof(ACMIEventTrailer),
 			CompareEventTrailer);
 
-		for (i = 0; i < importNumEvents; i++)
+		int importEventTrailerVecSize = importEventTrailerVec.size();
+
+		for (i = 0; i < importEventTrailerVecSize; i++)
 		{
 			ret = fwrite(&importEventTrailerVec[i], sizeof(ACMIEventTrailer), 1, tapeFile);
 			if (!ret)
@@ -2132,7 +2136,10 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 		} // end for events loop
 
 		// write out the feature events
-		for (i = 0; i < importNumFeatEvents; i++)
+
+		int importFeatEventVecSize = importFeatEventVec.size();
+
+		for (i = 0; i < importFeatEventVecSize; i++)
 		{
 			ret = fwrite(&importFeatEventVec[i].data, sizeof(ACMIFeatEvent), 1, tapeFile);
 			if (!ret)
@@ -2146,7 +2153,9 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 		fclose(tapeFile);
 		return;
 
-	} catch (const std::exception& e) {
+	} 
+	catch (const std::exception& e) 
+	{
 
 
 		MonoPrint("Error writing new tape file\n");
