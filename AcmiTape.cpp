@@ -1752,15 +1752,21 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader *tapeHdr)
 
 void ACMITape::ThreadEntityEvents2(ACMITapeHeader *tapeHdr)
 {
-	int calc = 0;
+	//int calc = 0;
 
 	// we run an outer and inner loop here.
 	// the outer loops steps thru each entity
 	// the inner loop searches each position update for one owned by the
 	// entity and chains them together
 
+
+	int importEntityVecSize = importEntityVec.size(); // importNumEnt
+	int importPosVecSize = importPosVec.size(); // importNumPos
+	int importFeatVecSize = importFeatVec.size(); // importNumFeat
+	int importEntEventVecSize = importEntEventVec.size(); // importNumEntEvents
+
 	// Now threadded 
-	par_for(0, importNumEnt, [&](int i, int cpu)
+	par_for(0, importEntityVecSize, [&](int i, int cpu)
 	{
 		long currOffset;
 		BOOL foundFirst = FALSE;
@@ -1770,13 +1776,13 @@ void ACMITape::ThreadEntityEvents2(ACMITapeHeader *tapeHdr)
 
 		int prevPosVec = -1;
 
-		for (int j = 0; j < importNumEntEvents; j++)
+		for (int j = 0; j < importEntEventVecSize; j++)
 		{
 
 			// check the id to see if this position belongs to the entity
 			if (importEntEventVec[j].uniqueID == importEntityVec[i].uniqueID)
 			{
-			calc++;
+
 			// calculate the offset of this positional record
 			currOffset = tapeHdr->firstEntEventOffset +
 				sizeof(ACMIEntityPositionData) * j;
@@ -1994,26 +2000,9 @@ error_exit:
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-bool myfunction(const ACMIEventTrailer& i, const ACMIEventTrailer& j)
-{
-	
-	//return (i.timeEnd < j.timeEnd);
-
-	/*if (i.timeEnd < j.timeEnd)
-		return -1;*/
-	if (i.timeEnd > j.timeEnd)
-		return 1;
-	else
-		return 0;
-
-
-}
 
 int CompareEventTrailer(const ACMIEventTrailer& i, const ACMIEventTrailer& j)
 {
-	//ACMIEventTrailer *t1 = (ACMIEventTrailer *)p1;
-	//ACMIEventTrailer *t2 = (ACMIEventTrailer *)p2;
-
 	if (i.timeEnd < j.timeEnd)
 		return -1;
 	else if (i.timeEnd > j.timeEnd)
@@ -2026,6 +2015,14 @@ int CompareEventTrailer(const ACMIEventTrailer& i, const ACMIEventTrailer& j)
 void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 {
 	FILE *tapeFile;
+
+
+	int importEntityVecSize = importEntityVec.size(); // importNumEnt
+	int importPosVecSize = importPosVec.size(); // importNumPos
+	int importFeatVecSize = importFeatVec.size(); // importNumFeat
+	int importEntEventVecSize = importEntEventVec.size(); // importNumEntEvents
+
+
 	try {
 
 		int i, j;
@@ -2046,7 +2043,7 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 
 
 		// write out the entities 
-		for (i = 0; i < importNumEnt; i++)
+		for (i = 0; i < importEntityVecSize; i++)
 		{
 			ret = fwrite(&importEntityVec[i], sizeof(ACMIEntityData), 1, tapeFile);
 			if (!ret)
@@ -2056,7 +2053,7 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 
 
 		 // write out the features
-		for (i = 0; i < importNumFeat; i++)
+		for (i = 0; i < importFeatVecSize; i++)
 		{
 			ret = fwrite(&importFeatVec[i], sizeof(ACMIEntityData), 1, tapeFile);
 			if (!ret)
@@ -2064,14 +2061,14 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 		} // end for entity loop
 
 		// write out the entitiy positions
-		for (i = 0; i < importNumPos; i++)
+		for (i = 0; i < importPosVecSize; i++)
 		{
 			// we now want to do a "fixup" of the radar targets.  These are
 			// currently in "uniqueIDs" and we want to convert them into
 			// an index into the entity list
 			if (importPosVec[i].entityPosData.posData.radarTarget != -1)
 			{
-				for (j = 0; j < importNumEnt; j++)
+				for (j = 0; j < importEntityVecSize; j++)
 				{
 					if (importPosVec[i].entityPosData.posData.radarTarget == importEntityVec[j].uniqueID)
 					{
@@ -2081,7 +2078,7 @@ void ACMITape::WriteTapeFile2(char *fname, ACMITapeHeader *tapeHdr)
 				} // end for entity loop
 
 				  // did we find it?
-				if (j == importNumEnt)
+				if (j == importEntityVecSize)
 				{
 					// nope
 					importPosVec[i].entityPosData.posData.radarTarget = -1;
