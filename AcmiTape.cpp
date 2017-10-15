@@ -945,41 +945,80 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader *tapeHdr)
 
 		int prevPosVec = -1;
 
-		for (int j = 0; j < importEntEventVecSize; j++)
-		{
 
-			// check the id to see if this position belongs to the entity
-			if (importEntEventVec[j].uniqueID == importEntityVec[i].uniqueID)
+		//https://stackoverflow.com/questions/3752019/how-to-get-the-index-of-a-value-in-a-vector-using-for-each
+		std::for_each(importEntEventVec.begin(), importEntEventVec.end(), [&, j = 0](ACMIRawPositionData &CurrentimportEntEventVec) mutable {
+
+			if (CurrentimportEntEventVec.uniqueID == importEntityVec[i].uniqueID)
 			{
 
-			// calculate the offset of this positional record
-			currOffset = tapeHdr->firstEntEventOffset +
-				sizeof(ACMIEntityPositionData) * j;
+				// calculate the offset of this positional record
+				currOffset = tapeHdr->firstEntEventOffset +
+					sizeof(ACMIEntityPositionData) * j;
 
-			// if it's the 1st in the chain, set the offset to it in
-			// the entity's record
-			if (foundFirst == FALSE)
-			{
-				importEntityVec[i].firstEventDataOffset = currOffset;
-				foundFirst = TRUE;
-			}
+				// if it's the 1st in the chain, set the offset to it in
+				// the entity's record
+				if (foundFirst == FALSE)
+				{
+					importEntityVec[i].firstEventDataOffset = currOffset;
+					foundFirst = TRUE;
+				}
 
-			// thread current to previous
-			importEntEventVec[j].entityPosData.prevPositionUpdateOffset = prevOffset;
-			importEntEventVec[j].entityPosData.nextPositionUpdateOffset = 0;
+				// thread current to previous
+				CurrentimportEntEventVec.entityPosData.prevPositionUpdateOffset = prevOffset;
+				CurrentimportEntEventVec.entityPosData.nextPositionUpdateOffset = 0;
 
-			// thread previous to current
-			if (prevPosVec != -1)
-			{
-				importEntEventVec[prevPosVec].entityPosData.nextPositionUpdateOffset = currOffset;
-			}
+				// thread previous to current
+				if (prevPosVec != -1)
+				{
+					importEntEventVec[prevPosVec].entityPosData.nextPositionUpdateOffset = currOffset;
+				}
 
-			// set vals for next time thru loop
-			prevOffset = currOffset;
-			prevPosVec = j;
-		
+				// set vals for next time thru loop
+				prevOffset = currOffset;
+				prevPosVec = j;
+
 			} //end of if
-		}
+			++j;
+		});
+
+		//for (int j = 0; j < importEntEventVecSize; ++j)
+		//{
+
+		//	// check the id to see if this position belongs to the entity
+		//	if (importEntEventVec[j].uniqueID == importEntityVec[i].uniqueID)
+		//	{
+
+		//		// calculate the offset of this positional record
+		//		currOffset = tapeHdr->firstEntEventOffset +
+		//			sizeof(ACMIEntityPositionData) * j;
+
+		//		// if it's the 1st in the chain, set the offset to it in
+		//		// the entity's record
+		//		if (foundFirst == FALSE)
+		//		{
+		//			importEntityVec[i].firstEventDataOffset = currOffset;
+		//			foundFirst = TRUE;
+		//		}
+
+		//		// thread current to previous
+		//		importEntEventVec[j].entityPosData.prevPositionUpdateOffset = prevOffset;
+		//		importEntEventVec[j].entityPosData.nextPositionUpdateOffset = 0;
+
+		//		// thread previous to current
+		//		if (prevPosVec != -1)
+		//		{
+		//			importEntEventVec[prevPosVec].entityPosData.nextPositionUpdateOffset = currOffset;
+		//		}
+
+		//		// set vals for next time thru loop
+		//		prevOffset = currOffset;
+		//		prevPosVec = j;
+
+		//	} //end of if
+		//}
+
+
 	});// end for threadded entity loop
 }
 
