@@ -27,6 +27,7 @@
 	#define MonoPrint  NULL
 #endif 
 
+#define MonoPrint  printf
 
 long tempTarget; // for missile lock.
 				
@@ -531,7 +532,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	}
 	clock_t t;
 	// build the importEntityList
-	MonoPrint("ACMITape Import: Parsing Entities2 ....\n");
+	MonoPrint("ACMITape Import: Parsing Entities ....\n");
 	t = clock();
 	ParseEntities();
 	t = clock() - t;
@@ -584,6 +585,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 
 	// set up the chain offsets of entity events
 	MonoPrint("ACMITape Import: Threading Entity Events ....\n");
+
 	t = clock();
 	ThreadEntityEvents(&tapeHdr);
 	t = clock() - t;
@@ -600,9 +602,13 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 
 	// Open a writecopy file mapping.
 	// Write out file in .vhs format.
+	
 	MonoPrint("ACMITape Import: Writing Tape File ....\n");
+	
+	t = clock();
 	WriteTapeFile(outTapeFileName, &tapeHdr);
-
+	t = clock() - t;
+	MonoPrint("VECTOR : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 	// Cleanup import data.
 	CleanupACMIImportPositionData ( flightFile, rawPositionData );
 
@@ -743,9 +749,7 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 	int importPosVecSize = importPosVec.size();			// importNumPos
 	int importFeatVecSize = importFeatVec.size();		// importNumFeat
 	int importEntEventVecSize = importEntEventVec.size(); // importNumEntEvents
-
-
-
+	int importFeatEventVecSize = importFeatEventVec.size();
 
 	//for (int i = 0; i < importEntityVecSize; i++)
 	//{
@@ -806,11 +810,9 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 	// the outer loops steps thru each Feature
 	// the inner loop searches each position update for one owned by the
 	// Feature and chains them together
-
-
-
-
-	for (int i = 0; i < importFeatVecSize; i++)
+	
+	//for (int i = 0; i < importFeatVecSize; i++)
+	par_for(0, importFeatVecSize, [&](int i, int cpu)
 	{
 		long currOffset;
 		BOOL foundFirst = FALSE;
@@ -819,9 +821,9 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 		importFeatVec[i].firstPositionDataOffset = 0;
 		int prevPosVec = -1;
 
-
+		/* can't thread that because we need to parse the vector in order*/
 		for (int j = 0; j < importPosVecSize; j++)
-		{	
+		{
 			// check the id to see if this position belongs to the entity
 			if (importPosVec[j].uniqueID == importFeatVec[i].uniqueID)
 			{
@@ -858,7 +860,7 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 		  // feature event list looking for our unique ID in the events
 		  // and setting the index value of our feature in the event
 
-		int importFeatEventVecSize = importFeatEventVec.size();
+		
 
 		for (int j = 0; j < importFeatEventVecSize; j++)
 		{
@@ -902,7 +904,7 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 				importFeatVec[i].leadIndex = -1;
 			}
 		}
-	} // end for feature entity loop
+	}); // end for feature entity loop
 
 
 }
@@ -917,8 +919,6 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 */
 void ACMITape::ThreadEntityEvents(ACMITapeHeader *tapeHdr)
 {
-	//int calc = 0;
-
 	// we run an outer and inner loop here.
 	// the outer loops steps thru each entity
 	// the inner loop searches each position update for one owned by the
@@ -1049,22 +1049,20 @@ void ACMITape::WriteTapeFile(char *fname, ACMITapeHeader *tapeHdr)
 
 
 		// write out the entities 
-		for (i = 0; i < importEntityVecSize; i++)
-		{
-			ret = fwrite(&importEntityVec[i], sizeof(ACMIEntityData), 1, tapeFile);
+//		for (i = 0; i < importEntityVecSize; i++)
+//		{
+			ret = fwrite(importEntityVec.data(), sizeof(ACMIEntityData) * importEntityVecSize, 1, tapeFile);
 			if (!ret)
 				throw "error_exit";
-		} // end for entity loop
+//		} // end for entity loop
 
 
 
 		 // write out the features
-		for (i = 0; i < importFeatVecSize; i++)
-		{
-			ret = fwrite(&importFeatVec[i], sizeof(ACMIEntityData), 1, tapeFile);
+			ret = fwrite(importFeatVec.data(), sizeof(ACMIEntityData) * importFeatVecSize, 1, tapeFile);
 			if (!ret)
 				throw "error_exit";
-		} // end for entity loop
+		 // end for entity loop
 
 		// write out the entitiy positions
 		for (i = 0; i < importPosVecSize; i++)
@@ -1177,149 +1175,6 @@ void ACMITape::WriteTapeFile(char *fname, ACMITapeHeader *tapeHdr)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
-//BOOL ACMITape::GetEntityPosition
-//(
-//	int index,
-//	float &x,
-//	float &y,
-//	float &z,
-//	float &yaw,
-//	float &pitch,
-//	float &roll,
-//	float &speed,
-//	float &turnrate,
-//	float &turnradius
-//)
-//{
-//	float
-//		deltaTime;
-//
-//	float dx, dy, dz;
-//	float dx1, dy1, dz1;
-//
-//	ACMIEntityPositionData
-//		*pos1,
-//		*pos2,
-//		*pos3;
-//
-//	// init speed to 0.0
-//	speed = 0.0f;
-//	turnrate = 0.0f;
-//	turnradius = 0.0f;
-//
-//	F4Assert(index >= 0 && index < NumEntities());
-//
-//	pos1 = CurrentEntityPositionHead(index);
-//
-//	// If there is not at least 1 positional update, the entity doesn't exist.
-//	F4Assert(pos1 != NULL);
-//
-//	if(pos1->time > _simTime)
-//	{
-//		x = pos1->posData.x;
-//		y = pos1->posData.y;
-//		z = pos1->posData.z;
-//		yaw = pos1->posData.yaw;
-//		pitch = pos1->posData.pitch;
-//		roll = pos1->posData.roll;
-//		return FALSE;
-//	}
-//
-//	pos2 = HeadNext(pos1);
-//	if(pos2 == NULL)
-//	{
-//		x = pos1->posData.x;
-//		y = pos1->posData.y;
-//		z = pos1->posData.z;
-//		yaw = pos1->posData.yaw;
-//		pitch = pos1->posData.pitch;
-//		roll = pos1->posData.roll;
-//		return FALSE;		
-//	}
-//	else
-//	{
-//   	pos3 = HeadPrev(pos1);
-//		F4Assert(pos1->time <= _simTime);
-//		F4Assert(pos2->time > _simTime);
-//
-//		dx = pos2->posData.x - pos1->posData.x;
-//		dy = pos2->posData.y - pos1->posData.y;
-//		dz = pos2->posData.z - pos1->posData.z;
-//
-//		// Interpolate.
-//		deltaTime = 
-//		(
-//			(_simTime - pos1->time) /
-//			(pos2->time - pos1->time)
-//		);
-//
-//		x = 
-//		(
-//			pos1->posData.x + dx * deltaTime
-//		);
-//
-//		y = 
-//		(
-//			pos1->posData.y + dy * deltaTime
-//		);
-//
-//		z = 
-//		(
-//			pos1->posData.z + dz * deltaTime
-//		);
-//
-//		yaw = AngleInterp( pos1->posData.yaw, pos2->posData.yaw, deltaTime );
-//		pitch = AngleInterp( pos1->posData.pitch, pos2->posData.pitch, deltaTime );
-//		roll = AngleInterp( pos1->posData.roll, pos2->posData.roll, deltaTime );
-//
-//		// get the average speed
-//		speed = (float)sqrt( dx * dx + dy * dy + dz * dz ) / ( pos2->time - pos1->time );
-//		float dAng = pos2->posData.yaw - pos1->posData.yaw;
-//		if ( fabs( dAng ) > 180.0f * DTR )
-//		{
-//			if ( dAng >= 0.0f )
-//				dAng -= 360.0f * DTR;
-//			else
-//				dAng += 360.0f * DTR;
-//
-//		}
-//
-//      if (pos3)
-//      {
-//		   dx1 = pos1->posData.x - pos3->posData.x;
-//		   dy1 = pos1->posData.y - pos3->posData.y;
-//		   dz1 = pos1->posData.z - pos3->posData.z;
-//
-//         // Turn rate = solid angle delta between velocity vectors
-//         turnrate = (float)acos ((dx*dx1 + dy*dy1 + dz*dz1)/
-//            (float)sqrt((dx*dx + dy*dy + dz*dz) * (dx1*dx1 + dy1*dy1 + dz1*dz1)));
-//         turnrate *= RTD / ( pos2->time - pos1->time );
-////		   turnrate = RTD * fabs( dAng ) / ( pos2->time - pos1->time );
-//
-//		   if ( turnrate != 0.0f )
-//		   {
-//			   // sec to turn 360 deg
-//			   float secs = 360.0f/turnrate;
-//
-//			   // get circumference
-//			   float circum = speed * secs;
-//
-//			   // now we get turn radius ( circum = 2 * PI * R )
-//			   turnradius = circum/( 2.0f * PI );
-//		   }
-//      }
-//      else
-//      {
-//         turnrate = 0.0F;
-//         turnradius = 0.0F;
-//      }
-//	}
-//
-//	return TRUE;
-//}
-
-
 
 
 /*
