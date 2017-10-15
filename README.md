@@ -25,3 +25,11 @@ So, what did I do ?
 ## Things be aware if you want to modify this code
 
 - Building in Debug in Visual Studio will make the code slower because VS add a lot of debugging stuff to the vector (it's nearly **25 times slower** ) So use *release* if you want to evaluate your code performance
+
+## Special thanks
+
+Thanks to this website for putting me on the path to find some falcon source code and an excellent .pdf describing how Falcon changed over the years
+
+https://sites.google.com/site/falcon4sourcecode/
+
+https://github.com/FreeFalcon/freefalcon-central
