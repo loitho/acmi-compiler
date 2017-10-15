@@ -945,9 +945,11 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader *tapeHdr)
 
 		int prevPosVec = -1;
 
+		//for (int j = 0; j < importEntEventVecSize; j++)
 
 		//https://stackoverflow.com/questions/3752019/how-to-get-the-index-of-a-value-in-a-vector-using-for-each
-		std::for_each(importEntEventVec.begin(), importEntEventVec.end(), [&, j = 0](ACMIRawPositionData &CurrentimportEntEventVec) mutable {
+		std::for_each(importEntEventVec.begin(), importEntEventVec.end(), [&, j = 0](ACMIRawPositionData &CurrentimportEntEventVec) mutable 
+		{
 
 			if (CurrentimportEntEventVec.uniqueID == importEntityVec[i].uniqueID)
 			{
