@@ -21,13 +21,7 @@
     <ClCompile Include="AcmiTape.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="acmtpinl.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="events.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -36,42 +30,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AcmiTape.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AcmiUI.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AcmiView.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="codelib\tools\lists\lists.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="codelib\tools\lists\omni.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="F4error.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Falcmesg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="F4VU.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="apitypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FalcEnt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="EvtParse.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="events.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="misseval.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="threading.h">

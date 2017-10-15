@@ -5,14 +5,18 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "FalcMesg.h"
-#include "codelib\tools\lists\lists.h"
+//#include "FalcMesg.h"
+
+//#include "apitypes.h"
+//#include "F4Vu.h"
+
+//#include "codelib\tools\lists\lists.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-#define		MAX_ENTITY_CAMS	50
+#define	MAX_ENTITY_CAMS	50
 
 #define ACMI_VERSION 2
 
@@ -377,16 +381,16 @@ typedef struct
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-extern "C"
-{
-	void DestroyACMIRawPositionDataList(LIST* _frameList);
-	void DeleteACMIRawPositionData(ACMIRawPositionData* rawPositionData);
-	void DeleteACMIEntityPositionData(ACMIEntityPositionData *data);
-	void DeleteACMIEntityData(ACMIEntityData *data);
-	void DeleteACMIEventHeader(ACMIEventHeader *data);
-	void DeleteACMIFeatEventImportData(ACMIFeatEventImportData *data);
-	int CompareEventTrailer( const void *t1, const void *t2 );
-};
+//extern "C"
+//{
+//	//void DestroyACMIRawPositionDataList(LIST* _frameList);
+//	/*void DeleteACMIRawPositionData(ACMIRawPositionData* rawPositionData);
+//	void DeleteACMIEntityPositionData(ACMIEntityPositionData *data);
+//	void DeleteACMIEntityData(ACMIEntityData *data);
+//	void DeleteACMIEventHeader(ACMIEventHeader *data);
+//	void DeleteACMIFeatEventImportData(ACMIFeatEventImportData *data);
+//	int CompareEventTrailer( const void *t1, const void *t2 );*/
+//};
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -399,14 +403,14 @@ extern "C"
 // can be decoded with the event id.
 // The second void * parameter is for user data.
 
-typedef void (*ACMI_GENERAL_EVENT_CALLBACK) (ACMITape *, EventIdData, void *, void *);
+//typedef void (*ACMI_GENERAL_EVENT_CALLBACK) (ACMITape *, EventIdData, void *, void *);
 
-typedef struct
-{
-	ACMI_GENERAL_EVENT_CALLBACK		forwardCallback;
-	ACMI_GENERAL_EVENT_CALLBACK		reverseCallback;
-	void									*userData;
-} ACMIGeneralEventCallback;
+//typedef struct
+//{
+//	ACMI_GENERAL_EVENT_CALLBACK		forwardCallback;
+//	ACMI_GENERAL_EVENT_CALLBACK		reverseCallback;
+//	void									*userData;
+//} ACMIGeneralEventCallback;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -535,7 +539,7 @@ public:
 	// sets the draw position and matrix for bsp update
 	//void ObjectSetData(SimBaseClass*, Tpoint*, Trotation*);
 
-	void SetScreenCapturing( BOOL val )
+	/*void SetScreenCapturing( BOOL val )
 	{
 		_screenCapturing = val;
 	};
@@ -553,7 +557,7 @@ public:
 	float GetDeltaSimTime( void )
 	{
 		return _deltaSimTime;
-	};
+	};*/
 
 	//void SetWingTrails( BOOL val );
 
@@ -686,9 +690,9 @@ private:
 	void									*_tape;
 	ACMIEntityReadHead				*_entityReadHeads;
 	long							_generalEventReadHeadHeader;
-	ACMIEventTrailer				*_generalEventReadHeadTrailer;
-	ACMIGeneralEventCallback		_generalEventCallbacks;
-	ACMIFeatEvent					*_featEventReadHead;
+	//ACMIEventTrailer				*_generalEventReadHeadTrailer;
+	//ACMIGeneralEventCallback		_generalEventCallbacks;
+	//ACMIFeatEvent					*_featEventReadHead;
 
 	// events
 	ActiveEvent						**_eventList;
@@ -703,7 +707,6 @@ private:
 };
 
 
-#include "acmtpinl.cpp"
 
 #endif  // _ACMITAPE_H_
 
