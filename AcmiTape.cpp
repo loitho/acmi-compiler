@@ -1191,13 +1191,14 @@ void ACMITape::WriteTapeFile(char *fname, ACMITapeHeader *tapeHdr)
 		if (importEventTrailerVecSize > 0)
 		{
 			qsort(&importEventTrailerVec[0], importEventTrailerVec.size(), sizeof(ACMIEventTrailer), CompareEventTrailer);
+			
+			ret = fwrite(importEventTrailerVec.data(), sizeof(ACMIEventTrailer) * importEventTrailerVecSize, 1, tapeFile);
+			if (!ret)
+				throw "error_exit";
 		}
 
-		ret = fwrite(importEventTrailerVec.data(), sizeof(ACMIEventTrailer) * importEventTrailerVecSize, 1, tapeFile);
-		if (!ret)
-			throw "error_exit";
-		 // end for events loop
-
+		
+		
 		// write out the feature events
 		int importFeatEventVecSize = importFeatEventVec.size();
 
