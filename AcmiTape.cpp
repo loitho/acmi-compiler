@@ -1103,6 +1103,7 @@ void ACMITape::WriteTapeFile(char *fname, ACMITapeHeader *tapeHdr)
 		}
 
 		// write the header
+		//MonoPrint("ACMITapeHeader %d - size : %ld  \n", sizeof(ACMITapeHeader), tapeHdr->fileSize);
 		ret = fwrite(tapeHdr, sizeof(ACMITapeHeader), 1, tapeFile);
 		if (!ret)
 			throw "error_exit";
@@ -1181,17 +1182,16 @@ void ACMITape::WriteTapeFile(char *fname, ACMITapeHeader *tapeHdr)
 				throw "error_exit";
 		} // end for events loop
 		
+		int importEventTrailerVecSize = importEventTrailerVec.size();
+		
 		/*
 		Using qsort because sort and sort_stable don't output the same exact result
 		Don't know if it's a problem I use that for now.
 		*/
-		qsort(&importEventTrailerVec[0],
-			importEventTrailerVec.size(),
-			sizeof(ACMIEventTrailer),
-			CompareEventTrailer);
-
-		int importEventTrailerVecSize = importEventTrailerVec.size();
-
+		if (importEventTrailerVecSize > 0)
+		{
+			qsort(&importEventTrailerVec[0], importEventTrailerVec.size(), sizeof(ACMIEventTrailer), CompareEventTrailer);
+		}
 
 		ret = fwrite(importEventTrailerVec.data(), sizeof(ACMIEventTrailer) * importEventTrailerVecSize, 1, tapeFile);
 		if (!ret)
@@ -1199,7 +1199,6 @@ void ACMITape::WriteTapeFile(char *fname, ACMITapeHeader *tapeHdr)
 		 // end for events loop
 
 		// write out the feature events
-
 		int importFeatEventVecSize = importFeatEventVec.size();
 
 		for (i = 0; i < importFeatEventVecSize; i++)
