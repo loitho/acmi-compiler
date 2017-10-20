@@ -2,9 +2,11 @@
 // Originally written by Jim DiZoglio (x257) as ACMIView class
 // last modified: 9/25/97	Michael P. Songy
 // Modified SEVERAL TIMES SINCE... various people
-//#pragma optimize( "", off )
+//
+// Modified by Loitho between 
 
-// STFU _CRT_SECURE_NO_WARNINGS
+
+/* STFU _CRT_SECURE_NO_WARNINGS */
 #pragma warning(disable:4996)
 
 #include <windows.h>
@@ -31,6 +33,7 @@
 
 long tempTarget; // for missile lock.
 				
+
 
 /*Converted list to vector*/
 std::vector<ACMIEntityData> importEntityVec;
@@ -632,21 +635,18 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 
 void ACMITape::ParseEntities(void)
 {
-	int
-		i = 0,
-		count = 0;
+	int	i = 0;
 
 	int importPosVecSize = importPosVec.size();
 
-	for (count = 0; count < importPosVecSize; count++)
+	for (int count = 0; count < importPosVecSize; count++)
 	{
 
 		if (importPosVec[count].flags & ENTITY_FLAG_FEATURE)
 		{
 			// look for existing entity
 			for (i = 0; i < importFeatVec.size() && importPosVec[count].uniqueID != importFeatVec[i].uniqueID; i++)
-			{
-			
+			{			
 			}
 			
 			// create new import entity record
@@ -694,6 +694,10 @@ void ACMITape::ParseEntities(void)
 
 	MonoPrint("ACMITape Import: Counting ....\n");
 
+	/*
+	** I have no Idea if it's really usefull as Tacview doesn't seem to be using those values.
+	** But they were doing that in the original code so *shrug*
+	*/
 	int objCount;
 
 	i = 0;
@@ -870,9 +874,6 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 		  // while we're doing the features, for each one, go thru the
 		  // feature event list looking for our unique ID in the events
 		  // and setting the index value of our feature in the event
-
-		
-
 		for (int j = 0; j < importFeatEventVecSize; j++)
 		{
 
@@ -890,7 +891,6 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 
 		if (importFeatVec[i].leadIndex != -1)
 		{
-
 			int j;
 			for (j = 0; j < importFeatVecSize; j++)
 			{
@@ -901,8 +901,8 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 						importFeatVec[i].leadIndex = j;
 						break;
 				}
-
 			}
+
 			// if we're gone thru the whole list and haven't found
 			// a lead index, we're in trouble.  To protect, set the
 			// lead index to -1
@@ -1092,7 +1092,7 @@ void ACMITape::WriteTapeFile(char *fname, ACMITapeHeader *tapeHdr)
 	try {
 
 		int i, j;
-	
+
 		long ret;
 
 		tapeFile = fopen(fname, "wb");
@@ -1112,20 +1112,20 @@ void ACMITape::WriteTapeFile(char *fname, ACMITapeHeader *tapeHdr)
 		// write out the entities 
 //		for (i = 0; i < importEntityVecSize; i++)
 //		{
-			ret = fwrite(importEntityVec.data(), sizeof(ACMIEntityData) * importEntityVecSize, 1, tapeFile);
-			if (!ret)
-				throw "error_exit";
-//		} // end for entity loop
+		ret = fwrite(importEntityVec.data(), sizeof(ACMIEntityData) * importEntityVecSize, 1, tapeFile);
+		if (!ret)
+			throw "error_exit";
+		//		} // end for entity loop
 
 
 
-		 // write out the features
-			ret = fwrite(importFeatVec.data(), sizeof(ACMIEntityData) * importFeatVecSize, 1, tapeFile);
-			if (!ret)
-				throw "error_exit";
-		 // end for entity loop
+				 // write out the features
+		ret = fwrite(importFeatVec.data(), sizeof(ACMIEntityData) * importFeatVecSize, 1, tapeFile);
+		if (!ret)
+			throw "error_exit";
+		// end for entity loop
 
-		// write out the entitiy positions
+	   // write out the entitiy positions
 		for (i = 0; i < importPosVecSize; i++)
 		{
 			// we now want to do a "fixup" of the radar targets.  These are
@@ -1166,7 +1166,7 @@ void ACMITape::WriteTapeFile(char *fname, ACMITapeHeader *tapeHdr)
 
 		// allocate the trailer list
 
-		
+
 		int importEventVecSize = importEventVec.size();
 		std::vector<ACMIEventTrailer> importEventTrailerVec(importEventVecSize);
 
@@ -1181,9 +1181,9 @@ void ACMITape::WriteTapeFile(char *fname, ACMITapeHeader *tapeHdr)
 			if (!ret)
 				throw "error_exit";
 		} // end for events loop
-		
+
 		int importEventTrailerVecSize = importEventTrailerVec.size();
-		
+
 		/*
 		Using qsort because sort and sort_stable don't output the same exact result
 		Don't know if it's a problem I use that for now.
@@ -1191,14 +1191,14 @@ void ACMITape::WriteTapeFile(char *fname, ACMITapeHeader *tapeHdr)
 		if (importEventTrailerVecSize > 0)
 		{
 			qsort(&importEventTrailerVec[0], importEventTrailerVec.size(), sizeof(ACMIEventTrailer), CompareEventTrailer);
-			
+
 			ret = fwrite(importEventTrailerVec.data(), sizeof(ACMIEventTrailer) * importEventTrailerVecSize, 1, tapeFile);
 			if (!ret)
 				throw "error_exit";
 		}
 
-		
-		
+
+
 		// write out the feature events
 		int importFeatEventVecSize = importFeatEventVec.size();
 
@@ -1216,12 +1216,12 @@ void ACMITape::WriteTapeFile(char *fname, ACMITapeHeader *tapeHdr)
 		fclose(tapeFile);
 		return;
 
-	} 
-	catch (const std::exception& e) 
+	}
+	catch (const std::exception& e)
 	{
 
 
-		MonoPrint("Error writing new tape file\n");
+		MonoPrint("Error writing new tape file: %s\n", e.what());
 		if (tapeFile)
 			fclose(tapeFile);
 		return;
