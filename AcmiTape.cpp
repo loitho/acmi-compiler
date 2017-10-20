@@ -197,7 +197,11 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	begTime = -1.0;
 	endTime = 0.0;
 	//OutputDebugString("TEST-DEBUG\n");
+	clock_t t;
+
 	MonoPrint("ACMITape Import: Reading Raw Data ....\n");
+	t = clock();
+
 	while( fread(&hdr, sizeof( ACMIRecHeader ), 1, flightFile ) )
 	{
 		
@@ -276,7 +280,6 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 
 				// Allocate a new data node.
 				ehdr = new ACMIEventHeader;
-
 
 				/*Maybe change and stop querying the vec size*/
 
@@ -530,7 +533,11 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				endTime = hdr.time;
 		}
 	}
-	clock_t t;
+
+	t = clock() - t;
+	MonoPrint("import entity It took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
+
+	
 	// build the importEntityList
 	MonoPrint("ACMITape Import: Parsing Entities ....\n");
 	t = clock();
@@ -637,12 +644,9 @@ void ACMITape::ParseEntities(void)
 		if (importPosVec[count].flags & ENTITY_FLAG_FEATURE)
 		{
 			// look for existing entity
-			for (i = 0; i < importFeatVec.size(); i++)
+			for (i = 0; i < importFeatVec.size() && importPosVec[count].uniqueID != importFeatVec[i].uniqueID; i++)
 			{
-				if (importPosVec[count].uniqueID == importFeatVec[i].uniqueID)
-				{
-					break;
-				}
+			
 			}
 			
 			// create new import entity record
@@ -668,12 +672,8 @@ void ACMITape::ParseEntities(void)
 			// not a feature
 
 			// look for existing entity
-			for (i = 0; i < importEntityVec.size(); i++)
+			for (i = 0; i < importEntityVec.size() && importPosVec[count].uniqueID != importEntityVec[i].uniqueID; i++)
 			{
-				if (importPosVec[count].uniqueID == importEntityVec[i].uniqueID)
-				{
-					break;
-				}
 			}
 
 			// create new import entity record
@@ -811,6 +811,15 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 	// the inner loop searches each position update for one owned by the
 	// Feature and chains them together
 	
+	clock_t t;
+	// build the importEntityList
+	//MonoPrint("ACMITape Import: testloop....\n");
+	//t = clock();
+
+	
+
+
+
 	//for (int i = 0; i < importFeatVecSize; i++)
 	par_for(0, importFeatVecSize, [&](int i, int cpu)
 	{
@@ -822,6 +831,8 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 		int prevPosVec = -1;
 
 		/* can't thread that because we need to parse the vector in order*/
+
+
 		for (int j = 0; j < importPosVecSize; j++)
 		{
 			// check the id to see if this position belongs to the entity
@@ -877,7 +888,6 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 		// change them to indices into the list
 		// actually NOW, go through and just make sure they exist... otherwise, clear
 
-
 		if (importFeatVec[i].leadIndex != -1)
 		{
 
@@ -885,17 +895,14 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 			for (j = 0; j < importFeatVecSize; j++)
 			{
 				// we don't compare ourselves
-				if (j != i)
+				if (j != i && importFeatVec[i].leadIndex == importFeatVec[j].uniqueID)
 				{
-					if (importFeatVec[i].leadIndex == importFeatVec[j].uniqueID)
-					{
+				
 						importFeatVec[i].leadIndex = j;
 						break;
-					}
 				}
 
 			}
-
 			// if we're gone thru the whole list and haven't found
 			// a lead index, we're in trouble.  To protect, set the
 			// lead index to -1
@@ -904,8 +911,17 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 				importFeatVec[i].leadIndex = -1;
 			}
 		}
+
+
+		//std::vector<ACMIEntityData>::iterator it = std::find_if(importFeatVec.begin(), importFeatVec.end(), 
+		//	[&](const ACMIEntityData& CurrentimportFeatVec) { return CurrentimportFeatVec.leadIndex == importFeatVec[i].leadIndex; });
+
+
+
 	}); // end for feature entity loop
 
+	//t = clock() - t;
+	//MonoPrint("LOOP TEST : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 
 }
 
@@ -947,7 +963,10 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader *tapeHdr)
 
 		//for (int j = 0; j < importEntEventVecSize; j++)
 
-		//https://stackoverflow.com/questions/3752019/how-to-get-the-index-of-a-value-in-a-vector-using-for-each
+		/* 
+		** https://stackoverflow.com/questions/3752019/how-to-get-the-index-of-a-value-in-a-vector-using-for-each
+		** j is a loop index for for_each
+		*/
 		std::for_each(importEntEventVec.begin(), importEntEventVec.end(), [&, j = 0](ACMIRawPositionData &CurrentimportEntEventVec) mutable 
 		{
 
