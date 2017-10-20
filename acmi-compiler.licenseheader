@@ -1,0 +1,19 @@
+﻿extensions: AcmiTape.cpp .cpp generated.cs
+// %FileName%
+// File created : %CreationYear%-%CreationMonth%-%CreationDay%
+// Originally written by Jim DiZoglio (x257) as ACMIView class
+// 
+//
+// Last update : %CurrentYear%-%CurrentMonth%-%CurrentDay%
+// By %UserName%
+
+extensions: .aspx .ascx
+<%-- 
+Copyright (c) 2011 rubicon IT GmbH
+--%>
+extensions: .vb
+'Sample license text.
+extensions:  .xml .config .xsd
+<!--
+Sample license text.
+-->

@@ -1,9 +1,13 @@
-// ACMI tape class.
+// AcmiTape.cpp
+// File created : 2017-9-23
 // Originally written by Jim DiZoglio (x257) as ACMIView class
-// last modified: 9/25/97	Michael P. Songy
-// Modified SEVERAL TIMES SINCE... various people
+// 
 //
-// Modified by Loitho between 
+// Last update : 2017-10-21
+// By loitho
+
+// previous last modified: 9/25/97	Michael P. Songy
+
 
 
 /* STFU _CRT_SECURE_NO_WARNINGS */
