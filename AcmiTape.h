@@ -33,26 +33,26 @@ class RenderOTW;
 #pragma pack (push, pack1, 1)
 typedef struct 
 {
-	long		fileID;
-	long		fileSize;
-	long		numEntities;
-	long		numFeat;
-	long 		entityBlockOffset;
-	long 		featBlockOffset;
-	long		numEntityPositions;
-	long		timelineBlockOffset;
-	long		firstEntEventOffset;
-	long		firstGeneralEventOffset;
-	long		firstEventTrailerOffset;
-	long		firstTextEventOffset;
-	long		firstFeatEventOffset;
-	long		numEvents;
-	long		numEntEvents;
-	long		numTextEvents;
-	long		numFeatEvents;
-	float		startTime;
-	float		totPlayTime;
-	float 		todOffset;
+	long		fileID = 0;
+	long		fileSize = 0;
+	long		numEntities = 0;
+	long		numFeat = 0;
+	long 		entityBlockOffset = 0;			// 5th
+	long 		featBlockOffset = 0;
+	long		numEntityPositions = 0;
+	long		timelineBlockOffset = 0;
+	long		firstEntEventOffset = 0;
+	long		firstGeneralEventOffset = 0;	// 10th => 40 Bytes
+	long		firstEventTrailerOffset = 0;
+	long		firstTextEventOffset = 0;
+	long		firstFeatEventOffset = 0;
+	long		numEvents = 0;
+	long		numEntEvents = 0;				// 15th => 60 Byte
+	long		numTextEvents = 0;
+	long		numFeatEvents = 0;
+	float		startTime = 0;
+	float		totPlayTime = 0;
+	float 		todOffset = 0;
 } ACMITapeHeader;
 #pragma pack (pop, pack1)
 
@@ -63,10 +63,10 @@ typedef struct
 #pragma pack (push, pack1, 1)
 typedef struct 
 {
-	long		uniqueID;
-	long		type;
-	long		count;
-	long		flags;
+	long		uniqueID = 0;
+	long		type = 0;
+	long		count = 0;
+	long		flags = 0;
 	
 		#define		ENTITY_FLAG_MISSILE			0x00000001
 		#define		ENTITY_FLAG_FEATURE			0x00000002
@@ -76,14 +76,14 @@ typedef struct
 
 	// for features we may need an index to the lead component and
 	// the slot # that was in the camp component list (for bridges, bases...)
-	long		leadIndex;
-	int			slot;
-	int			specialFlags;
+	long		leadIndex = 0;
+	int			slot = 0;
+	int			specialFlags = 0;
 
 
 	// Offset from the start of the file to the start of my positional data.
-	long 		firstPositionDataOffset;
-	long 		firstEventDataOffset;
+	long 		firstPositionDataOffset = 0;
+	long 		firstEventDataOffset = 0;
 
 } ACMIEntityData;
 #pragma pack (pop, pack1)
@@ -140,8 +140,8 @@ typedef struct
 	// Although position data is a fixed size, we still want
 	// this so that we can organize the data to be friendly for
 	// paging.
-	long		nextPositionUpdateOffset;
-	long		prevPositionUpdateOffset;
+	long		nextPositionUpdateOffset = 0;
+	long		prevPositionUpdateOffset = 0;
 } ACMIEntityPositionData;
 #pragma pack (pop, pack1)
 
@@ -152,16 +152,16 @@ typedef struct
 
 typedef struct 
 {
-	int			type;			// type of object
-	long		uniqueID;		// A unique ID for the object. Many to One correlation to Falcon Entities
-	int			flags;			// side
+	int			type = 0;			// type of object
+	long		uniqueID = 0;		// A unique ID for the object. Many to One correlation to Falcon Entities
+	int			flags = 0;			// side
 
 	// for features we may need an index to the lead component and
 	// the slot # that was in the camp component list (for bridges, bases...)
-	long		leadIndex;
-	int			slot;
-	int			specialFlags;
-	ACMIEntityPositionData entityPosData;
+	long		leadIndex = 0;
+	int			slot = 0;
+	int			specialFlags = 0;
+	ACMIEntityPositionData entityPosData = {};
 } ACMIRawPositionData;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -176,17 +176,23 @@ typedef struct
 	long 		index;
 
 	// Time stamp for this event.
-	float		time;
-	float		timeEnd;
+	float		time = 0;
+	float		timeEnd = 0;
 
 	// data specific to type of event
-	long		type;
-	long		user;
-	long		flags;
-	float		scale;
-	float		x, y, z;
-	float		dx, dy, dz;
-	float		roll, pitch, yaw;
+	long		type = 0;
+	long		user = 0;
+	long		flags = 0;
+	float		scale = 0;
+	float		x = 0;
+	float		y = 0;
+	float		z = 0;
+	float		dx = 0;
+	float		dy = 0;
+	float		dz = 0;
+	float		roll = 0;
+	float		pitch = 0;
+	float		yaw = 0;
 
 } ACMIEventHeader;
 #pragma pack (pop, pack1)
@@ -198,8 +204,8 @@ typedef struct
 #pragma pack (push, pack1, 1)
 typedef struct
 {
-	float		timeEnd;
-	long 		index;		// into EventHeader
+	float		timeEnd = 0;
+	long 		index = 0;		// into EventHeader
 } ACMIEventTrailer;
 #pragma pack (pop, pack1)
 
@@ -217,15 +223,15 @@ typedef struct
 	long 		index;
 
 	// data specific to type of event
-	long		newStatus;
-	long		prevStatus;
+	long		newStatus = 0;
+	long		prevStatus = 0;
 
 } ACMIFeatEvent;
 #pragma pack (pop, pack1)
 
 typedef struct
 {
-	long		uniqueID;
+	long		uniqueID = 0;
 	ACMIFeatEvent data;
 } ACMIFeatEventImportData;
 
@@ -288,8 +294,8 @@ typedef struct
 typedef struct
 {
 
-	long			positionDataOffset;
-	long			eventDataOffset;
+	long			positionDataOffset = 0;
+	long			eventDataOffset = 0;
 } ACMIEntityReadHead;
 
 ////////////////////////////////////////////////////////////////////////////////

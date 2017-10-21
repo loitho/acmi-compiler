@@ -6,17 +6,12 @@
 ** History:
 **		13-oct-97 (edg)
 **			We go dancing in.....
+** Here we are in 21 october 2017, 20 years after ! (loitho)
 */
 #ifndef _ACMIREC_H_
 #define _ACMIREC_H_
 
-//#include "f4thread.h"
 #include "tchar.h"
-//#include "acmihash.h"
-
-#define RECORD_DIR "acmibin\\"
-//#define RECORD_DIR "campaign\\save\\fltfiles\\"
-
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -69,14 +64,14 @@ typedef struct
 #pragma pack (push, pack1, 1)
 typedef struct 
 {
-	int	type;			// base type for creating simbase object
-	long	uniqueID;	// identifier of instance
-	float	x;
-	float	y;
-	float	z;
-	float	yaw;
-	float	pitch;
-	float 	roll;
+	int		type = 0;			// base type for creating simbase object
+	long	uniqueID = 0;		// identifier of instance
+	float	x = 0;
+	float	y = 0;
+	float	z = 0;
+	float	yaw = 0;
+	float	pitch = 0;
+	float 	roll = 0;
 } ACMIGenPositionData;
 #pragma pack (pop, pack1)
 
@@ -87,17 +82,17 @@ typedef struct
 #pragma pack (push, pack1, 1)
 typedef struct 
 {
-	int		type;			// base type for creating simbase object
-	long	uniqueID;		// identifier of instance
-	long	leadUniqueID;	// id of lead component (for bridges. bases etc)
-	int		slot;			// slot number in component list
-	int		specialFlags;   // campaign feature flag
-	float	x;
-	float	y;
-	float	z;
-	float	yaw;
-	float	pitch;
-	float 	roll;
+	int		type = 0;			// base type for creating simbase object
+	long	uniqueID = 0;		// identifier of instance
+	long	leadUniqueID = 0;	// id of lead component (for bridges. bases etc)
+	int		slot = 0;			// slot number in component list
+	int		specialFlags = 0;   // campaign feature flag
+	float	x = 0;
+	float	y = 0;
+	float	z = 0;
+	float	yaw = 0;
+	float	pitch = 0;
+	float 	roll = 0;
 } ACMIFeaturePositionData;
 #pragma pack (pop, pack1)
 
