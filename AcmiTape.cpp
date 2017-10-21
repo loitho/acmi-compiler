@@ -3,11 +3,11 @@
 // Originally written by Jim DiZoglio (x257) as ACMIView class
 // 
 //
-// Last update : 2017-10-21
+// Last update : 2017-10-22
 // By loitho
 
 // previous last modified: 9/25/97	Michael P. Songy
-
+// Yes, that was 20 years ago
 
 
 /* STFU _CRT_SECURE_NO_WARNINGS */
@@ -64,13 +64,13 @@ long import_count=0;
 
 ACMITape::ACMITape(char *name, RenderOTW *renderer, RViewPoint *viewPoint )
 { 
-	int j;
+	/*int j;
 	int i, numEntities;
 	char fullName[MAX_PATH];
 	ACMIEntityData *e;
 	long length=0;
 	char *callsigns=NULL;
-	long numcalls=0;
+	long numcalls=0;*/
 
 	std::cout << "test acmi tape started" << std::endl;
 	
@@ -83,8 +83,8 @@ ACMITape::ACMITape(char *name, RenderOTW *renderer, RViewPoint *viewPoint )
 	// LOL, how fun is it to read that nearly 20 years after and the code is still the same x)
 
 	//strcpy( fullName, "campaign\\save\\fltfiles\\" );
-	strcpy( fullName, "acmibin\\" );
-	strcat( fullName, name );
+	/*strcpy( fullName, "acmibin\\" );
+	strcat( fullName, name );*/
 
 	// commented out if statement for quick testing....
  	// if ( Import( fullName ) )
@@ -723,11 +723,6 @@ void ACMITape::ParseEntities(void)
 }
 
 
-
-
-
-
-
 /*
 ** Description:
 **		At this point importEntList and importPosList should be populated.
@@ -748,8 +743,8 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 	int importEntEventVecSize = importEntEventVec.size(); // importNumEntEvents
 	int importFeatEventVecSize = importFeatEventVec.size();
 
-	//for (int i = 0; i < importEntityVecSize; i++)
-	//{
+	clock_t t = clock();
+
 	par_for(0, importEntityVecSize, [&](int i, int cpu)
 	{
 
@@ -760,6 +755,8 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 		importEntityVec[i].firstPositionDataOffset = 0;
 		int prevPosVec = -1;
 
+
+		//std::for_each(importPosVec.begin(), importPosVec.end(), [&, j = 0](ACMIRawPositionData &CurrentimportPosVec) mutable
 		for (int j = 0; j < importPosVecSize; j++)
 		{
 
@@ -799,25 +796,20 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 
 	}); // end for threaded entity loop
 
-	  // ------------------------------------------------------------------------------------
-	  // ------------------------------------------------------------------------------------
-	  // ------------------------------------------------------------------------------------
+	// ------------------------------------------------------------------------------------
+	// ------------------------------------------------------------------------------------
+	// ------------------------------------------------------------------------------------
 
 	// we run an outer and inner loop here.
 	// the outer loops steps thru each Feature
 	// the inner loop searches each position update for one owned by the
 	// Feature and chains them together
-	
-	clock_t t;
-	// build the importEntityList
-	//MonoPrint("ACMITape Import: testloop....\n");
-	//t = clock();
 
-	
+	t = clock() - t;
+	MonoPrint("\n par_for 1: It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+	t = clock();
 
 
-
-	//for (int i = 0; i < importFeatVecSize; i++)
 	par_for(0, importFeatVecSize, [&](int i, int cpu)
 	{
 		long currOffset;
@@ -890,9 +882,9 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 				// we don't compare ourselves
 				if (j != i && importFeatVec[i].leadIndex == importFeatVec[j].uniqueID)
 				{
-				
-						importFeatVec[i].leadIndex = j;
-						break;
+
+					importFeatVec[i].leadIndex = j;
+					break;
 				}
 			}
 
@@ -905,17 +897,10 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 			}
 		}
 
-
-		//std::vector<ACMIEntityData>::iterator it = std::find_if(importFeatVec.begin(), importFeatVec.end(), 
-		//	[&](const ACMIEntityData& CurrentimportFeatVec) { return CurrentimportFeatVec.leadIndex == importFeatVec[i].leadIndex; });
-
-
-
 	}); // end for feature entity loop
 
-	//t = clock() - t;
-	//MonoPrint("LOOP TEST : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
-
+	t = clock() - t;
+	MonoPrint(" par_for 2: It took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
 }
 
 
@@ -996,43 +981,6 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader *tapeHdr)
 			++j;
 		});
 
-		//for (int j = 0; j < importEntEventVecSize; ++j)
-		//{
-
-		//	// check the id to see if this position belongs to the entity
-		//	if (importEntEventVec[j].uniqueID == importEntityVec[i].uniqueID)
-		//	{
-
-		//		// calculate the offset of this positional record
-		//		currOffset = tapeHdr->firstEntEventOffset +
-		//			sizeof(ACMIEntityPositionData) * j;
-
-		//		// if it's the 1st in the chain, set the offset to it in
-		//		// the entity's record
-		//		if (foundFirst == FALSE)
-		//		{
-		//			importEntityVec[i].firstEventDataOffset = currOffset;
-		//			foundFirst = TRUE;
-		//		}
-
-		//		// thread current to previous
-		//		importEntEventVec[j].entityPosData.prevPositionUpdateOffset = prevOffset;
-		//		importEntEventVec[j].entityPosData.nextPositionUpdateOffset = 0;
-
-		//		// thread previous to current
-		//		if (prevPosVec != -1)
-		//		{
-		//			importEntEventVec[prevPosVec].entityPosData.nextPositionUpdateOffset = currOffset;
-		//		}
-
-		//		// set vals for next time thru loop
-		//		prevOffset = currOffset;
-		//		prevPosVec = j;
-
-		//	} //end of if
-		//}
-
-
 	});// end for threadded entity loop
 }
 
@@ -1086,7 +1034,7 @@ void ACMITape::WriteTapeFile(char *fname, ACMITapeHeader *tapeHdr)
 
 		int i, j;
 
-		long ret;
+		size_t ret;
 
 		tapeFile = fopen(fname, "wb");
 		if (tapeFile == NULL)
@@ -1212,8 +1160,6 @@ void ACMITape::WriteTapeFile(char *fname, ACMITapeHeader *tapeHdr)
 	}
 	catch (const std::exception& e)
 	{
-
-
 		MonoPrint("Error writing new tape file: %s\n", e.what());
 		if (tapeFile)
 			fclose(tapeFile);
@@ -1237,7 +1183,7 @@ void
 ACMITape::ImportTextEventList( FILE *fd, ACMITapeHeader *tapeHdr )
 {
 	// fd is tapefile vhs and tapehdr is the tape header
-	long ret;
+	size_t ret;
 
 	tapeHdr->numTextEvents = 0;
 

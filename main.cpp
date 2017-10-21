@@ -1,3 +1,11 @@
+// main.cpp
+// File created : 2017-9-23
+// Originally written by Jim DiZoglio (x257) as ACMIView class
+// 
+//
+// Last update : 2017-10-21
+// By loitho
+
 
 #include <windows.h>
 #include <conio.h>
@@ -54,6 +62,7 @@ int main()
 			sprintf(fname, "D:\\tmp\\TAPE%04d.vhs", y);
 
 			fp = fopen(fname, "r");
+			// If open failed then the file doesnt exist
 			if (!fp)
 			{
 				clock_t t;
