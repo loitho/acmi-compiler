@@ -58,6 +58,8 @@ ACMITape::~ACMITape()
 	// Delete Callsigns
 	MonoPrint("TEEEEEEEEEEEEEEEEEEEEEEEEEEST\n");
 	OutputDebugString("TEST-DEBUG");
+
+	delete Import_Callsigns;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -69,18 +71,26 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	FILE
 		*flightFile;
 
-	ACMIRawPositionData
-		*rawPositionData = NULL;
+	/*
+	** We'll use the const to reset the structure value
+	** This keeps the compiled file consistent between
+	** 2 compilations
+	*/
 
-	ACMIEventHeader
-		*ehdr = NULL;
+	const ACMIRawPositionData	EmptyrawPositionData;
+	ACMIRawPositionData			rawPositionData;
 
-	ACMIFeatEventImportData
-		*fedata = NULL;
+	const ACMIEventHeader	EmptyHeader;
+	ACMIEventHeader			ehdr;
+
+	const ACMIFeatEventImportData	Emptyfedata;
+	ACMIFeatEventImportData			fedata;
 
 	float
 		begTime,
 		endTime;
+
+	
 
 	ACMITapeHeader tapeHdr;
 	ACMIRecHeader  hdr;
@@ -93,7 +103,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	ACMIDOFData dd;
 	ACMIFeatureStatusData fs;
 		
-	
+
 	// this value comes from tod type record
 	tapeHdr.todOffset =  0.0f;
 
@@ -121,6 +131,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 		// now read in the rest of the record depending on type
 		switch( hdr.type )
 		{
+
 			case ACMIRecTodOffset:
 				tapeHdr.todOffset =  hdr.time;
 				break;
@@ -144,41 +155,37 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				else
 					tempTarget = -1;
 
-				// Allocate a new data node.
-				rawPositionData = new ACMIRawPositionData;
+				// Clear positiondata structure.
+				rawPositionData = EmptyrawPositionData;
 
 				// fill in raw position data
-				rawPositionData->uniqueID = genpos.uniqueID;
-				rawPositionData->type = genpos.type;
+				rawPositionData.uniqueID = genpos.uniqueID;
+				rawPositionData.type = genpos.type;
 				if ( hdr.type == ACMIRecMissilePosition )
-					rawPositionData->flags = ENTITY_FLAG_MISSILE;
+					rawPositionData.flags = ENTITY_FLAG_MISSILE;
 				else if ( hdr.type == ACMIRecAircraftPosition )
-					rawPositionData->flags = ENTITY_FLAG_AIRCRAFT;
+					rawPositionData.flags = ENTITY_FLAG_AIRCRAFT;
 				else if ( hdr.type == ACMIRecChaffPosition )
-					rawPositionData->flags = ENTITY_FLAG_CHAFF;
+					rawPositionData.flags = ENTITY_FLAG_CHAFF;
 				else if ( hdr.type == ACMIRecFlarePosition )
-					rawPositionData->flags = ENTITY_FLAG_FLARE;
+					rawPositionData.flags = ENTITY_FLAG_FLARE;
 				else
-					rawPositionData->flags = 0;
+					rawPositionData.flags = 0;
 
-				rawPositionData->entityPosData.time = hdr.time;
-				rawPositionData->entityPosData.type = PosTypePos;
+				rawPositionData.entityPosData.time = hdr.time;
+				rawPositionData.entityPosData.type = PosTypePos;
 
-				rawPositionData->entityPosData.posData.x = genpos.x;
-				rawPositionData->entityPosData.posData.y = genpos.y;
-				rawPositionData->entityPosData.posData.z = genpos.z;
-				rawPositionData->entityPosData.posData.roll = genpos.roll;
-				rawPositionData->entityPosData.posData.pitch = genpos.pitch;
-				rawPositionData->entityPosData.posData.yaw = genpos.yaw;
-				rawPositionData->entityPosData.posData.radarTarget= tempTarget;
+				rawPositionData.entityPosData.posData.x = genpos.x;
+				rawPositionData.entityPosData.posData.y = genpos.y;
+				rawPositionData.entityPosData.posData.z = genpos.z;
+				rawPositionData.entityPosData.posData.roll = genpos.roll;
+				rawPositionData.entityPosData.posData.pitch = genpos.pitch;
+				rawPositionData.entityPosData.posData.yaw = genpos.yaw;
+				rawPositionData.entityPosData.posData.radarTarget= tempTarget;
 
 				// Append our new position data.								
-				importPosVec.push_back(*rawPositionData);
+				importPosVec.push_back(rawPositionData);
 
-				rawPositionData = NULL;
-		
-				// bump counter
-				//importNumPos++;
 
 				break;
 			case ACMIRecTracerStart:
@@ -190,26 +197,26 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				}
 
 				// Allocate a new data node.
-				ehdr = new ACMIEventHeader;
-
+				ehdr = EmptyHeader;
+				
 				/*Maybe change and stop querying the vec size*/
 
 				// fill in data
-				ehdr->eventType = hdr.type;
-				ehdr->time = hdr.time;
-				ehdr->timeEnd = hdr.time + 2.5F;
-				ehdr->index = importEventVec.size(); //  importNumEvents;
-				ehdr->x = tracer.x;
-				ehdr->y = tracer.y;
-				ehdr->z = tracer.z;
-				ehdr->dx = tracer.dx;
-				ehdr->dy = tracer.dy;
-				ehdr->dz = tracer.dz;
+				ehdr.eventType = hdr.type;
+				ehdr.time = hdr.time;
+				ehdr.timeEnd = hdr.time + 2.5F;
+				ehdr.index = importEventVec.size(); //  importNumEvents;
+				ehdr.x = tracer.x;
+				ehdr.y = tracer.y;
+				ehdr.z = tracer.z;
+				ehdr.dx = tracer.dx;
+				ehdr.dy = tracer.dy;
+				ehdr.dz = tracer.dz;
 
 				// Append our new data.
-				importEventVec.push_back(*ehdr);
+				importEventVec.push_back(ehdr);
 			
-				ehdr = NULL;
+				
 		
 				// bump counter
 				//importNumEvents++;
@@ -221,27 +228,23 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 					return FALSE;
 				}
 
-				// Allocate a new data node.
-				ehdr = new ACMIEventHeader;
+				// clear header
+				ehdr = EmptyHeader;
 
 				// fill in data
-				ehdr->eventType = hdr.type;
-				ehdr->index = importEventVec.size();
-				ehdr->time = hdr.time;
-				ehdr->timeEnd = hdr.time + sfx.timeToLive;
-				ehdr->x = sfx.x;
-				ehdr->y = sfx.y;
-				ehdr->z = sfx.z;
-				ehdr->type = sfx.type;
-				ehdr->scale = sfx.scale;
+				ehdr.eventType = hdr.type;
+				ehdr.index = importEventVec.size();
+				ehdr.time = hdr.time;
+				ehdr.timeEnd = hdr.time + sfx.timeToLive;
+				ehdr.x = sfx.x;
+				ehdr.y = sfx.y;
+				ehdr.z = sfx.z;
+				ehdr.type = sfx.type;
+				ehdr.scale = sfx.scale;
 
 				// Append our new data.
-				importEventVec.push_back(*ehdr);
+				importEventVec.push_back(ehdr);
 
-				ehdr = NULL;
-		
-				// bump counter
-				//importNumEvents++;
 				break;
 
 			case ACMIRecFeatureStatus:
@@ -251,22 +254,19 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 					return FALSE;
 				}
 
-				// Allocate a new data node.
-				fedata = new ACMIFeatEventImportData;
+				// Clear feature structure.
+				fedata = Emptyfedata;
 
 				// fill in data
-				fedata->uniqueID = fs.uniqueID;
-				fedata->data.index = -1;	// will be filled in later
-				fedata->data.time = hdr.time;
-				fedata->data.newStatus = fs.newStatus;
-				fedata->data.prevStatus = fs.prevStatus;
+				fedata.uniqueID = fs.uniqueID;
+				fedata.data.index = -1;	// will be filled in later
+				fedata.data.time = hdr.time;
+				fedata.data.newStatus = fs.newStatus;
+				fedata.data.prevStatus = fs.prevStatus;
 
 				// Append our new data.
-				importFeatEventVec.push_back(*fedata);
-				fedata = NULL;
-		
-				// bump counter
-				//importNumFeatEvents++;
+				importFeatEventVec.push_back(fedata);
+
 				break;
 
 			// not ready for these yet
@@ -277,29 +277,29 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 					return FALSE;
 				}
 
-				// Allocate a new data node.
-				ehdr = new ACMIEventHeader;
+				// Clear header structure.
+				ehdr = EmptyHeader;
 
 				// fill in data
-				ehdr->eventType = hdr.type;
-				ehdr->index = importEventVec.size();
-				ehdr->time = hdr.time;
-				ehdr->timeEnd = hdr.time + msfx.timeToLive;
-				ehdr->x = msfx.x;
-				ehdr->y = msfx.y;
-				ehdr->z = msfx.z;
-				ehdr->dx = msfx.dx;
-				ehdr->dy = msfx.dy;
-				ehdr->dz = msfx.dz;
-				ehdr->flags = msfx.flags;
-				ehdr->user = msfx.user;
-				ehdr->type = msfx.type;
-				ehdr->scale = msfx.scale;
+				ehdr.eventType = hdr.type;
+				ehdr.index = importEventVec.size();
+				ehdr.time = hdr.time;
+				ehdr.timeEnd = hdr.time + msfx.timeToLive;
+				ehdr.x = msfx.x;
+				ehdr.y = msfx.y;
+				ehdr.z = msfx.z;
+				ehdr.dx = msfx.dx;
+				ehdr.dy = msfx.dy;
+				ehdr.dz = msfx.dz;
+				ehdr.flags = msfx.flags;
+				ehdr.user = msfx.user;
+				ehdr.type = msfx.type;
+				ehdr.scale = msfx.scale;
 
 				// Append our new data.
-				importEventVec.push_back(*ehdr);
+				importEventVec.push_back(ehdr);
 
-				ehdr = NULL;
+		
 		
 				// bump counter
 				//importNumEvents++;
@@ -313,26 +313,22 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 					return FALSE;
 				}
 
-				// Allocate a new data node.
-				rawPositionData = new ACMIRawPositionData;
+				// Clear positiondata structure.
+				rawPositionData = EmptyrawPositionData;
 		
 				// fill in raw position data
-				rawPositionData->uniqueID = sd.uniqueID;
-				rawPositionData->type = sd.type;
-				rawPositionData->flags = 0;
+				rawPositionData.uniqueID = sd.uniqueID;
+				rawPositionData.type = sd.type;
+				rawPositionData.flags = 0;
 
-				rawPositionData->entityPosData.time = hdr.time;
-				rawPositionData->entityPosData.type = PosTypeSwitch;
-				rawPositionData->entityPosData.switchData.switchNum = sd.switchNum;
-				rawPositionData->entityPosData.switchData.switchVal = sd.switchVal;
-				rawPositionData->entityPosData.switchData.prevSwitchVal = sd.prevSwitchVal;
+				rawPositionData.entityPosData.time = hdr.time;
+				rawPositionData.entityPosData.type = PosTypeSwitch;
+				rawPositionData.entityPosData.switchData.switchNum = sd.switchNum;
+				rawPositionData.entityPosData.switchData.switchVal = sd.switchVal;
+				rawPositionData.entityPosData.switchData.prevSwitchVal = sd.prevSwitchVal;
 
 				// Append our new position data.
-				importEntEventVec.push_back(*rawPositionData);
-				rawPositionData = NULL;
-		
-				// bump counter
-				//importNumEntEvents++;
+				importEntEventVec.push_back(rawPositionData);
 
 				break;
 
@@ -344,29 +340,24 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 					return FALSE;
 				}
 
-				// Allocate a new data node.
-				rawPositionData = new ACMIRawPositionData;
+				// Clear positiondata structure.
+				rawPositionData = EmptyrawPositionData;
 		
 				// fill in raw position data
-				rawPositionData->uniqueID = dd.uniqueID;
-				rawPositionData->type = dd.type;
-				rawPositionData->flags = 0;
+				rawPositionData.uniqueID = dd.uniqueID;
+				rawPositionData.type = dd.type;
+				rawPositionData.flags = 0;
 
 
-				rawPositionData->entityPosData.time = hdr.time;
-				rawPositionData->entityPosData.type = PosTypeDOF;
-				rawPositionData->entityPosData.dofData.DOFNum = dd.DOFNum;
-				rawPositionData->entityPosData.dofData.DOFVal = dd.DOFVal;
-				rawPositionData->entityPosData.dofData.prevDOFVal = dd.prevDOFVal;
+				rawPositionData.entityPosData.time = hdr.time;
+				rawPositionData.entityPosData.type = PosTypeDOF;
+				rawPositionData.entityPosData.dofData.DOFNum = dd.DOFNum;
+				rawPositionData.entityPosData.dofData.DOFVal = dd.DOFVal;
+				rawPositionData.entityPosData.dofData.prevDOFVal = dd.prevDOFVal;
 				
 				
 				// Append our new position data.
-				importEntEventVec.push_back(*rawPositionData);
-
-				rawPositionData = NULL;
-		
-				// bump counter
-				//importNumEntEvents++;
+				importEntEventVec.push_back(rawPositionData);
 
 				break;
 
@@ -378,33 +369,28 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 					return FALSE;
 				}
 
-				// Allocate a new data node.
-				rawPositionData = new ACMIRawPositionData;
+				// Clear positiondata structure.
+				rawPositionData = EmptyrawPositionData;
 
 				// fill in raw position data
-				rawPositionData->uniqueID = featpos.uniqueID;
-				rawPositionData->leadIndex = featpos.leadUniqueID;
-				rawPositionData->specialFlags = featpos.specialFlags;
-				rawPositionData->slot = featpos.slot;
-				rawPositionData->type = featpos.type;
-				rawPositionData->flags = ENTITY_FLAG_FEATURE;
+				rawPositionData.uniqueID = featpos.uniqueID;
+				rawPositionData.leadIndex = featpos.leadUniqueID;
+				rawPositionData.specialFlags = featpos.specialFlags;
+				rawPositionData.slot = featpos.slot;
+				rawPositionData.type = featpos.type;
+				rawPositionData.flags = ENTITY_FLAG_FEATURE;
 
-				rawPositionData->entityPosData.time = hdr.time;
-				rawPositionData->entityPosData.type = PosTypePos;
-				rawPositionData->entityPosData.posData.x = featpos.x;
-				rawPositionData->entityPosData.posData.y = featpos.y;
-				rawPositionData->entityPosData.posData.z = featpos.z;
-				rawPositionData->entityPosData.posData.roll = featpos.roll;
-				rawPositionData->entityPosData.posData.pitch = featpos.pitch;
-				rawPositionData->entityPosData.posData.yaw = featpos.yaw;
+				rawPositionData.entityPosData.time = hdr.time;
+				rawPositionData.entityPosData.type = PosTypePos;
+				rawPositionData.entityPosData.posData.x = featpos.x;
+				rawPositionData.entityPosData.posData.y = featpos.y;
+				rawPositionData.entityPosData.posData.z = featpos.z;
+				rawPositionData.entityPosData.posData.roll = featpos.roll;
+				rawPositionData.entityPosData.posData.pitch = featpos.pitch;
+				rawPositionData.entityPosData.posData.yaw = featpos.yaw;
 				
 				// Append our new position data.
-				importPosVec.push_back(*rawPositionData);
-
-				rawPositionData = NULL;
-		
-				// bump counter
-				//importNumPos++;
+				importPosVec.push_back(rawPositionData);
 
 				break;
 			case ACMICallsignList:
@@ -414,14 +400,17 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				{
 					return FALSE;
 				}
-
-
+				//Import_Callsigns.
+				//Import_Callsigns.reserve(import_count * sizeof(ACMI_CallRec));
 				Import_Callsigns=new ACMI_CallRec[import_count];
 
-				if(!fread(Import_Callsigns,import_count * sizeof(ACMI_CallRec),1,flightFile))
+				if (!fread(Import_Callsigns, import_count * sizeof(ACMI_CallRec), 1, flightFile))
 				{
+					MonoPrint("FUUUUK\n\n");
 					return FALSE;
 				}
+
+				MonoPrint("FUUUUK\n\n");
 				break;
 
 			default:

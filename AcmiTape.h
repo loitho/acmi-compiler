@@ -337,11 +337,7 @@ private:
 	std::vector<ACMIFeatEventImportData> importFeatEventVec;
 
 
-
-	ACMIEventTrailer *importEventTrailerList;
-
-
-
+	//std::vector<ACMI_CallRec> Import_Callsigns;
 	ACMI_CallRec *Import_Callsigns = NULL;
 	long import_count = 0;
 
