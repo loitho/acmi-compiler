@@ -23,6 +23,18 @@
 int main(int argc, char* argv[])
 {
 	std::cout << "arg" << argc << std::endl;
+	if (argc > 3)
+	{
+		std::cerr << "Too many argument" << std::endl
+			<< "Usage :\n To start with GUI (only on windows)" << std::endl
+			<< "\t ./acmi-compiler.exe " << std::endl << std::endl
+			<< "Usage :\n To simply convert .flt to .vhs file" << std::endl
+			<< "\t ./acmi-compiler.exe source-File.flt destination-File.vhs" << std::endl;
+		return -1;
+	}
+
+
+
 
 
 	FILE *fp;
