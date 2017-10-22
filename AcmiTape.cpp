@@ -13,14 +13,14 @@
 /* STFU _CRT_SECURE_NO_WARNINGS */
 #pragma warning(disable:4996)
 
-#include <windows.h>
-#include <conio.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <direct.h>
-#include <tchar.h>
-#include <iostream>
+//#include <windows.h>
+//#include <conio.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <string.h>
+//#include <direct.h>
+//#include <tchar.h>
+//#include <iostream>
 #include <vector>
 
 
@@ -57,7 +57,7 @@ ACMITape::~ACMITape()
 {
 	// Delete Callsigns
 	MonoPrint("TEEEEEEEEEEEEEEEEEEEEEEEEEEST\n");
-	OutputDebugString("TEST-DEBUG");
+	//OutputDebugString("TEST-DEBUG");
 
 	delete Import_Callsigns;
 }
@@ -66,7 +66,7 @@ ACMITape::~ACMITape()
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
+bool ACMITape::Import(char *inFltFile, char *outTapeFileName)
 {
 	FILE
 		*flightFile;
@@ -114,7 +114,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	if (flightFile == NULL)
 	{
 		MonoPrint("Error opening acmi flight file");
-		return FALSE;
+		return false;
 	}
 
 	begTime = -1.0;
@@ -148,7 +148,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				// Read the data
 				if ( !fread( &genpos, sizeof( ACMIGenPositionData ), 1, flightFile ) )
 				{
-					return FALSE;
+					return false;
 				}
 				if (hdr.type == ACMIRecAircraftPosition)
 					fread(&tempTarget, sizeof(tempTarget),1,flightFile);
@@ -193,7 +193,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				// Read the data
 				if ( !fread( &tracer, sizeof( ACMITracerStartData ), 1, flightFile ) )
 				{
-					return FALSE;
+					return false;
 				}
 
 				// Allocate a new data node.
@@ -222,7 +222,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				// Read the data
 				if ( !fread( &sfx, sizeof( ACMIStationarySfxData ), 1, flightFile ) )
 				{
-					return FALSE;
+					return false;
 				}
 
 				// clear header
@@ -248,7 +248,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				// Read the data
 				if ( !fread( &fs, sizeof( ACMIFeatureStatusData ), 1, flightFile ) )
 				{
-					return FALSE;
+					return false;
 				}
 
 				// Clear feature structure.
@@ -271,7 +271,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				// Read the data
 				if ( !fread( &msfx, sizeof( ACMIMovingSfxData ), 1, flightFile ) )
 				{
-					return FALSE;
+					return false;
 				}
 
 				// Clear header structure.
@@ -296,10 +296,6 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				// Append our new data.
 				importEventVec.push_back(ehdr);
 
-		
-		
-				// bump counter
-				//importNumEvents++;
 				break;
 
 			case ACMIRecSwitch:
@@ -307,7 +303,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				// Read the data
 				if ( !fread( &sd, sizeof( ACMISwitchData ), 1, flightFile ) )
 				{
-					return FALSE;
+					return false;
 				}
 
 				// Clear positiondata structure.
@@ -334,7 +330,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				// Read the data
 				if ( !fread( &dd, sizeof( ACMIDOFData ), 1, flightFile ) )
 				{
-					return FALSE;
+					return false;
 				}
 
 				// Clear positiondata structure.
@@ -345,14 +341,12 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				rawPositionData.type = dd.type;
 				rawPositionData.flags = 0;
 
-
 				rawPositionData.entityPosData.time = hdr.time;
 				rawPositionData.entityPosData.type = PosTypeDOF;
 				rawPositionData.entityPosData.dofData.DOFNum = dd.DOFNum;
 				rawPositionData.entityPosData.dofData.DOFVal = dd.DOFVal;
 				rawPositionData.entityPosData.dofData.prevDOFVal = dd.prevDOFVal;
-				
-				
+						
 				// Append our new position data.
 				importEntEventVec.push_back(rawPositionData);
 
@@ -363,7 +357,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				// Read the data
 				if ( !fread( &featpos, sizeof( ACMIFeaturePositionData ), 1, flightFile ) )
 				{
-					return FALSE;
+					return false;
 				}
 
 				// Clear positiondata structure.
@@ -390,12 +384,13 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				importPosVec.push_back(rawPositionData);
 
 				break;
+
 			case ACMICallsignList:
 		
 				// Read the data
 				if ( !fread( &import_count, sizeof( long ), 1, flightFile ) )
 				{
-					return FALSE;
+					return false;
 				}
 				//Import_Callsigns.
 				//Import_Callsigns.reserve(import_count * sizeof(ACMI_CallRec));
@@ -404,7 +399,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				if (!fread(Import_Callsigns, import_count * sizeof(ACMI_CallRec), 1, flightFile))
 				{
 					MonoPrint("FUUUUK\n\n");
-					return FALSE;
+					return false;
 				}
 
 				MonoPrint("FUUUUK\n\n");
@@ -513,7 +508,7 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	//remove("campaign\\save\\fltfiles\\acmi.flt");
 	//remove(inFltFile);
 
-	return TRUE;
+	return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -539,19 +534,17 @@ void ACMITape::ParseEntities(void)
 			// create new import entity record
 			if (i == importFeatVec.size())
 			{
-				ACMIEntityData* importEntityInfo = new ACMIEntityData;
-				importEntityInfo->count = 0;
+				ACMIEntityData importEntityInfo;
+				importEntityInfo.count = 0;
 
-				importEntityInfo->uniqueID = importPosVec[count].uniqueID;
-				importEntityInfo->type = importPosVec[count].type;
-				importEntityInfo->flags = importPosVec[count].flags;
-				importEntityInfo->leadIndex = importPosVec[count].leadIndex;
-				importEntityInfo->specialFlags = importPosVec[count].specialFlags;
-				importEntityInfo->slot = importPosVec[count].slot;
+				importEntityInfo.uniqueID = importPosVec[count].uniqueID;
+				importEntityInfo.type = importPosVec[count].type;
+				importEntityInfo.flags = importPosVec[count].flags;
+				importEntityInfo.leadIndex = importPosVec[count].leadIndex;
+				importEntityInfo.specialFlags = importPosVec[count].specialFlags;
+				importEntityInfo.slot = importPosVec[count].slot;
 
-				importFeatVec.push_back(*importEntityInfo);
-
-				//importNumFeat++;
+				importFeatVec.push_back(importEntityInfo);
 			}
 		}
 		else
@@ -643,7 +636,7 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 	{
 
 		long currOffset;
-		BOOL foundFirst = FALSE;
+		bool foundFirst = false;
 		long prevOffset = 0;
 		importEntityVec[i].firstPositionDataOffset = 0;
 		int prevPosVec = -1;
@@ -663,10 +656,10 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 
 				// if it's the 1st in the chain, set the offset to it in
 				// the entity's record
-				if (foundFirst == FALSE)
+				if (foundFirst == false)
 				{
 					importEntityVec[i].firstPositionDataOffset = currOffset;
-					foundFirst = TRUE;
+					foundFirst = true;
 				}
 
 				// thread current to previous
@@ -706,7 +699,7 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 	par_for(0, importFeatVecSize, [&](int i, int cpu)
 	{
 		long currOffset;
-		BOOL foundFirst = FALSE;
+		bool foundFirst = false;
 		long prevOffset = 0;
 		importFeatVec[i].firstPositionDataOffset = 0;
 		int prevPosVec = -1;
@@ -725,10 +718,10 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 
 				// if it's the 1st in the chain, set the offset to it in
 				// the entity's record
-				if (foundFirst == FALSE)
+				if (foundFirst == false)
 				{
 					importFeatVec[i].firstPositionDataOffset = currOffset;
-					foundFirst = TRUE;
+					foundFirst = true;
 				}
 
 				// thread current to previous
@@ -824,15 +817,14 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader *tapeHdr)
 	par_for(0, importEntityVecSize, [&](int i, int cpu)
 	{
 		long currOffset;
-		BOOL foundFirst = FALSE;
+		bool foundFirst = false;
 		long prevOffset = 0;
 		importEntityVec[i].firstEventDataOffset = 0;
 
 		int prevPosVec = -1;
 
-		//for (int j = 0; j < importEntEventVecSize; j++)
-
 		/* 
+		** for (int j = 0; j < importEntEventVecSize; j++)
 		** https://stackoverflow.com/questions/3752019/how-to-get-the-index-of-a-value-in-a-vector-using-for-each
 		** j is a loop index for for_each
 		*/
@@ -848,10 +840,10 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader *tapeHdr)
 
 				// if it's the 1st in the chain, set the offset to it in
 				// the entity's record
-				if (foundFirst == FALSE)
+				if (foundFirst == false)
 				{
 					importEntityVec[i].firstEventDataOffset = currOffset;
-					foundFirst = TRUE;
+					foundFirst = true;
 				}
 
 				// thread current to previous
@@ -892,16 +884,6 @@ int CompareEventTrailer(const void *p1, const void *p2)
 		return 0;
 }
 
-
-//int CompareEventTrailer(const ACMIEventTrailer& i, const ACMIEventTrailer& j)
-//{
-//	if (i.timeEnd < j.timeEnd)
-//		return -1;
-//	else if (i.timeEnd > j.timeEnd)
-//		return 1;
-//	else
-//		return 0;
-//}
 
 /*
 ** Description:

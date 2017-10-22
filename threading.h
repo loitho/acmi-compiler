@@ -1,13 +1,18 @@
+/*
+** Name: THREADING.H
+** Description:
+**		File to handle the multithreadded for loop
+**
+** History:
+**		1-oct-17 
+**			File creation by loitho
+** 
+*/
+
 #pragma once
 
-#include <algorithm>
 #include <atomic>
-
-#include <string>
 #include <vector>
-
-#include <atomic>
-#include <thread>
 #include <future>
 
 template <class F>

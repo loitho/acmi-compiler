@@ -7,16 +7,7 @@
 // By loitho
 
 #include <windows.h>
-#include <conio.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <direct.h>
-#include <tchar.h>
 #include <iostream>
-#include <vector>
-#include <thread>
-#include <mutex>
 #include <time.h>
 
 

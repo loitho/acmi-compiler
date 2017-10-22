@@ -5,9 +5,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-// Needed for BOOL type
-#include "tchar.h"
+// ACMI_CallRec
 #include "acmirec.h"
+
+#include <vector>
+
+typedef unsigned char BYTE;
 
 #define	MAX_ENTITY_CAMS	50
 
@@ -303,8 +306,6 @@ class ACMITape
 public:
 	
 	// Constructors.
-	// Do not put the extension with name.
-	// This should be the name of the desired .vcr file.
 	ACMITape();
 
 	// Destructor.
@@ -313,7 +314,7 @@ public:
 	// Import the current positional, event, and sfx data.
 	// The filenames of these files will always be the same 
 	// so we don't have to pass them in.
-	BOOL Import(char *inFltFile, char *outTapeFileName);
+	bool Import(char *inFltFile, char *outTapeFileName);
 	
 	
 private:
