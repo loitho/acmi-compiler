@@ -13,16 +13,7 @@
 /* STFU _CRT_SECURE_NO_WARNINGS */
 #pragma warning(disable:4996)
 
-//#include <windows.h>
-//#include <conio.h>
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <string.h>
-//#include <direct.h>
-//#include <tchar.h>
-//#include <iostream>
 #include <vector>
-
 
 #include "AcmiTape.h"
 #include "threading.h"
@@ -497,17 +488,13 @@ bool ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	
 	MonoPrint("ACMITape Import: Writing Tape File ....\n");
 	
+	fclose(flightFile);
+
 	t = clock();
 	WriteTapeFile(outTapeFileName, &tapeHdr);
 	t = clock() - t;
 	MonoPrint("VECTOR : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 	
-
-
-	// now delete the acmi.flt file
-	//remove("campaign\\save\\fltfiles\\acmi.flt");
-	//remove(inFltFile);
-
 	return true;
 }
 

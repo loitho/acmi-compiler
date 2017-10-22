@@ -20,8 +20,11 @@
 
 #define _ITERATOR_DEBUG_LEVEL 0
 
-int main()
+int main(int argc, char* argv[])
 {
+	std::cout << "arg" << argc << std::endl;
+
+
 	FILE *fp;
 	int y;
 	char fname[100];
