@@ -3,9 +3,8 @@
 // Originally written by Jim DiZoglio (x257) as ACMIView class
 // 
 //
-// Last update : 2017-10-21
+// Last update : 2017-10-22
 // By loitho
-
 
 #include <windows.h>
 #include <conio.h>
@@ -65,10 +64,11 @@ int main()
 			// If open failed then the file doesnt exist
 			if (!fp)
 			{
+				ACMITape newtape;
 				clock_t t;
 				t = clock();
 
-				ACMITape::Import(fltname, fname);
+				newtape.Import(fltname, fname);
 
 				t = clock() - t;
 				printf("It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);

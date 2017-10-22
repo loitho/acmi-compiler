@@ -98,6 +98,7 @@ typedef struct
 
 /*
 ** ACMI Text event (strings parsed from event file)
+** Which we don't have, so this is never used
 */
 #pragma pack (push, pack1, 1)
 typedef struct
@@ -296,67 +297,13 @@ typedef struct
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-class ACMIRecorder
-{
-public:
-	
-	// Constructors.
-	ACMIRecorder( void );
-
-	// Destructor.
-	~ACMIRecorder();
-
-	void StartRecording( void );
-	void StopRecording( void );
-	void ToggleRecording( void );
-
-	inline BOOL IsRecording( void )
-	{
-		return _recording;
-	};
-
-	void TracerRecord( ACMITracerStartRecord *recp );
-	void GenPositionRecord( ACMIGenPositionRecord *recp );
-	void AircraftPositionRecord( ACMIAircraftPositionRecord *recp );
-	void MissilePositionRecord( ACMIMissilePositionRecord *recp );
-	void ChaffPositionRecord( ACMIChaffPositionRecord *recp );
-	void FlarePositionRecord( ACMIFlarePositionRecord *recp );
-	void FeaturePositionRecord( ACMIFeaturePositionRecord *recp );
-	void StationarySfxRecord( ACMIStationarySfxRecord *recp );
-	void MovingSfxRecord( ACMIMovingSfxRecord *recp );
-	void SwitchRecord( ACMISwitchRecord *recp );
-	void DOFRecord( ACMIDOFRecord *recp );
-	void TodOffsetRecord( ACMITodOffsetRecord *recp );
-	void FeatureStatusRecord( ACMIFeatureStatusRecord *recp );
-
-	int	 PercentTapeFull( void );
-
-	
-private:
-	FILE 				*_fd;
-
-	// we need synchronization for writes
-	//F4CSECTIONHANDLE*	_csect;
-
-	BOOL				_recording;
-
-	float				_bytesWritten;
-	float				_maxBytesToWrite;
-
-};
-
 #pragma pack (1)
 struct ACMI_CallRec
 {
 	char label[16];
 	long teamColor;
 };
-
 #pragma pack()
-
-extern ACMI_CallRec *ACMI_Callsigns;
-extern ACMIRecorder gACMIRec;
-//extern ACMI_Hash    *ACMIIDTable;
 
 #endif  // _ACMIREC_H_
 

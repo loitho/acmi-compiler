@@ -23,8 +23,8 @@
 #include <iostream>
 #include <vector>
 
+
 #include "AcmiTape.h"
-#include "acmirec.h"
 #include "threading.h"
 
 #if _DEBUG
@@ -35,26 +35,8 @@
 
 #define MonoPrint  printf
 
-long tempTarget; // for missile lock.
-				
 
 
-/*Converted list to vector*/
-std::vector<ACMIEntityData> importEntityVec;
-std::vector<ACMIEntityData> importFeatVec;
-std::vector<ACMIRawPositionData> importPosVec;
-std::vector<ACMIEventHeader> importEventVec;
-std::vector<ACMIRawPositionData> importEntEventVec;
-std::vector<ACMIFeatEventImportData> importFeatEventVec;
-
-
-
-ACMIEventTrailer *importEventTrailerList;
-
-
-ACMI_CallRec *ACMI_Callsigns=NULL;
-ACMI_CallRec *Import_Callsigns=NULL;
-long import_count=0;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -62,40 +44,9 @@ long import_count=0;
 ////////////////////////////////////////////////////////////////////////////////
 
 
-ACMITape::ACMITape(char *name, RenderOTW *renderer, RViewPoint *viewPoint )
+ACMITape::ACMITape()
 { 
-	/*int j;
-	int i, numEntities;
-	char fullName[MAX_PATH];
-	ACMIEntityData *e;
-	long length=0;
-	char *callsigns=NULL;
-	long numcalls=0;*/
-
-	std::cout << "test acmi tape started" << std::endl;
-	
-	// Open up a map file with the given name.
-
-	// edg note on hack: right now, ALWAYS do an import from the acmi.flt
-	// file to convert to a tape file.  Later we'll probably want to import
-	// right after an ACMIU record session to get into .vhs format
-
-	// LOL, how fun is it to read that nearly 20 years after and the code is still the same x)
-
-	//strcpy( fullName, "campaign\\save\\fltfiles\\" );
-	/*strcpy( fullName, "acmibin\\" );
-	strcat( fullName, name );*/
-
-	// commented out if statement for quick testing....
- 	// if ( Import( fullName ) )
-	
-		// create the memory mapping
-		//length=OpenTapeFile( fullName );
-
-		// just test
-		
-	// If it loaded, do any additional setup.
-	
+	MonoPrint("TEEEEEEEEEEEEEEEEEEEEEEEEEEST2222\n");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -105,42 +56,8 @@ ACMITape::ACMITape(char *name, RenderOTW *renderer, RViewPoint *viewPoint )
 ACMITape::~ACMITape()
 {
 	// Delete Callsigns
-	if(ACMI_Callsigns)
-	{
-		delete ACMI_Callsigns;
-		ACMI_Callsigns=NULL;
-	}
-	
-
+	MonoPrint("TEEEEEEEEEEEEEEEEEEEEEEEEEEST\n");
 	OutputDebugString("TEST-DEBUG");
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void CleanupACMIImportPositionData
-(
-	FILE *flightFile,
-	ACMIRawPositionData *rawPositionData
-)
-{
-	if(flightFile != NULL)
-	{
-		fclose(flightFile);
-	}
-
-	if(rawPositionData != NULL)
-	{
-		delete rawPositionData;
-	}
-
-	if(Import_Callsigns)
-	{
-		delete Import_Callsigns;
-		Import_Callsigns=NULL;
-		import_count=0;
-	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -220,7 +137,6 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				// Read the data
 				if ( !fread( &genpos, sizeof( ACMIGenPositionData ), 1, flightFile ) )
 				{
-					CleanupACMIImportPositionData ( flightFile, rawPositionData );
 					return FALSE;
 				}
 				if (hdr.type == ACMIRecAircraftPosition)
@@ -270,7 +186,6 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				// Read the data
 				if ( !fread( &tracer, sizeof( ACMITracerStartData ), 1, flightFile ) )
 				{
-					CleanupACMIImportPositionData ( flightFile, rawPositionData );
 					return FALSE;
 				}
 
@@ -303,7 +218,6 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				// Read the data
 				if ( !fread( &sfx, sizeof( ACMIStationarySfxData ), 1, flightFile ) )
 				{
-					CleanupACMIImportPositionData ( flightFile, rawPositionData );
 					return FALSE;
 				}
 
@@ -334,7 +248,6 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				// Read the data
 				if ( !fread( &fs, sizeof( ACMIFeatureStatusData ), 1, flightFile ) )
 				{
-					CleanupACMIImportPositionData ( flightFile, rawPositionData );
 					return FALSE;
 				}
 
@@ -361,7 +274,6 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				// Read the data
 				if ( !fread( &msfx, sizeof( ACMIMovingSfxData ), 1, flightFile ) )
 				{
-					CleanupACMIImportPositionData ( flightFile, rawPositionData );
 					return FALSE;
 				}
 
@@ -398,7 +310,6 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				// Read the data
 				if ( !fread( &sd, sizeof( ACMISwitchData ), 1, flightFile ) )
 				{
-					CleanupACMIImportPositionData ( flightFile, rawPositionData );
 					return FALSE;
 				}
 
@@ -430,7 +341,6 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				// Read the data
 				if ( !fread( &dd, sizeof( ACMIDOFData ), 1, flightFile ) )
 				{
-					CleanupACMIImportPositionData ( flightFile, rawPositionData );
 					return FALSE;
 				}
 
@@ -465,7 +375,6 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				// Read the data
 				if ( !fread( &featpos, sizeof( ACMIFeaturePositionData ), 1, flightFile ) )
 				{
-					CleanupACMIImportPositionData ( flightFile, rawPositionData );
 					return FALSE;
 				}
 
@@ -503,15 +412,14 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				// Read the data
 				if ( !fread( &import_count, sizeof( long ), 1, flightFile ) )
 				{
-					CleanupACMIImportPositionData ( flightFile, rawPositionData );
 					return FALSE;
 				}
+
 
 				Import_Callsigns=new ACMI_CallRec[import_count];
 
 				if(!fread(Import_Callsigns,import_count * sizeof(ACMI_CallRec),1,flightFile))
 				{
-					CleanupACMIImportPositionData ( flightFile, rawPositionData );
 					return FALSE;
 				}
 				break;
@@ -612,8 +520,8 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 	WriteTapeFile(outTapeFileName, &tapeHdr);
 	t = clock() - t;
 	MonoPrint("VECTOR : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
-	// Cleanup import data.
-	CleanupACMIImportPositionData ( flightFile, rawPositionData );
+	
+
 
 	// now delete the acmi.flt file
 	//remove("campaign\\save\\fltfiles\\acmi.flt");
@@ -751,7 +659,6 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 		long currOffset;
 		BOOL foundFirst = FALSE;
 		long prevOffset = 0;
-		ACMIRawPositionData *prevPosPtr = NULL;
 		importEntityVec[i].firstPositionDataOffset = 0;
 		int prevPosVec = -1;
 
@@ -815,7 +722,6 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 		long currOffset;
 		BOOL foundFirst = FALSE;
 		long prevOffset = 0;
-		ACMIRawPositionData *prevPosPtr = NULL;
 		importFeatVec[i].firstPositionDataOffset = 0;
 		int prevPosVec = -1;
 
@@ -934,7 +840,6 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader *tapeHdr)
 		long currOffset;
 		BOOL foundFirst = FALSE;
 		long prevOffset = 0;
-		ACMIRawPositionData *prevPosPtr = NULL;
 		importEntityVec[i].firstEventDataOffset = 0;
 
 		int prevPosVec = -1;
@@ -1051,16 +956,13 @@ void ACMITape::WriteTapeFile(char *fname, ACMITapeHeader *tapeHdr)
 
 
 		// write out the entities 
-//		for (i = 0; i < importEntityVecSize; i++)
-//		{
 		ret = fwrite(importEntityVec.data(), sizeof(ACMIEntityData) * importEntityVecSize, 1, tapeFile);
 		if (!ret)
 			throw "error_exit";
-		//		} // end for entity loop
+	
 
 
-
-				 // write out the features
+		// write out the features
 		ret = fwrite(importFeatVec.data(), sizeof(ACMIEntityData) * importFeatVecSize, 1, tapeFile);
 		if (!ret)
 			throw "error_exit";
@@ -1179,8 +1081,7 @@ void ACMITape::WriteTapeFile(char *fname, ACMITapeHeader *tapeHdr)
 **		Reads the event file and writes out associated text events with
 **		the tape.
 */
-void
-ACMITape::ImportTextEventList( FILE *fd, ACMITapeHeader *tapeHdr )
+void ACMITape::ImportTextEventList(FILE *fd, ACMITapeHeader *tapeHdr)
 {
 	// fd is tapefile vhs and tapehdr is the tape header
 	size_t ret;
@@ -1224,28 +1125,28 @@ ACMITape::ImportTextEventList( FILE *fd, ACMITapeHeader *tapeHdr )
 
 
 	// write callsign list
-	if(Import_Callsigns)
+	if (Import_Callsigns)
 	{
-		ret = fwrite(&import_count, sizeof(long),1, fd );
-		if ( !ret )
-	 		goto error_exit;
+		ret = fwrite(&import_count, sizeof(long), 1, fd);
+		if (!ret)
+			goto error_exit;
 
-		ret = fwrite(Import_Callsigns, import_count * sizeof(ACMI_CallRec),1, fd );
-		if ( !ret )
-	 		goto error_exit;
+		ret = fwrite(Import_Callsigns, import_count * sizeof(ACMI_CallRec), 1, fd);
+		if (!ret)
+			goto error_exit;
 	}
 
 	// write the header again (bleck)
-	ret = fseek( fd, 0, SEEK_SET );
-	if ( ret )
+	ret = fseek(fd, 0, SEEK_SET);
+	if (ret)
 	{
-		MonoPrint( "Error seeking TAPE start\n" );
+		MonoPrint("Error seeking TAPE start\n");
 		goto error_exit;
 	}
-	ret = fwrite( tapeHdr, sizeof( ACMITapeHeader ), 1, fd );
-	if ( !ret )
+	ret = fwrite(tapeHdr, sizeof(ACMITapeHeader), 1, fd);
+	if (!ret)
 	{
-		MonoPrint( "Error writing TAPE header again\n" );
+		MonoPrint("Error writing TAPE header again\n");
 	}
 
 error_exit:

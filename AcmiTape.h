@@ -7,16 +7,13 @@
 
 // Needed for BOOL type
 #include "tchar.h"
+#include "acmirec.h"
 
 #define	MAX_ENTITY_CAMS	50
 
 #define ACMI_VERSION 2
 
 #define ACMI_LABEL_LEN 15
-
-class RViewPoint;
-class RenderOTW;
-
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -293,7 +290,6 @@ typedef struct
 
 typedef struct
 {
-
 	long			positionDataOffset = 0;
 	long			eventDataOffset = 0;
 } ACMIEntityReadHead;
@@ -309,7 +305,7 @@ public:
 	// Constructors.
 	// Do not put the extension with name.
 	// This should be the name of the desired .vcr file.
-	ACMITape(char *name, RenderOTW *renderer, RViewPoint *viewPoint);
+	ACMITape();
 
 	// Destructor.
 	~ACMITape();
@@ -317,16 +313,38 @@ public:
 	// Import the current positional, event, and sfx data.
 	// The filenames of these files will always be the same 
 	// so we don't have to pass them in.
-	static BOOL Import(char *inFltFile, char *outTapeFileName);
-	static void WriteTapeFile ( char *fname, ACMITapeHeader *tapeHdr );
+	BOOL Import(char *inFltFile, char *outTapeFileName);
+	
 	
 private:
 
 	// These are used for importation.
-	static void ParseEntities ( void );
-	static void ThreadEntityPositions( ACMITapeHeader *tapeHdr );
-	static void ThreadEntityEvents( ACMITapeHeader *tapeHdr );
-	static void ImportTextEventList( FILE *fd, ACMITapeHeader *tapeHdr );
+	void ParseEntities(void);
+	void ThreadEntityPositions(ACMITapeHeader *tapeHdr);
+	void ThreadEntityEvents(ACMITapeHeader *tapeHdr);
+	void ImportTextEventList(FILE *fd, ACMITapeHeader *tapeHdr);
+	void WriteTapeFile(char *fname, ACMITapeHeader *tapeHdr);
+
+
+	long tempTarget; // for missile lock.
+	
+	/*Converted list to vector*/
+	std::vector<ACMIEntityData> importEntityVec;
+	std::vector<ACMIEntityData> importFeatVec;
+	std::vector<ACMIRawPositionData> importPosVec;
+	std::vector<ACMIEventHeader> importEventVec;
+	std::vector<ACMIRawPositionData> importEntEventVec;
+	std::vector<ACMIFeatEventImportData> importFeatEventVec;
+
+
+
+	ACMIEventTrailer *importEventTrailerList;
+
+
+
+	ACMI_CallRec *Import_Callsigns = NULL;
+	long import_count = 0;
+
 
 };
 
