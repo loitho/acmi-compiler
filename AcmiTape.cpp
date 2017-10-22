@@ -186,8 +186,8 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 				// Append our new position data.								
 				importPosVec.push_back(rawPositionData);
 
-
 				break;
+
 			case ACMIRecTracerStart:
 
 				// Read the data
@@ -215,12 +215,9 @@ BOOL ACMITape::Import(char *inFltFile, char *outTapeFileName)
 
 				// Append our new data.
 				importEventVec.push_back(ehdr);
-			
 				
-		
-				// bump counter
-				//importNumEvents++;
 				break;
+
 			case ACMIRecStationarySfx:
 				// Read the data
 				if ( !fread( &sfx, sizeof( ACMIStationarySfxData ), 1, flightFile ) )
