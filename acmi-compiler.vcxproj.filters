@@ -18,21 +18,21 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AcmiTape.cpp">
+    <ClCompile Include="src\AcmiTape.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Acmirec.h">
+    <ClInclude Include="src\Acmirec.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AcmiTape.h">
+    <ClInclude Include="src\AcmiTape.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="threading.h">
+    <ClInclude Include="src\threading.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

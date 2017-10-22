@@ -114,13 +114,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AcmiTape.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\AcmiTape.cpp" />
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Acmirec.h" />
-    <ClInclude Include="AcmiTape.h" />
-    <ClInclude Include="threading.h" />
+    <ClInclude Include="src\Acmirec.h" />
+    <ClInclude Include="src\AcmiTape.h" />
+    <ClInclude Include="src\threading.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitattributes" />
