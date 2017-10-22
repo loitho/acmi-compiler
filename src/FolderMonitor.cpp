@@ -2,8 +2,10 @@
 // File created : 2017-10-22
 // 
 //
-// Last update : 2017-10-22
+// Last update : 2017-10-23
 // By loitho
+
+// https://msdn.microsoft.com/en-us/library/aa365261%28VS.85%29.aspx?f=255&MSPPError=-2147217396
 
 //#include <windows.h>
 #include <stdlib.h>
@@ -24,10 +26,10 @@
 //	WatchDirectory(argv[1]);
 //}
 
-void WatchDirectory(LPTSTR lpDir)
+int WatchDirectory(LPTSTR lpDir)
 {
 	DWORD dwWaitStatus;
-	HANDLE dwChangeHandles[2];
+	HANDLE dwChangeHandles;
 	TCHAR lpDrive[4];
 	TCHAR lpFile[_MAX_FNAME];
 	TCHAR lpExt[_MAX_EXT];
@@ -39,34 +41,21 @@ void WatchDirectory(LPTSTR lpDir)
 
 	// Watch the directory for file creation and deletion. 
 
-	dwChangeHandles[0] = FindFirstChangeNotification(
+	dwChangeHandles = FindFirstChangeNotification(
 		lpDir,                         // directory to watch 
 		FALSE,                         // do not watch subtree 
 		FILE_NOTIFY_CHANGE_FILE_NAME); // watch file name changes 
 
-	if (dwChangeHandles[0] == INVALID_HANDLE_VALUE)
+	if (dwChangeHandles == INVALID_HANDLE_VALUE)
 	{
 		throw std::runtime_error("\n ERROR: The folder you selected is invalid.\n");
-		//ExitProcess(GetLastError());
-	}
-
-	// Watch the subtree for directory creation and deletion. 
-
-	dwChangeHandles[1] = FindFirstChangeNotification(
-		lpDrive,                       // directory to watch 
-		TRUE,                          // watch the subtree 
-		FILE_NOTIFY_CHANGE_DIR_NAME);  // watch dir name changes 
-
-	if (dwChangeHandles[1] == INVALID_HANDLE_VALUE)
-	{
-		throw std::runtime_error("\n ERROR: INVALID_HANDLE_VALUE2.\n");
 		//ExitProcess(GetLastError());
 	}
 
 
 	// Make a final validation check on our handles.
 
-	if ((dwChangeHandles[0] == NULL) || (dwChangeHandles[1] == NULL))
+	if (dwChangeHandles == NULL)
 	{
 		throw std::runtime_error("\n ERROR: INVALID_HANDLE_VALUE3.\n");
 		//ExitProcess(GetLastError());
@@ -83,9 +72,8 @@ void WatchDirectory(LPTSTR lpDir)
 		// Wait for notification.
 
 		printf("\nWaiting for notification...\n");
-
-		dwWaitStatus = WaitForMultipleObjects(2, dwChangeHandles,
-			FALSE, INFINITE);
+		
+		dwWaitStatus = WaitForSingleObject(dwChangeHandles, INFINITE);
 
 		switch (dwWaitStatus)
 		{
@@ -95,24 +83,14 @@ void WatchDirectory(LPTSTR lpDir)
 			// Refresh this directory and restart the notification.
 
 			RefreshDirectory(lpDir);
-			if (FindNextChangeNotification(dwChangeHandles[0]) == FALSE)
+			if (FindNextChangeNotification(dwChangeHandles) == FALSE)
 			{
 				printf("\n ERROR: FindNextChangeNotification function failed.\n");
 				ExitProcess(GetLastError());
 			}
-			break;
 
-		case WAIT_OBJECT_0 + 1:
+			return 0;
 
-			// A directory was created, renamed, or deleted.
-			// Refresh the tree and restart the notification.
-
-			RefreshTree(lpDrive);
-			if (FindNextChangeNotification(dwChangeHandles[1]) == FALSE)
-			{
-				printf("\n ERROR: FindNextChangeNotification function failed.\n");
-				ExitProcess(GetLastError());
-			}
 			break;
 
 		case WAIT_TIMEOUT:
@@ -140,12 +118,4 @@ void RefreshDirectory(LPTSTR lpDir)
 	// would not be necessary.
 
 	_tprintf(TEXT("Directory (%s) changed.\n"), lpDir);
-}
-
-void RefreshTree(LPTSTR lpDrive)
-{
-	// This is where you might place code to refresh your
-	// directory listing, including the subtree.
-
-	//s_tprintf(TEXT("Directory tree (%s) changed.\n"), lpDrive);
 }

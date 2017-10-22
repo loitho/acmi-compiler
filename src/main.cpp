@@ -2,7 +2,7 @@
 // File created : 2017-9-23
 // 
 //
-// Last update : 2017-10-22
+// Last update : 2017-10-23
 // By loitho
 
 #include <windows.h>
@@ -34,16 +34,32 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
+
+	HANDLE findfile = INVALID_HANDLE_VALUE;
+	WIN32_FIND_DATA fileData;
+
+	// look for *.flt files to import
+	
+
 	try 
 	{
-		WatchDirectory("C:\\Falcon BMS 4.33 U1\\User\\Acmi");
+		while (findfile == INVALID_HANDLE_VALUE)
+		{
+			WatchDirectory("C:\\Falcon BMS 4.33 U1\\User\\Acmi\\");
+
+			findfile = FindFirstFile("C:\\Falcon BMS 4.33 U1\\User\\Acmi\\acmi*.flt", &fileData);
+			if (findfile == INVALID_HANDLE_VALUE)
+				std::cout << "The file created wasn't a .flt file" << std::endl;
+		}
+		std::cout << "Found .flt file" << std::endl;
+		system("pause");
 	} 
 	catch (const std::exception& e)
 	{
 		std::cerr << e.what() << std::endl;
 	}
 
-	
+	//LockFileEx 
 
 	FILE *fp;
 	int y;

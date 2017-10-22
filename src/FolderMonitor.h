@@ -4,4 +4,4 @@
 
 void RefreshDirectory(LPTSTR);
 void RefreshTree(LPTSTR);
-void WatchDirectory(LPTSTR);
+int WatchDirectory(LPTSTR);
