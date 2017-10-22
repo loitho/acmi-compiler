@@ -1,6 +1,5 @@
 // main.cpp
 // File created : 2017-9-23
-// Originally written by Jim DiZoglio (x257) as ACMIView class
 // 
 //
 // Last update : 2017-10-22
@@ -13,6 +12,8 @@
 
 #include "AcmiTape.h"
 #include "threading.h"
+
+#include "FolderMonitor.h"
 
 
 // STFU _CRT_SECURE_NO_WARNINGS
@@ -33,9 +34,16 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
+	try 
+	{
+		WatchDirectory("C:\\Falcon BMS 4.33 U1\\User\\Acmi");
+	} 
+	catch (const std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+	}
 
-
-
+	
 
 	FILE *fp;
 	int y;
