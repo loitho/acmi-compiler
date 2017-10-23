@@ -9,6 +9,7 @@
 #include <iostream>
 #include <time.h>
 
+#include <string>
 
 #include "AcmiTape.h"
 #include "threading.h"
@@ -40,24 +41,55 @@ int main(int argc, char* argv[])
 
 	// look for *.flt files to import
 	
+	std::string folder("C:\\Falcon BMS 4.33 U1\\User\\Acmi\\");
+	//char * folder = folder.c_str();
 
 	try 
 	{
 		while (findfile == INVALID_HANDLE_VALUE)
 		{
-			WatchDirectory("C:\\Falcon BMS 4.33 U1\\User\\Acmi\\");
+			WatchDirectory(const_cast<char *>(folder.c_str()));
 
-			findfile = FindFirstFile("C:\\Falcon BMS 4.33 U1\\User\\Acmi\\acmi*.flt", &fileData);
+			findfile = FindFirstFile(const_cast<char *>((folder + "acmi*.flt").c_str()), &fileData);
 			if (findfile == INVALID_HANDLE_VALUE)
 				std::cout << "The file created wasn't a .flt file" << std::endl;
 		}
 		std::cout << "Found .flt file" << std::endl;
-		system("pause");
+		//system("pause");
 	} 
 	catch (const std::exception& e)
 	{
 		std::cerr << e.what() << std::endl;
 	}
+	std::cout << "file name :" << fileData.cFileName << std::endl;
+	fileData.cAlternateFileName;
+
+	//CreateFile
+	//OVERLAPPED overlapvar = { 0 };
+
+	OVERLAPPED overlapped;
+	memset(&overlapped, 0, sizeof(overlapped));
+	const int lockSize = 10000;
+	printf("Taking lock\n");
+	if (!LockFileEx(findfile, LOCKFILE_EXCLUSIVE_LOCK, 0, 0, 0, &overlapped))
+	{
+		DWORD err = GetLastError();
+		printf("Error %i\n", err);
+	}
+	else
+	{
+		printf("Acquired lock\n");
+		getchar();
+		UnlockFileEx(findfile, 0, lockSize, 0, &overlapped);
+		printf("Released lock\n");
+	}
+	//return 0;
+
+	//std::cout << "before" << std::endl;
+	//std::cout << "lockfile" << LockFileEx(findfile, LOCKFILE_EXCLUSIVE_LOCK, 0, MAXDWORD, MAXDWORD, &overlapvar) << std::endl;
+	//printf("CreateFile failed (%d)\n", GetLastError());
+	//std::cout << "after" << std::endl;
+	system("pause");
 
 	//LockFileEx 
 
