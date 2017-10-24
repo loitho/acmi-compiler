@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
 
 	// define for maxtry and sleep
 	
-	while (dwRetries < 10 && bSuccess == FALSE)
+	while (dwRetries < 1000 && bSuccess == FALSE)
 	{
 		hFile = CreateFile((folder + fileData.cFileName).c_str(),
 			GENERIC_READ,
