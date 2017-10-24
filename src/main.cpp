@@ -2,7 +2,7 @@
 // File created : 2017-9-23
 // 
 //
-// Last update : 2017-10-24
+// Last update : 2017-10-25
 // By loitho
 
 #include <windows.h>
@@ -95,10 +95,10 @@ int main(int argc, char* argv[])
 	{
 		hFile = CreateFile((folder + fileData.cFileName).c_str(),
 			GENERIC_READ,
-			FILE_SHARE_READ,
+			0, // FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
 			NULL,
 			OPEN_EXISTING,
-			FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED,
+			FILE_ATTRIBUTE_NORMAL, //FILE_FLAG_OVERLAPPED, //FILE_ATTRIBUTE_NORMAL,
 			NULL);
 
 		// error
@@ -121,36 +121,52 @@ int main(int argc, char* argv[])
 				throw;
 			}
 		}
-		bSuccess = TRUE;
+		else 
+		{
+			bSuccess = TRUE;
+		}
 	}
 	if (bSuccess)
 	{
+		system("pause");
+		exit;
+		
+		
 		// You succeeded in opening the file.
 		
 		std::cout << "FILE OPEN" << std::endl;
-
+		//ERROR_IO_PENDING
 		OVERLAPPED overlapped;
 		memset(&overlapped, 0, sizeof(overlapped));
 		const int lockSize = 10000;
 		printf("Taking lock\n");
-		
-		if (!LockFileEx(hFile, LOCKFILE_EXCLUSIVE_LOCK, 0, MAXDWORD, MAXDWORD, &overlapped))
+		//LockFileEx(hFile, LOCKFILE_EXCLUSIVE_LOCK, 0, MAXDWORD, MAXDWORD, &overlapped);
+		printf("After\n");
+
+		if (INVALID_HANDLE_VALUE == hFile)
+		{
+			dwErr = GetLastError();
+			std::cout << "error :" << dwErr << std::endl;
+		}
+
+		while (LockFileEx(hFile, LOCKFILE_EXCLUSIVE_LOCK, 0, MAXDWORD, MAXDWORD, &overlapped) == FALSE)
 		{
 			DWORD err = GetLastError();
 			printf("Error %i\n", err);
+			Sleep(250);
 		}
-		else
-		{
+		
 			printf("Acquired lock\n");
 			getchar();
 			UnlockFileEx(hFile, 0, lockSize, 0, &overlapped);
 			printf("Released lock\n");
-		}
+		
 
 
 	}
 	else
 	{
+		printf("YOU DONE FUCKED UP\n");
 	}
 
 
