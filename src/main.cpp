@@ -2,7 +2,7 @@
 // File created : 2017-9-23
 // 
 //
-// Last update : 2017-10-23
+// Last update : 2017-10-24
 // By loitho
 
 #include <windows.h>
@@ -15,6 +15,7 @@
 #include "threading.h"
 
 #include "FolderMonitor.h"
+
 
 
 // STFU _CRT_SECURE_NO_WARNINGS
@@ -61,8 +62,104 @@ int main(int argc, char* argv[])
 	{
 		std::cerr << e.what() << std::endl;
 	}
-	std::cout << "file name :" << fileData.cFileName << std::endl;
+	std::cout << "file name :" << folder + fileData.cFileName << std::endl;
 	fileData.cAlternateFileName;
+
+	////FindClose(hFind)
+	//HANDLE hFile = //::CreateFile((folder + fileData.cFileName).c_str(), GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+	//CreateFile("C:\\Falcon BMS 4.33 U1\\User\\Acmi\\acmi0001-bvr.flt",               // file to open
+	//	GENERIC_READ,          // open for reading
+	//	FILE_SHARE_READ,       // share for reading
+	//	NULL,                  // default security
+	//	OPEN_EXISTING,         // existing file only
+	//	FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, // normal file
+	//	NULL);
+
+	//// Error code 32
+	//// https://support.microsoft.com/en-us/help/316609/prb-error-sharing-violation-error-message-when-the-createfile-function
+	//if (hFile == INVALID_HANDLE_VALUE) {
+	//	//DisplayError(TEXT("CreateFile"));
+	//	printf("CreateFile failed (%d)\n", GetLastError());
+	//	
+	//}
+
+
+	HANDLE  hFile = INVALID_HANDLE_VALUE;
+	DWORD   dwRetries = 0;
+	BOOL    bSuccess = FALSE;
+	DWORD   dwErr = 0;
+
+	// define for maxtry and sleep
+	
+	while (dwRetries < 10 && bSuccess == FALSE)
+	{
+		hFile = CreateFile((folder + fileData.cFileName).c_str(),
+			GENERIC_READ,
+			FILE_SHARE_READ,
+			NULL,
+			OPEN_EXISTING,
+			FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED,
+			NULL);
+
+		// error
+		if (INVALID_HANDLE_VALUE == hFile)
+		{
+			dwErr = GetLastError();
+			std::cout << "error :" << dwErr << std::endl;
+			if (ERROR_SHARING_VIOLATION == dwErr)
+			{
+				dwRetries += 1;
+				std::cout << "error sharing" << std::endl;
+				Sleep(250);
+				//continue;
+			}
+			else
+			{
+				// An error occurred.
+				//break;
+				std::cout << "Other error" << std::endl;
+				throw;
+			}
+		}
+		bSuccess = TRUE;
+	}
+	if (bSuccess)
+	{
+		// You succeeded in opening the file.
+		
+		std::cout << "FILE OPEN" << std::endl;
+
+		OVERLAPPED overlapped;
+		memset(&overlapped, 0, sizeof(overlapped));
+		const int lockSize = 10000;
+		printf("Taking lock\n");
+		
+		if (!LockFileEx(hFile, LOCKFILE_EXCLUSIVE_LOCK, 0, MAXDWORD, MAXDWORD, &overlapped))
+		{
+			DWORD err = GetLastError();
+			printf("Error %i\n", err);
+		}
+		else
+		{
+			printf("Acquired lock\n");
+			getchar();
+			UnlockFileEx(hFile, 0, lockSize, 0, &overlapped);
+			printf("Released lock\n");
+		}
+
+
+	}
+	else
+	{
+	}
+
+
+
+
+
+
+
+	//CloseHandle 
 
 	//CreateFile
 	//OVERLAPPED overlapvar = { 0 };
@@ -71,7 +168,7 @@ int main(int argc, char* argv[])
 	memset(&overlapped, 0, sizeof(overlapped));
 	const int lockSize = 10000;
 	printf("Taking lock\n");
-	if (!LockFileEx(findfile, LOCKFILE_EXCLUSIVE_LOCK, 0, 0, 0, &overlapped))
+	if (!LockFileEx(hFile, LOCKFILE_EXCLUSIVE_LOCK, 0, MAXDWORD, MAXDWORD, &overlapped))
 	{
 		DWORD err = GetLastError();
 		printf("Error %i\n", err);
@@ -80,7 +177,7 @@ int main(int argc, char* argv[])
 	{
 		printf("Acquired lock\n");
 		getchar();
-		UnlockFileEx(findfile, 0, lockSize, 0, &overlapped);
+		UnlockFileEx(hFile, 0, lockSize, 0, &overlapped);
 		printf("Released lock\n");
 	}
 	//return 0;
