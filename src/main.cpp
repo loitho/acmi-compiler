@@ -2,7 +2,7 @@
 // File created : 2017-9-23
 // 
 //
-// Last update : 2017-10-25
+// Last update : 2017-10-26
 // By loitho
 
 #include <windows.h>
@@ -11,11 +11,20 @@
 
 #include <string>
 
+#include <conio.h>  
+
 #include "AcmiTape.h"
 #include "threading.h"
 
 #include "FolderMonitor.h"
 
+
+std::string ExePath() {
+	char buffer[MAX_PATH];
+	GetModuleFileName(NULL, buffer, MAX_PATH);
+	std::string::size_type pos = std::string(buffer).find_last_of("\\/");
+	return std::string(buffer).substr(0, pos);
+}
 
 
 // STFU _CRT_SECURE_NO_WARNINGS
@@ -39,11 +48,33 @@ int main(int argc, char* argv[])
 
 	HANDLE findfile = INVALID_HANDLE_VALUE;
 	WIN32_FIND_DATA fileData;
+	std::string currentPath = ExePath();
+	std::string folder;
 
 	// look for *.flt files to import
 	
-	std::string folder("C:\\Falcon BMS 4.33 U1\\User\\Acmi\\");
+	// If current path is the ACMI Folder 
+	if (currentPath.find("Acmi") != std::string::npos)
+	{
+		folder = currentPath + "\\";
+	}
+	else
+	{
+		// Use default folder
+		folder = "C:\\Falcon BMS 4.33 U1\\User\\Acmi\\";
+	}
+
 	//char * folder = folder.c_str();
+
+	/*while (!_kbhit())
+	{
+		puts("Hit me!! ");
+		Sleep(1000);
+	}
+	printf("\nKey struck was '%c'\n", _getch());*/
+
+	std::cout << "Folder checking :" << folder << std::endl;
+
 
 	try 
 	{
@@ -63,26 +94,11 @@ int main(int argc, char* argv[])
 		std::cerr << e.what() << std::endl;
 	}
 	std::cout << "file name :" << folder + fileData.cFileName << std::endl;
-	fileData.cAlternateFileName;
 
-	////FindClose(hFind)
-	//HANDLE hFile = //::CreateFile((folder + fileData.cFileName).c_str(), GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
-	//CreateFile("C:\\Falcon BMS 4.33 U1\\User\\Acmi\\acmi0001-bvr.flt",               // file to open
-	//	GENERIC_READ,          // open for reading
-	//	FILE_SHARE_READ,       // share for reading
-	//	NULL,                  // default security
-	//	OPEN_EXISTING,         // existing file only
-	//	FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, // normal file
-	//	NULL);
 
 	//// Error code 32
 	//// https://support.microsoft.com/en-us/help/316609/prb-error-sharing-violation-error-message-when-the-createfile-function
-	//if (hFile == INVALID_HANDLE_VALUE) {
-	//	//DisplayError(TEXT("CreateFile"));
-	//	printf("CreateFile failed (%d)\n", GetLastError());
-	//	
-	//}
-
+	
 
 	HANDLE  hFile = INVALID_HANDLE_VALUE;
 	DWORD   dwRetries = 0;
@@ -91,7 +107,9 @@ int main(int argc, char* argv[])
 
 	// define for maxtry and sleep
 	
-	while (dwRetries < 1000 && bSuccess == FALSE)
+
+	// while the .flt file is being written to
+	while (bSuccess == FALSE)
 	{
 		hFile = CreateFile((folder + fileData.cFileName).c_str(),
 			GENERIC_READ,
@@ -106,6 +124,8 @@ int main(int argc, char* argv[])
 		{
 			dwErr = GetLastError();
 			std::cout << "error :" << dwErr << std::endl;
+
+			// Error 32
 			if (ERROR_SHARING_VIOLATION == dwErr)
 			{
 				dwRetries += 1;
@@ -117,8 +137,10 @@ int main(int argc, char* argv[])
 			{
 				// An error occurred.
 				//break;
-				std::cout << "Other error" << std::endl;
-				throw;
+				std::cout << "Other error number:" << dwErr << "program will now exit" << std::endl;
+				system("pause");
+				exit(-1);
+				//throw;
 			}
 		}
 		else 
@@ -126,48 +148,40 @@ int main(int argc, char* argv[])
 			bSuccess = TRUE;
 		}
 	}
-	if (bSuccess)
+	
+	// You succeeded in opening the file.
+
+	std::cout << "FILE OPEN" << std::endl;
+	//ERROR_IO_PENDING
+	OVERLAPPED overlapped;
+	memset(&overlapped, 0, sizeof(overlapped));
+	
+	//system("pause");
+
+	printf("Taking lock\n");
+	
+	if (INVALID_HANDLE_VALUE == hFile)
 	{
-		system("pause");
-		exit;
-		
-		
-		// You succeeded in opening the file.
-		
-		std::cout << "FILE OPEN" << std::endl;
-		//ERROR_IO_PENDING
-		OVERLAPPED overlapped;
-		memset(&overlapped, 0, sizeof(overlapped));
-		const int lockSize = 10000;
-		printf("Taking lock\n");
-		//LockFileEx(hFile, LOCKFILE_EXCLUSIVE_LOCK, 0, MAXDWORD, MAXDWORD, &overlapped);
-		printf("After\n");
-
-		if (INVALID_HANDLE_VALUE == hFile)
-		{
-			dwErr = GetLastError();
-			std::cout << "error :" << dwErr << std::endl;
-		}
-
-		while (LockFileEx(hFile, LOCKFILE_EXCLUSIVE_LOCK, 0, MAXDWORD, MAXDWORD, &overlapped) == FALSE)
-		{
-			DWORD err = GetLastError();
-			printf("Error %i\n", err);
-			Sleep(250);
-		}
-		
-			printf("Acquired lock\n");
-			getchar();
-			UnlockFileEx(hFile, 0, lockSize, 0, &overlapped);
-			printf("Released lock\n");
-		
-
-
+		dwErr = GetLastError();
+		std::cout << "error :" << dwErr << std::endl;
 	}
-	else
-	{
-		printf("YOU DONE FUCKED UP\n");
-	}
+
+	//while (LockFileEx(hFile, LOCKFILE_EXCLUSIVE_LOCK, 0, MAXDWORD, MAXDWORD, &overlapped) == FALSE)
+	//{
+	//	DWORD err = GetLastError();
+	//	printf("Error %i\n", err);
+	//	Sleep(250);
+	//}
+
+	printf("Acquired lock\n");
+	printf("renaming file\n");
+	//getchar();
+	CloseHandle(hFile);
+	if (MoveFile((folder + fileData.cFileName).c_str(), (folder + fileData.cFileName + ".tmp").c_str()) == 0)
+		std::cout << "error moving :" << GetLastError() << std::endl;
+
+	//UnlockFileEx(hFile, 0, MAXDWORD, 0, &overlapped);
+	printf("Released lock\n");
 
 
 
@@ -176,11 +190,13 @@ int main(int argc, char* argv[])
 
 
 	//CloseHandle 
+	//FindClose(hqndle);
+
 
 	//CreateFile
 	//OVERLAPPED overlapvar = { 0 };
 
-	OVERLAPPED overlapped;
+	/*OVERLAPPED overlapped;
 	memset(&overlapped, 0, sizeof(overlapped));
 	const int lockSize = 10000;
 	printf("Taking lock\n");
@@ -195,7 +211,7 @@ int main(int argc, char* argv[])
 		getchar();
 		UnlockFileEx(hFile, 0, lockSize, 0, &overlapped);
 		printf("Released lock\n");
-	}
+	}*/
 	//return 0;
 
 	//std::cout << "before" << std::endl;
@@ -217,6 +233,8 @@ int main(int argc, char* argv[])
 	// look for *.flt files to import
 	findHand = FindFirstFile("D:\\tmp\\acmi*.flt", &fData);
 	
+	//findHand = FindFirstFile(const_cast<char *>((folder + "acmi*.flt").c_str()), &fData);
+
 	std::cout << "Hello World" << std::endl;
 	
 	// find anything?
