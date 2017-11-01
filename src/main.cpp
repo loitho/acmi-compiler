@@ -2,7 +2,7 @@
 // File created : 2017-9-23
 // 
 //
-// Last update : 2017-10-26
+// Last update : 2017-11-1
 // By loitho
 
 #include <windows.h>
@@ -46,8 +46,7 @@ int main(int argc, char* argv[])
 	}
 
 
-	HANDLE findfile = INVALID_HANDLE_VALUE;
-	WIN32_FIND_DATA fileData;
+	
 	std::string currentPath = ExePath();
 	std::string folder;
 
@@ -56,134 +55,35 @@ int main(int argc, char* argv[])
 	// If current path is the ACMI Folder 
 	if (currentPath.find("Acmi") != std::string::npos)
 	{
+		
 		folder = currentPath + "\\";
+		std::cout << "Executable detected to be running in Acmi folder" << std::endl;
 	}
 	else
 	{
 		// Use default folder
 		folder = "C:\\Falcon BMS 4.33 U1\\User\\Acmi\\";
+		std::cout << "Executable not running in Acmi folder \nFalling back to default folder : C:\\Falcon BMS 4.33 U1\\User\\Acmi\\ " << std::endl;
 	}
 
 	//char * folder = folder.c_str();
 
-	/*while (!_kbhit())
-	{
-		puts("Hit me!! ");
+	
+	/*	puts("Hit me!! ");
 		Sleep(1000);
-	}
+	
 	printf("\nKey struck was '%c'\n", _getch());*/
 
-	std::cout << "Folder checking :" << folder << std::endl;
-
-
-	try 
+	try
 	{
-		while (findfile == INVALID_HANDLE_VALUE)
-		{
-			WatchDirectory(const_cast<char *>(folder.c_str()));
-
-			findfile = FindFirstFile(const_cast<char *>((folder + "acmi*.flt").c_str()), &fileData);
-			if (findfile == INVALID_HANDLE_VALUE)
-				std::cout << "The file created wasn't a .flt file" << std::endl;
-		}
-		std::cout << "Found .flt file" << std::endl;
-		//system("pause");
-	} 
+		while (TRUE)
+			FindRenameFile(folder);
+	}
 	catch (const std::exception& e)
 	{
-		std::cerr << e.what() << std::endl;
+
+		std::cerr << "exception :" << e.what() << std::endl;
 	}
-	std::cout << "file name :" << folder + fileData.cFileName << std::endl;
-
-
-	//// Error code 32
-	//// https://support.microsoft.com/en-us/help/316609/prb-error-sharing-violation-error-message-when-the-createfile-function
-	
-
-	HANDLE  hFile = INVALID_HANDLE_VALUE;
-	DWORD   dwRetries = 0;
-	BOOL    bSuccess = FALSE;
-	DWORD   dwErr = 0;
-
-	// define for maxtry and sleep
-	
-
-	// while the .flt file is being written to
-	while (bSuccess == FALSE)
-	{
-		hFile = CreateFile((folder + fileData.cFileName).c_str(),
-			GENERIC_READ,
-			0, // FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-			NULL,
-			OPEN_EXISTING,
-			FILE_ATTRIBUTE_NORMAL, //FILE_FLAG_OVERLAPPED, //FILE_ATTRIBUTE_NORMAL,
-			NULL);
-
-		// error
-		if (INVALID_HANDLE_VALUE == hFile)
-		{
-			dwErr = GetLastError();
-			std::cout << "error :" << dwErr << std::endl;
-
-			// Error 32
-			if (ERROR_SHARING_VIOLATION == dwErr)
-			{
-				dwRetries += 1;
-				std::cout << "error sharing" << std::endl;
-				Sleep(250);
-				//continue;
-			}
-			else
-			{
-				// An error occurred.
-				//break;
-				std::cout << "Other error number:" << dwErr << "program will now exit" << std::endl;
-				system("pause");
-				exit(-1);
-				//throw;
-			}
-		}
-		else 
-		{
-			bSuccess = TRUE;
-		}
-	}
-	
-	// You succeeded in opening the file.
-
-	std::cout << "FILE OPEN" << std::endl;
-	//ERROR_IO_PENDING
-	OVERLAPPED overlapped;
-	memset(&overlapped, 0, sizeof(overlapped));
-	
-	//system("pause");
-
-	printf("Taking lock\n");
-	
-	if (INVALID_HANDLE_VALUE == hFile)
-	{
-		dwErr = GetLastError();
-		std::cout << "error :" << dwErr << std::endl;
-	}
-
-	//while (LockFileEx(hFile, LOCKFILE_EXCLUSIVE_LOCK, 0, MAXDWORD, MAXDWORD, &overlapped) == FALSE)
-	//{
-	//	DWORD err = GetLastError();
-	//	printf("Error %i\n", err);
-	//	Sleep(250);
-	//}
-
-	printf("Acquired lock\n");
-	printf("renaming file\n");
-	//getchar();
-	CloseHandle(hFile);
-	if (MoveFile((folder + fileData.cFileName).c_str(), (folder + fileData.cFileName + ".tmp").c_str()) == 0)
-		std::cout << "error moving :" << GetLastError() << std::endl;
-
-	//UnlockFileEx(hFile, 0, MAXDWORD, 0, &overlapped);
-	printf("Released lock\n");
-
-
 
 
 
