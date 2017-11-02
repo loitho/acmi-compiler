@@ -2,7 +2,7 @@
 // File created : 2017-9-23
 // 
 //
-// Last update : 2017-11-1
+// Last update : 2017-11-2
 // By loitho
 
 #include <windows.h>
@@ -46,12 +46,9 @@ int main(int argc, char* argv[])
 	}
 
 
-	
 	std::string currentPath = ExePath();
 	std::string folder;
 
-	// look for *.flt files to import
-	
 	// If current path is the ACMI Folder 
 	if (currentPath.find("Acmi") != std::string::npos)
 	{
@@ -66,14 +63,6 @@ int main(int argc, char* argv[])
 		std::cout << "Executable not running in Acmi folder \nFalling back to default folder : C:\\Falcon BMS 4.33 U1\\User\\Acmi\\ " << std::endl;
 	}
 
-	//char * folder = folder.c_str();
-
-	
-	/*	puts("Hit me!! ");
-		Sleep(1000);
-	
-	printf("\nKey struck was '%c'\n", _getch());*/
-
 	try
 	{
 		while (TRUE)
@@ -83,6 +72,7 @@ int main(int argc, char* argv[])
 	{
 
 		std::cerr << "exception :" << e.what() << std::endl;
+		exit(1);
 	}
 
 

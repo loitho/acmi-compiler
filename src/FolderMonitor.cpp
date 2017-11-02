@@ -2,7 +2,7 @@
 // File created : 2017-10-22
 // 
 //
-// Last update : 2017-11-1
+// Last update : 2017-11-2
 // By loitho
 
 // https://msdn.microsoft.com/en-us/library/aa365261%28VS.85%29.aspx?f=255&MSPPError=-2147217396
@@ -35,6 +35,27 @@ std::string GetLastErrorAsString()
 
 	return message;
 }
+
+std::string GetLastErrorAsString(DWORD error)
+{
+	//Get the error message, if any.
+	DWORD errorMessageID = error;
+	if (errorMessageID == 0)
+		return std::string(); //No error message has been recorded
+
+	LPSTR messageBuffer = nullptr;
+	size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
+
+	std::string message(messageBuffer, size);
+
+	//Free the buffer.
+	LocalFree(messageBuffer);
+
+	return message;
+}
+
+
 
 int WatchDirectory(LPTSTR lpDir)
 {
@@ -69,7 +90,7 @@ int WatchDirectory(LPTSTR lpDir)
 		//ExitProcess(GetLastError());
 	}
 
-	// Faire retourner une des fonctions pour grabber le fichier
+
 
 	while (TRUE)
 	{
@@ -104,8 +125,14 @@ int WatchDirectory(LPTSTR lpDir)
 			// In a single-threaded environment you might not want an
 			// INFINITE wait.
 
+			// Check if we received a keyboard input
 			if (_kbhit())
+			{
+				printf("\nKey struck was '%c'\n", _getch());
+
+				// Who need to check exit value when you can throw your way out
 				throw std::runtime_error("keyboard input");
+			}
 
 
 			printf("\nNo changes in the timeout period.\n");
@@ -135,9 +162,8 @@ void FindRenameFile(const std::string &folder)
 	HANDLE findfile = INVALID_HANDLE_VALUE;
 	WIN32_FIND_DATA fileData;
 	
-	//while (!_kbhit())
-	//{
-
+	
+	// Loop as long as we don't find a file in .ftl
 	while (findfile == INVALID_HANDLE_VALUE)
 	{
 		WatchDirectory(const_cast<char *>(folder.c_str()));
@@ -147,10 +173,6 @@ void FindRenameFile(const std::string &folder)
 			std::cout << "The file created wasn't a .flt file" << std::endl;
 	}
 	std::cout << "Found .flt file" << std::endl;
-
-	//}
-	//printf("\nKey struck was '%c'\n", _getch());
-
 	std::cout << "file name :" << folder + fileData.cFileName << std::endl;
 
 
@@ -181,12 +203,12 @@ void FindRenameFile(const std::string &folder)
 		if (INVALID_HANDLE_VALUE == hFile)
 		{
 			dwErr = GetLastError();
-			std::cout << "error :" << dwErr << std::endl;
+			//std::cout << "error :" << dwErr << std::endl;
 
-			// Error 32
+			// Error 32 
+			// We do not have access to the file yet
 			if (ERROR_SHARING_VIOLATION == dwErr)
 			{
-				dwRetries += 1;
 				std::cout << "error sharing" << std::endl;
 				Sleep(250);
 				//continue;
@@ -194,11 +216,7 @@ void FindRenameFile(const std::string &folder)
 			else
 			{
 				// An error occurred.
-				//break;
-				std::cout << "Other error number:" << dwErr << "program will now exit" << std::endl;
-				system("pause");
-				exit(-1);
-				//throw;
+				throw std::runtime_error("File monitoring: " + GetLastErrorAsString());
 			}
 		}
 		else
@@ -222,7 +240,19 @@ void FindRenameFile(const std::string &folder)
 
 	CloseHandle(hFile);
 
-	if (MoveFile((folder + fileData.cFileName).c_str(), (folder + fileData.cFileName + ".tmp").c_str()) == 0)
+
+	SYSTEMTIME date;
+	GetSystemTime(&date);
+
+	std::string currentTime = std::to_string(date.wYear) + "-"
+		+ std::to_string(date.wMonth) + "-"
+		+ std::to_string(date.wDay) + "-"
+		+ std::to_string(date.wHour) + "h"
+		+ std::to_string(date.wMinute) + "+"
+		+ std::to_string(date.wSecond) + "s";
+
+
+	if (MoveFile((folder + fileData.cFileName).c_str(), (folder + "ACMI-" + currentTime + ".flt.tmp").c_str()) == 0)
 		std::cout << "error renaming :" << GetLastErrorAsString() << std::endl;
 
 }
