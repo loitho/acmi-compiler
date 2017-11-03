@@ -2,7 +2,7 @@
 // File created : 2017-10-22
 // 
 //
-// Last update : 2017-11-2
+// Last update : 2017-11-3
 // By loitho
 
 // https://msdn.microsoft.com/en-us/library/aa365261%28VS.85%29.aspx?f=255&MSPPError=-2147217396
@@ -90,14 +90,13 @@ int WatchDirectory(LPTSTR lpDir)
 		//ExitProcess(GetLastError());
 	}
 
-
+	printf("\nWaiting for change in folder...\n");
+	printf("\nOnce you finished recording your flight on BMS, press any key to stop the loop\n");
 
 	while (TRUE)
 	{
 		// Wait for notification.
 
-		printf("\nWaiting for change in folder...\n");
-		
 		//dwWaitStatus = WaitForSingleObject(dwChangeHandles, INFINITE);
 		dwWaitStatus = WaitForSingleObject(dwChangeHandles, 1000);
 
@@ -135,7 +134,7 @@ int WatchDirectory(LPTSTR lpDir)
 			}
 
 
-			printf("\nNo changes in the timeout period.\n");
+			//printf("\nNo changes in the timeout period.\n");
 			break;
 
 		default:
@@ -170,7 +169,7 @@ void FindRenameFile(const std::string &folder)
 
 		findfile = FindFirstFile(const_cast<char *>((folder + "acmi*.flt").c_str()), &fileData);
 		if (findfile == INVALID_HANDLE_VALUE)
-			std::cout << "The file created wasn't a .flt file" << std::endl;
+			std::cout << "No .flt file were created" << std::endl;
 	}
 	std::cout << "Found .flt file" << std::endl;
 	std::cout << "file name :" << folder + fileData.cFileName << std::endl;
@@ -185,10 +184,8 @@ void FindRenameFile(const std::string &folder)
 	BOOL    bSuccess = FALSE;
 	DWORD   dwErr = 0;
 
-	// define for maxtry and sleep
 
-
-	// while the .flt file is being written to
+	// Loop while we haven't been able to open the file
 	while (bSuccess == FALSE)
 	{
 		hFile = CreateFile((folder + fileData.cFileName).c_str(),
@@ -203,15 +200,13 @@ void FindRenameFile(const std::string &folder)
 		if (INVALID_HANDLE_VALUE == hFile)
 		{
 			dwErr = GetLastError();
-			//std::cout << "error :" << dwErr << std::endl;
-
+	
 			// Error 32 
 			// We do not have access to the file yet
 			if (ERROR_SHARING_VIOLATION == dwErr)
 			{
 				std::cout << "error sharing" << std::endl;
 				Sleep(250);
-				//continue;
 			}
 			else
 			{
@@ -225,10 +220,10 @@ void FindRenameFile(const std::string &folder)
 		}
 	}
 
-	// You succeeded in opening the file.
+	// We opened the file and have a full lock on it
+	// BMS will not be able to process it this way
 	std::cout << "FILE OPEN" << std::endl;
-
-	printf("Taking lock\n");
+	//printf("Taking lock\n");
 
 	if (INVALID_HANDLE_VALUE == hFile)
 	{
@@ -236,10 +231,7 @@ void FindRenameFile(const std::string &folder)
 		std::cout << "error :" << dwErr << std::endl;
 	}
 
-	printf("renaming file\n");
-
-	CloseHandle(hFile);
-
+	printf("renaming file\n\n");
 
 	SYSTEMTIME date;
 	GetSystemTime(&date);
@@ -251,7 +243,7 @@ void FindRenameFile(const std::string &folder)
 		+ std::to_string(date.wMinute) + "+"
 		+ std::to_string(date.wSecond) + "s";
 
-
+	CloseHandle(hFile);
 	if (MoveFile((folder + fileData.cFileName).c_str(), (folder + "ACMI-" + currentTime + ".flt.tmp").c_str()) == 0)
 		std::cout << "error renaming :" << GetLastErrorAsString() << std::endl;
 

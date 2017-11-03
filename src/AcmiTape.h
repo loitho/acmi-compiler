@@ -314,7 +314,7 @@ public:
 	// Import the current positional, event, and sfx data.
 	// The filenames of these files will always be the same 
 	// so we don't have to pass them in.
-	bool Import(char *inFltFile, char *outTapeFileName);
+	bool Import(const char *inFltFile, const char *outTapeFileName);
 	
 	
 private:
@@ -324,7 +324,7 @@ private:
 	void ThreadEntityPositions(ACMITapeHeader *tapeHdr);
 	void ThreadEntityEvents(ACMITapeHeader *tapeHdr);
 	void ImportTextEventList(FILE *fd, ACMITapeHeader *tapeHdr);
-	void WriteTapeFile(char *fname, ACMITapeHeader *tapeHdr);
+	void WriteTapeFile(const char *fname, ACMITapeHeader *tapeHdr);
 
 
 	long tempTarget; // for missile lock.

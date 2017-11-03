@@ -2,7 +2,7 @@
 // File created : 2017-9-23
 // 
 //
-// Last update : 2017-10-22
+// Last update : 2017-11-2
 // By loitho
 
 // Originally written by Jim DiZoglio (x257) as ACMIView class
@@ -57,7 +57,7 @@ ACMITape::~ACMITape()
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-bool ACMITape::Import(char *inFltFile, char *outTapeFileName)
+bool ACMITape::Import(const char *inFltFile, const char *outTapeFileName)
 {
 	FILE
 		*flightFile;
@@ -879,7 +879,7 @@ int CompareEventTrailer(const void *p1, const void *p2)
 **		write out the file
 */
 
-void ACMITape::WriteTapeFile(char *fname, ACMITapeHeader *tapeHdr)
+void ACMITape::WriteTapeFile(const char *fname, ACMITapeHeader *tapeHdr)
 {
 	FILE *tapeFile;
 
