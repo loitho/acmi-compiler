@@ -52,7 +52,7 @@
 #endif 
 //extern ACMIView			*acmiView;
 
-
+#define MonoPrint  printf
 long tempTarget; // for missile lock.
 				
 
