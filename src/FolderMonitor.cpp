@@ -88,7 +88,7 @@ int WatchDirectory(LPTSTR lpDir)
 	}
 
 	printf("\nWaiting for change in folder...\n");
-	printf("\nOnce you finished recording your flight on BMS, press any key to stop the loop\n");
+	printf("\nOnce you finished recording your flight on BMS\n press any key to stop the loop and prepare for conversion\n");
 
 	while (TRUE)
 	{

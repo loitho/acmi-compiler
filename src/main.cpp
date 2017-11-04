@@ -77,6 +77,10 @@ int main(int argc, char* argv[])
 		}
 	}
 
+	printf("When ready press a key to start conversion\n");
+	printf("/!\\ CAUTION /!\\: \n This will use all the CPU available. Your computer might not respond for a few minutes\n");
+	system("pause");
+
 	FILE *fp;
 	char fname[MAX_PATH];
 	char fltname[MAX_PATH];
