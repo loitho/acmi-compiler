@@ -49,7 +49,7 @@ This program solve the problem in 2 different ways:
 
 - The program doesn't care if the ACMI is still recording while leaving the 3D environment (So if you eject and can't stop the recording, the program will prevent BMS from compiling the file anyway)
 
-- The converter/compiler is faster 
+- The converter/compiler is 5 to 6 times faster than the standard Falcon converter.
 
 ## Modifications to the original code
 
@@ -86,5 +86,6 @@ https://github.com/FreeFalcon/freefalcon-central
 ## Future upgrade ?
 
 - Travis-ci for autobuild / check 
+- Be able to compile on Linux
 - Spawn EC2, upload file, compile, download file, destroy EC2
 - GPU calculation ?
