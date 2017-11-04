@@ -3,7 +3,7 @@
 ## What is this ?
 
 
-This program is meant to compile .flt files into .vhs file. 
+This program is meant to compile .flt files into .vhs file.
 
 Yes, it's technically not a compiler it's more like a .flt to .vhs converter 
 
