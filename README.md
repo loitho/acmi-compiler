@@ -16,7 +16,9 @@ The flt file is then deleted and you're left with a .vhs file that you can put i
 - This program was tested on .flt files from **OpenFalcon 6** and **Falcon BMS 4.33** it should however work with pretty much any version of falcon starting from OpenFalcon 6 (Haven't tested anything before that, but the code was really old so ...)
 
 - You need to use [**Tacview**](http://www.tacview.net/product/about/en/) to read the .VHS files. The reason for that is that the Falcon ACMI viewer is old, slow and will crash if your .VHS file is too big.
- 
+
+- You need some Free RAM for the compilation / conversion 
+  (around 2.5 times the size of the .flt file) So for a 500 MB file you'll need ~1.3 GB of RAM
 
 ## Why should I use this program ?
 
