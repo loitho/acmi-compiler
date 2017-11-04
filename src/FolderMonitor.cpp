@@ -202,7 +202,7 @@ void FindRenameFile(const std::string &folder)
 			// We do not have access to the file yet
 			if (ERROR_SHARING_VIOLATION == dwErr)
 			{
-				std::cout << "error sharing" << std::endl;
+				//std::cout << "error sharing" << std::endl;
 				Sleep(250);
 			}
 			else

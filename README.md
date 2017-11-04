@@ -49,6 +49,7 @@ This program solve the problem in 2 different ways:
 
 - The program doesn't care if the ACMI is still recording while leaving the 3D environment (So if you eject and can't stop the recording, the program will prevent BMS from compiling the file anyway)
 
+- The converter/compiler is faster 
 
 ## Modifications to the original code
 
@@ -65,6 +66,8 @@ So, what did I do ?
 ## Things be aware if you want to modify this code
 
 - The code was written on Visual Studio 2015 (so well, if you have 2015 or newer it sould be good)
+
+- If you're changing the converter/compiler code, download something like [Hashtab](http://implbits.com/products/hashtab/) so you can get a checksum of the VHS files created
 
 - Building in Debug in Visual Studio will make the code slower because VS add a lot of debugging stuff to the vector (it's nearly **25 times slower** ) So use *release* if you want to evaluate your code performance
 
