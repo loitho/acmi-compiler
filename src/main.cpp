@@ -127,6 +127,8 @@ int main(int argc, char* argv[])
 			{
 				t = clock() - t;
 				printf("\n----- File converted with success in %d clicks (%f seconds). ----- \n\n\n", t, ((float)t) / CLOCKS_PER_SEC);
+
+				remove(fltname);
 			}
 		
 			//printf("It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
