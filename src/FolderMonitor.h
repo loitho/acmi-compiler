@@ -1,3 +1,7 @@
+// Made by loitho
+// october 2017
+// Header file for the folder monitor cpp file
+
 #pragma once
 
 #include <windows.h>

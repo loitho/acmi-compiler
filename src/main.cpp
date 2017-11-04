@@ -2,7 +2,7 @@
 // File created : 2017-9-23
 // 
 //
-// Last update : 2017-11-3
+// Last update : 2017-11-4
 // By loitho
 
 #include <windows.h>
@@ -118,14 +118,18 @@ int main(int argc, char* argv[])
 			clock_t t;
 			t = clock();
 
-			newtape.Import(fltname, fname);
-
-			t = clock() - t;
-			printf("It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+			printf("----- Starting conversion ----- \n\n");
+			if (newtape.Import(fltname, fname) == true)
+			{
+				t = clock() - t;
+				printf("\n----- File converted with success in %d clicks (%f seconds). ----- \n\n\n", t, ((float)t) / CLOCKS_PER_SEC);
+			}
+		
+			//printf("It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 		}
 		else
 		{
-			std::cerr << "Error : A .vhs file with the same already exist" << std::endl;
+			std::cerr << "####### Error : A .vhs file with the same already exist #######" << std::endl;
 			fclose(fp);
 		}
 			

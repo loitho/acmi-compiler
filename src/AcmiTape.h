@@ -330,11 +330,11 @@ private:
 	long tempTarget; // for missile lock.
 	
 	/*Converted list to vector*/
-	std::vector<ACMIEntityData> importEntityVec;
-	std::vector<ACMIEntityData> importFeatVec;
-	std::vector<ACMIRawPositionData> importPosVec;
-	std::vector<ACMIEventHeader> importEventVec;
-	std::vector<ACMIRawPositionData> importEntEventVec;
+	std::vector<ACMIEntityData> importEntityVec;				// List of entities
+	std::vector<ACMIEntityData> importFeatVec;					// List of Features
+	std::vector<ACMIRawPositionData> importPosVec;				// List of Positions
+	std::vector<ACMIEventHeader> importEventVec;				// List of Event
+	std::vector<ACMIRawPositionData> importEntEventVec;			// 
 	std::vector<ACMIFeatEventImportData> importFeatEventVec;
 
 

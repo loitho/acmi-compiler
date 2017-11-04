@@ -2,16 +2,13 @@
 // File created : 2017-10-22
 // 
 //
-// Last update : 2017-11-3
+// Last update : 2017-11-4
 // By loitho
 
 // https://msdn.microsoft.com/en-us/library/aa365261%28VS.85%29.aspx?f=255&MSPPError=-2147217396
 
-//#include <windows.h>
-#include <stdlib.h>
-#include <stdio.h>
+
 #include <tchar.h>
-#include <stdexcept>
 #include <conio.h>
 #include <iostream>
 #include <string>
@@ -127,7 +124,7 @@ int WatchDirectory(LPTSTR lpDir)
 			// Check if we received a keyboard input
 			if (_kbhit())
 			{
-				printf("\nKey struck was '%c'\n", _getch());
+				printf("\nKey struck was '%c'\n\n", _getch());
 
 				// Who need to check exit value when you can throw your way out
 				throw std::runtime_error("keyboard input");
@@ -223,7 +220,6 @@ void FindRenameFile(const std::string &folder)
 	// We opened the file and have a full lock on it
 	// BMS will not be able to process it this way
 	std::cout << "FILE OPEN" << std::endl;
-	//printf("Taking lock\n");
 
 	if (INVALID_HANDLE_VALUE == hFile)
 	{

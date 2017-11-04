@@ -2,7 +2,7 @@
 // File created : 2017-9-23
 // 
 //
-// Last update : 2017-11-2
+// Last update : 2017-11-4
 // By loitho
 
 // Originally written by Jim DiZoglio (x257) as ACMIView class
@@ -37,7 +37,6 @@
 
 ACMITape::ACMITape()
 { 
-	MonoPrint("TEEEEEEEEEEEEEEEEEEEEEEEEEEST2222\n");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -47,9 +46,6 @@ ACMITape::ACMITape()
 ACMITape::~ACMITape()
 {
 	// Delete Callsigns
-	MonoPrint("TEEEEEEEEEEEEEEEEEEEEEEEEEEST\n");
-	//OutputDebugString("TEST-DEBUG");
-
 	delete Import_Callsigns;
 }
 
@@ -104,7 +100,7 @@ bool ACMITape::Import(const char *inFltFile, const char *outTapeFileName)
 						
 	if (flightFile == NULL)
 	{
-		MonoPrint("Error opening acmi flight file");
+		MonoPrint("Error opening acmi flight file\n");
 		return false;
 	}
 
@@ -113,7 +109,7 @@ bool ACMITape::Import(const char *inFltFile, const char *outTapeFileName)
 	//OutputDebugString("TEST-DEBUG\n");
 	clock_t t;
 
-	MonoPrint("ACMITape Import: Reading Raw Data ....\n");
+	MonoPrint("(1/5) ACMITape Import: Reading Raw Data ....\n");
 	t = clock();
 
 	while( fread(&hdr, sizeof( ACMIRecHeader ), 1, flightFile ) )
@@ -389,11 +385,8 @@ bool ACMITape::Import(const char *inFltFile, const char *outTapeFileName)
 
 				if (!fread(Import_Callsigns, import_count * sizeof(ACMI_CallRec), 1, flightFile))
 				{
-					MonoPrint("FUUUUK\n\n");
-					return false;
+						return false;
 				}
-
-				MonoPrint("FUUUUK\n\n");
 				break;
 
 			default:
@@ -411,15 +404,15 @@ bool ACMITape::Import(const char *inFltFile, const char *outTapeFileName)
 	}
 
 	t = clock() - t;
-	MonoPrint("import entity It took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
+	MonoPrint("(1/5) ACMITape Import: Reading Raw Data \t took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
 
 	
 	// build the importEntityList
-	MonoPrint("ACMITape Import: Parsing Entities ....\n");
+	MonoPrint("(2/5) ACMITape Import: Parsing Entities ....\n");
 	t = clock();
 	ParseEntities();
 	t = clock() - t;
-	MonoPrint("VECTOR : thread entity It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+	MonoPrint("(2/5) ACMITape Import: Parsing Entities \t took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
 
 
 	int importEntityVecSize = importEntityVec.size();		// importNumEnt
@@ -458,21 +451,21 @@ bool ACMITape::Import(const char *inFltFile, const char *outTapeFileName)
 	
 
 	// set up the chain offsets of entity positions
-	MonoPrint("ACMITape Import: Threading Positions ....\n");
+	MonoPrint("(3/5) ACMITape Import: Threading Positions ....\n");
 	
 	t = clock();
 	ThreadEntityPositions(&tapeHdr);
 	t = clock() - t;
-	MonoPrint("VECTOR : thread entity It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+	MonoPrint("(3/5) ACMITape Import: Threading Positions took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
 	
 
 	// set up the chain offsets of entity events
-	MonoPrint("ACMITape Import: Threading Entity Events ....\n");
+	MonoPrint("(4/5) ACMITape Import: Threading Entity Events ....\n");
 
 	t = clock();
 	ThreadEntityEvents(&tapeHdr);
 	t = clock() - t;
-	MonoPrint("VECTOR : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+	MonoPrint("(4/5) ACMITape Import: Threading Entity took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
 
 
 	// Calculate size of .vhs file.
@@ -486,14 +479,14 @@ bool ACMITape::Import(const char *inFltFile, const char *outTapeFileName)
 	// Open a writecopy file mapping.
 	// Write out file in .vhs format.
 	
-	MonoPrint("ACMITape Import: Writing Tape File ....\n");
+	MonoPrint("(5/5) ACMITape Import: Writing Tape File ....\n");
 	
 	fclose(flightFile);
 
 	t = clock();
 	WriteTapeFile(outTapeFileName, &tapeHdr);
 	t = clock() - t;
-	MonoPrint("VECTOR : It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+	MonoPrint("(5/5) ACMITape Import: Writing Tape File took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 	
 	return true;
 }
@@ -510,7 +503,7 @@ void ACMITape::ParseEntities(void)
 
 	for (int count = 0; count < importPosVecSize; count++)
 	{
-
+		// if feature
 		if (importPosVec[count].flags & ENTITY_FLAG_FEATURE)
 		{
 			// look for existing entity
@@ -518,7 +511,7 @@ void ACMITape::ParseEntities(void)
 			{			
 			}
 			
-			// create new import entity record
+			// create new import entity record if none exist
 			if (i == importFeatVec.size())
 			{
 				ACMIEntityData importEntityInfo;
@@ -559,7 +552,7 @@ void ACMITape::ParseEntities(void)
 		}
 	}
 
-	MonoPrint("ACMITape Import: Counting ....\n");
+	MonoPrint(" Parsing: Counting Entities....\n");
 
 	/*
 	** I have no Idea if it's really usefull as Tacview doesn't seem to be using those values.
@@ -593,7 +586,7 @@ void ACMITape::ParseEntities(void)
 		}
 		i++;
 	}
-	MonoPrint("ACMITape Import: Counting ended ....\n");
+	MonoPrint(" Parsing: Counting Entities ended....\n");
 }
 
 
@@ -607,10 +600,7 @@ void ACMITape::ParseEntities(void)
 */
 void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 {
-	// we run an outer and inner loop here.
-	// the outer loops steps thru each entity
-	// the inner loop searches each position update for one owned by the
-	// entity and chains them together
+	
 	int importEntityVecSize = importEntityVec.size();	// importNumEnt
 	int importPosVecSize = importPosVec.size();			// importNumPos
 	int importFeatVecSize = importFeatVec.size();		// importNumFeat
@@ -619,6 +609,10 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 
 	clock_t t = clock();
 
+	// we run an outer and inner loop here.
+	// the outer loops steps thru each entity
+	// the inner loop searches each position update for one owned by the
+	// entity and chains them together
 	par_for(0, importEntityVecSize, [&](int i, int cpu)
 	{
 
@@ -649,11 +643,11 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 					foundFirst = true;
 				}
 
-				// thread current to previous
+				// link current to previous
 				importPosVec[j].entityPosData.prevPositionUpdateOffset = prevOffset;
 				importPosVec[j].entityPosData.nextPositionUpdateOffset = 0;
 
-				// thread previous to current
+				// link previous to current
 				if (prevPosVec != -1)
 				{
 					importPosVec[prevPosVec].entityPosData.nextPositionUpdateOffset = currOffset;
@@ -673,16 +667,16 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 	// ------------------------------------------------------------------------------------
 	// ------------------------------------------------------------------------------------
 
+	
+
+	t = clock() - t;
+	MonoPrint(" - Thread Entity par_for 1: It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+	t = clock();
+
 	// we run an outer and inner loop here.
 	// the outer loops steps thru each Feature
 	// the inner loop searches each position update for one owned by the
 	// Feature and chains them together
-
-	t = clock() - t;
-	MonoPrint("\n par_for 1: It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
-	t = clock();
-
-
 	par_for(0, importFeatVecSize, [&](int i, int cpu)
 	{
 		long currOffset;
@@ -711,11 +705,11 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 					foundFirst = true;
 				}
 
-				// thread current to previous
+				// link current to previous
 				importPosVec[j].entityPosData.prevPositionUpdateOffset = prevOffset;
 				importPosVec[j].entityPosData.nextPositionUpdateOffset = 0;
 
-				// thread previous to current
+				// link previous to current
 				if (prevPosVec != -1)
 				{
 					importPosVec[prevPosVec].entityPosData.nextPositionUpdateOffset = currOffset;
@@ -728,9 +722,11 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 
 		} // end for position loop
 
-		  // while we're doing the features, for each one, go thru the
-		  // feature event list looking for our unique ID in the events
-		  // and setting the index value of our feature in the event
+
+		// while we're doing the features, for each one, go thru the
+		// feature event list looking for our unique ID in the events
+		// and setting the index value of our feature in the event
+
 		for (int j = 0; j < importFeatEventVecSize; j++)
 		{
 
@@ -772,13 +768,13 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 	}); // end for feature entity loop
 
 	t = clock() - t;
-	MonoPrint(" par_for 2: It took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
+	MonoPrint(" - Thread Entity par_for 2: It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 }
 
 
 /*
 ** Description:
-**		At this point importEntList and importPosList should be populated.
+**		At this point importEntityVec and importPosVec should be populated.
 **		Now, we're going to have to setup the offset pointers to do the
 **		file mapping.  Each entity chains back and forth thru its position
 **		list.
@@ -833,11 +829,11 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader *tapeHdr)
 					foundFirst = true;
 				}
 
-				// thread current to previous
+				// link current to previous
 				CurrentimportEntEventVec.entityPosData.prevPositionUpdateOffset = prevOffset;
 				CurrentimportEntEventVec.entityPosData.nextPositionUpdateOffset = 0;
 
-				// thread previous to current
+				// link previous to current
 				if (prevPosVec != -1)
 				{
 					importEntEventVec[prevPosVec].entityPosData.nextPositionUpdateOffset = currOffset;
@@ -874,7 +870,7 @@ int CompareEventTrailer(const void *p1, const void *p2)
 
 /*
 ** Description:
-**		At this point importEntList and importPosList should be populated.
+**		At this point importEntityVec and importPosVec should be populated.
 **		Also the entities and positions are now threaded
 **		write out the file
 */
@@ -1035,6 +1031,7 @@ void ACMITape::WriteTapeFile(const char *fname, ACMITapeHeader *tapeHdr)
 ** Description:
 **		Reads the event file and writes out associated text events with
 **		the tape.
+**		Only the callsings now
 */
 void ACMITape::ImportTextEventList(FILE *fd, ACMITapeHeader *tapeHdr)
 {
@@ -1043,42 +1040,7 @@ void ACMITape::ImportTextEventList(FILE *fd, ACMITapeHeader *tapeHdr)
 
 	tapeHdr->numTextEvents = 0;
 
-	/*
-	** Don't care about the folowing stuff, it's only used by Falcon ACMI viewer
-	*/
-
-	// PJW Totally rewrote event debriefing stuff... thus the new code
-	//while ( cur )
-	//{
-	//	te.intTime = cur->eventTime;
-	//	GetTimeString(cur->eventTime, timestr);
-
-	//	_tcscpy(te.timeStr,timestr + 3);
-	//	_tcscpy(te.msgStr,cur->eventString);
-
-	//	// KCK: Edit out some script info which is used in debreiefings
-	//	_TCHAR	*strptr = _tcschr(te.msgStr,'@');
-	//	if (strptr)
-	//	{
-	//		strptr[0] = ' ';
-	//		strptr[1] = '-';
-	//		strptr[2] = ' ';
-	//	}
-
-	//	ret = fwrite( &te, sizeof( ACMITextEvent ), 1, fd );
-	//	if ( !ret )
-	//	{
-	//		MonoPrint( "Error writing TAPE event element\n" );
-	//		break;
-	//	}
-	//	tapeHdr->numTextEvents++;
-
-	//	// next one
-	//	cur = cur->next;
-
-	//} // end for events loop
-
-
+	
 	// write callsign list
 	if (Import_Callsigns)
 	{
@@ -1107,22 +1069,3 @@ void ACMITape::ImportTextEventList(FILE *fd, ACMITapeHeader *tapeHdr)
 error_exit:
 	return;
 }
-
-
-/*
-** Description:
-**		returns pointer to 1st text event element and the count of
-**		elements
-*/
-//void *
-//ACMITape::GetTextEvents( int *count )
-//{
-//	if (_tapeHdr.numTextEvents > 1048576) // Sanity check
-//	{
-//		count = 0;
-//		return NULL;
-//	}
-//
-//	*count = _tapeHdr.numTextEvents;
-//	return (void *)((char *)_tape + _tapeHdr.firstTextEventOffset);
-//}
