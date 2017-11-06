@@ -1,8 +1,8 @@
 // FolderMonitor.cpp
-// File created : 2017-10-22
+// File created : 2017-11-6
 // 
 //
-// Last update : 2017-11-4
+// Last update : 2017-11-7
 // By loitho
 
 // https://msdn.microsoft.com/en-us/library/aa365261%28VS.85%29.aspx?f=255&MSPPError=-2147217396
@@ -88,7 +88,7 @@ int WatchDirectory(LPTSTR lpDir)
 	}
 
 	printf("\nWaiting for change in folder...\n");
-	printf("\nOnce you finished recording your flight on BMS\n press any key to stop the loop and prepare for conversion\n");
+	printf("\nOnce you finished recording your flight on BMS\n press the 'k' key to stop the loop and prepare for conversion\n");
 
 	while (TRUE)
 	{
@@ -124,10 +124,18 @@ int WatchDirectory(LPTSTR lpDir)
 			// Check if we received a keyboard input
 			if (_kbhit())
 			{
-				printf("\nKey struck was '%c'\n\n", _getch());
+				char c = _getch();
+				
 
-				// Who need to check exit value when you can throw your way out
-				throw std::runtime_error("keyboard input");
+				if (c == 'k')
+				{
+					printf("\nLoop stopped\n\n");
+
+					// Who need to check exit value when you can throw your way out
+					throw std::runtime_error("keyboard input");
+				}
+
+				printf("\nKey struck was '%c', you need to press 'k' if you want to stop the loop and start compilation\n\n", c);
 			}
 
 

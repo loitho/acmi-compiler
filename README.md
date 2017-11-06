@@ -35,10 +35,12 @@ This program solve the problem in 2 different ways:
 
 ## Cool ! How do I use it ?
 
-- Download the [**executable**](https://github.com/loitho/acmi-compiler/releases/download/v0.1/acmi-compiler-v0.1.exe)
+- Download the [**executable**](https://github.com/loitho/acmi-compiler/releases/download/v0.2/acmi-compiler-v0.2.exe)
 
 - Move the .exe file to your ACMI folder (by default:  C:\Falcon BMS 4.33 U1\User\Acmi)
 
+- **Clear the ACMI Folder of any .flt file**
+ 
 - Run the .exe by double clicking on it. (It must run in the background)
 
 - Start Falcon BMS and play normally, the program will detect new .flt and prevent falcon from converting them
