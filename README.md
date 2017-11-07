@@ -7,13 +7,13 @@ This program is meant to compile .flt files into .vhs file.
 
 Yes, it's technically not a compiler it's more like a .flt to .vhs converter 
 
-.flt files are created and filled on the fly by Falcon (whether it's falcon BMS or openfalcon) and they are compiled into more readable .vhs files when exiting the 3D environment. 
+.flt files are created and filled on the fly by Falcon (whether it's falcon BMS or FreeFalcon) and they are compiled into more readable .vhs files when exiting the 3D environment. 
 The flt file is then deleted and you're left with a .vhs file that you can put into Falcon ACMI viewer (if you hate yourself) or Tacview
 
 
 ## What are the requirement ?
 
-- This program was tested on .flt files from **OpenFalcon 6** and **Falcon BMS 4.33** it should however work with pretty much any version of falcon starting from OpenFalcon 6 (Haven't tested anything before that, but the code was really old so ...)
+- This program was tested on .flt files from **FreeFalcon 6** and **Falcon BMS 4.33** it should however work with pretty much any version of falcon starting from FreeFalcon 6 (Haven't tested anything before that, but the code was really old so ...)
 
 - You need to use [**Tacview**](http://www.tacview.net/product/about/en/) to read the .VHS files. The reason for that is that the Falcon ACMI viewer is old, slow and will crash if your .VHS file is too big.
 
