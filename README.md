@@ -27,7 +27,7 @@ However, the longer you record, the longer it will take for falcon to convert/co
 
 This program solve the problem in 2 different ways:
 
-- The program will "steal" .flt files from falcon and rename them into .flt.tmp that way Falcon will not compile them and you'll be able to access the debriefing immediately
+- The program will "steal" .flt files from falcon and rename them into .flt.tmp that way **Falcon will not compile them and you'll be able to access the debriefing immediately**
 
 
 - The program will wait for your input and then compile the .flt files with all the CPU resources available on your computer
