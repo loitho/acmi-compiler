@@ -13,7 +13,7 @@ The flt file is then deleted and you're left with a .vhs file that you can put i
 
 ## What are the requirement ?
 
-- This program was tested on .flt files from **FreeFalcon 6** and **Falcon BMS 4.33** it should however work with pretty much any version of falcon starting from FreeFalcon 6 (Haven't tested anything before that, but the code was really old so ...)
+- This program was tested on .flt files from **FreeFalcon 6**, **Falcon BMS 4.33** and **Falcon BMS 4.34** it should however work with pretty much any version of falcon starting from FreeFalcon 6 (Haven't tested anything before that, but the code was really old so ...)
 
 - You need to use [**Tacview**](http://www.tacview.net/product/about/en/) to read the .VHS files. The reason for that is that the Falcon ACMI viewer is old, slow and will crash if your .VHS file is too big.
 
