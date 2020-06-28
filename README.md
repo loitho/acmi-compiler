@@ -3,12 +3,14 @@
 ## What is this ?
 
 
-This program is meant to compile .flt files into .vhs file.
+This program is meant to 
+- Compile .flt files into .vhs file.
+- Prevent any wait between the end of your flight and the Debriefing.
 
-Yes, it's technically not a compiler it's more like a .flt to .vhs converter 
+.flt files are created and filled on the fly by Falcon (whether it's falcon BMS or FreeFalcon) and they are compiled into more readable .vhs files right after exiting the 3D environment and before debriefing. 
+The flt file is then deleted and you're left with a .vhs file that you can put into Falcon ACMI viewer (if you hate yourself) or Tacview.
 
-.flt files are created and filled on the fly by Falcon (whether it's falcon BMS or FreeFalcon) and they are compiled into more readable .vhs files when exiting the 3D environment. 
-The flt file is then deleted and you're left with a .vhs file that you can put into Falcon ACMI viewer (if you hate yourself) or Tacview
+The point of this whole program is to prevent any issue with the ACMI compilation by Falcon by snatching the file from Falcon and allowing you to compile it when *you* want to
 
 
 ## What are the requirement ?
@@ -53,7 +55,9 @@ This program solve the problem in 2 different ways:
 
 - The program doesn't care if the ACMI is still recording while leaving the 3D environment (So if you eject and can't stop the recording, the program will prevent BMS from compiling the file anyway)
 
-- The converter/compiler is 5 to 6 times faster than the standard Falcon converter.
+- The converter/compiler is 5 to 6 times faster than the standard Falcon converter (at the time of Falcom 4.33 that was true, it's not the case anymore, it's a bit slower).
+
+- Yes, it's technically not a compiler it's more like a .flt to .vhs converter 
 
 ## Modifications to the original code
 
