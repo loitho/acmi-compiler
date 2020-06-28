@@ -47,6 +47,8 @@ This program solve the problem in 2 different ways:
 
 - Once you finished playing and have debriefed, go back to the program window, follow the instruction and the program will convert your files
 
+- You need to keep the CMD window in focus when compiling ACMI, otherwise the compilation will be very long.
+
 ## Sidenotes
 
 - The program doesn't care if the ACMI is still recording while leaving the 3D environment (So if you eject and can't stop the recording, the program will prevent BMS from compiling the file anyway)
