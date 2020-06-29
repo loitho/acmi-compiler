@@ -166,7 +166,6 @@ void FindRenameFile(const std::string &folder)
 	HANDLE findfile = INVALID_HANDLE_VALUE;
 	WIN32_FIND_DATA fileData;
 	
-	
 	// Loop as long as we don't find a file in .ftl
 	while (findfile == INVALID_HANDLE_VALUE)
 	{

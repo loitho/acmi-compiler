@@ -57,8 +57,9 @@ int main(int argc, char* argv[])
 	else
 	{
 		// Use default folder
-		folder = "C:\\Falcon BMS 4.33 U1\\User\\Acmi\\";
-		std::cout << "Executable not running in Acmi folder \nFalling back to default folder : C:\\Falcon BMS 4.33 U1\\User\\Acmi\\ " << std::endl;
+		//folder = "C:\\Falcon BMS 4.33 U1\\User\\Acmi\\";
+		folder = currentPath + "\\";
+		std::cout << "Executable running in an odd folder :\n		" << folder << "\n /!\ Are you sure this is the Falcon BMS ACMI Folder ? /!\\" << std::endl;
 	}
 
 	// Monitor folder for filechange
@@ -101,13 +102,12 @@ int main(int argc, char* argv[])
 		return -42;
 	}
 
-	
-
 	while (foundAFile)
 	{
 		std::string fileName = fData.cFileName;
-		size_t position = fileName.find(".");
+		
 		// get name without extension
+		size_t position = fileName.find(".");
 		std::string extractName = (std::string::npos == position) ? fileName : fileName.substr(0, position);
 
 		std::strcpy(fltname, (folder + fData.cFileName).c_str());
@@ -122,6 +122,7 @@ int main(int argc, char* argv[])
 			clock_t t;
 			t = clock();
 
+			std::cout << "found file : " << fileName << std::endl;
 			printf("----- Starting conversion ----- \n\n");
 			if (newtape.Import(fltname, fname) == true)
 			{
