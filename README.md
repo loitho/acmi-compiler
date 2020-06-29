@@ -3,9 +3,10 @@
 ## What is this ?
 
 
-This program is meant to 
+This program is useful to 
 - Prevent any wait between the end of your flight and the Debriefing.
-- Compile .flt files into .vhs file.
+- Stops the compling of ACMI through the Falcom BMS internal compiler s(o immediate return to debrief even with huge acmi recordings.)
+- Compile .flt files into .vhs file when you chose to do so.
 
 .flt files are created and filled on the fly by Falcon (whether it's falcon BMS or FreeFalcon) and they are compiled into more readable .vhs files right after exiting the 3D environment and before debriefing. 
 The flt file is then deleted and you're left with a .vhs file that you can put into Falcon ACMI viewer (if you hate yourself) or Tacview.
