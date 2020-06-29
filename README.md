@@ -74,7 +74,7 @@ So, what did I do ?
 
 ## Things be aware if you want to modify this code
 
-- The code was written on Visual Studio 2015 (so well, if you have 2015 or newer it sould be good)
+- The code was written on Visual Studio 2015 and updated for 2019 (so well, if you have 2019 or newer it sould be good)
 
 - If you're changing the converter/compiler code, download something like [Hashtab](http://implbits.com/products/hashtab/) so you can get a checksum of the VHS files created
 
