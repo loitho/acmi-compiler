@@ -683,7 +683,8 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 
 
 		//std::for_each(importPosVec.begin(), importPosVec.end(), [&, j = 0](ACMIRawPositionData &CurrentimportPosVec) mutable
-		for (int j = start; j < stop; j++)
+		//for (int j = start; j < stop; j++)
+		for (int j = 0; j < importPosVecSize; j++)
 		{
 
 			// check the id to see if this position belongs to the entity
