@@ -27,7 +27,21 @@
 
 #define MonoPrint  printf
 
+//https://www.fluentcpp.com/2017/01/16/how-to-stdfind-something-efficiently-with-the-stl/
+template<typename Container>
+class Range
+{
+public:
+	Range(std::pair<typename Container::iterator, typename Container::iterator> range)
+		: m_begin(range.first), m_end(range.second)
+	{}
+	typename Container::iterator begin() { return m_begin; }
+	typename Container::iterator end() { return m_end; }
 
+private:
+	typename Container::iterator m_begin;
+	typename Container::iterator m_end;
+};
 
 
 bool compare_uniq_id(ACMIRawPositionData i, ACMIRawPositionData j)
@@ -431,15 +445,17 @@ bool ACMITape::Import(const char *inFltFile, const char *outTapeFileName)
 
 	MonoPrint("(1.5/5) ACMITape Import: sorting array Entities ....\n");
 	t = clock();
+	// Stable sort instead of simple sort to prevent entities with the same ID to be misordered 
+	// As we want to keep the order at wich they were written to the file 
 	std::stable_sort(importPosVec.begin(), importPosVec.end(), compare_uniq_id);
 	std::pair<std::vector<ACMIRawPositionData>::iterator, std::vector<ACMIRawPositionData>::iterator> bounds;
+	Range<std::vector<ACMIRawPositionData>> range3 = std::equal_range(importPosVec.begin(), importPosVec.end(), 20, comp());
+
 	//std::pair<ACMIRawPositionData*, ACMIRawPositionData*> bounds;
 	bounds = std::equal_range(importPosVec.begin(), importPosVec.end(), 20, comp());
-	int ii = bounds.first - importPosVec.begin();
-	int jj = bounds.second - importPosVec.begin();
-
-
-	//https://www.fluentcpp.com/2017/01/16/how-to-stdfind-something-efficiently-with-the-stl/
+	int start = bounds.first - importPosVec.begin();
+	int stop = bounds.second - importPosVec.begin();
+	int test = range3.begin() - importPosVec.begin();
 
 	t = clock() - t;
 	MonoPrint("(1.5/5) ACMITape Import: sorting array Entities \t took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
@@ -539,7 +555,7 @@ void ACMITape::ParseEntities(void)
 
 	int importPosVecSize = importPosVec.size();
 
-	for (int count = 0; count < importPosVecSize; count++)
+		for (int count = 0; count < importPosVecSize; count++)
 	{
 		// if feature
 		if (importPosVec[count].flags & ENTITY_FLAG_FEATURE)
@@ -659,10 +675,15 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 		long prevOffset = 0;
 		importEntityVec[i].firstPositionDataOffset = 0;
 		int prevPosVec = -1;
+		std::pair<std::vector<ACMIRawPositionData>::iterator, std::vector<ACMIRawPositionData>::iterator> bounds;
+
+		bounds = std::equal_range(importPosVec.begin(), importPosVec.end(), i, comp());
+		int start = bounds.first - importPosVec.begin();
+		int stop = bounds.second - importPosVec.begin();
 
 
 		//std::for_each(importPosVec.begin(), importPosVec.end(), [&, j = 0](ACMIRawPositionData &CurrentimportPosVec) mutable
-		for (int j = 0; j < importPosVecSize; j++)
+		for (int j = start; j < stop; j++)
 		{
 
 			// check the id to see if this position belongs to the entity
