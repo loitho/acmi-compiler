@@ -59,6 +59,9 @@ int main(int argc, char* argv[])
 		// Use default folder
 		//folder = "C:\\Falcon BMS 4.33 U1\\User\\Acmi\\";
 		folder = currentPath + "\\";
+		#if _DEBUG
+		folder = "D:\\FALCON\\Falcon BMS 4.34\\User\\Acmi\\";
+		#endif 
 		std::cout << "Executable running in an odd folder :\n		" << folder << "\n /!\ Are you sure this is the Falcon BMS ACMI Folder ? /!\\" << std::endl;
 	}
 
