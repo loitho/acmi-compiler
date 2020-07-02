@@ -14,6 +14,7 @@
 #pragma warning(disable:4996)
 
 #include <vector>
+#include <algorithm>
 
 #include "AcmiTape.h"
 #include "threading.h"
@@ -26,7 +27,10 @@
 
 #define MonoPrint  printf
 
-
+bool compare_uniq_id(ACMIRawPositionData i, ACMIRawPositionData j)
+{
+	return (i.uniqueID < j.uniqueID);
+}
 
 
 
@@ -406,6 +410,13 @@ bool ACMITape::Import(const char *inFltFile, const char *outTapeFileName)
 	t = clock() - t;
 	MonoPrint("(1/5) ACMITape Import: Reading Raw Data \t took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
 
+
+	MonoPrint("(1.5/5) ACMITape Import: sorting array Entities ....\n");
+	t = clock();
+	//std::stable_sort(importPosVec.begin(), importPosVec.end(), compare_uniq_id);
+	t = clock() - t;
+	MonoPrint("(1.5/5) ACMITape Import: sorting array Entities \t took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
+
 	
 	// build the importEntityList
 	MonoPrint("(2/5) ACMITape Import: Parsing Entities ....\n");
@@ -628,7 +639,7 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 		{
 
 			// check the id to see if this position belongs to the entity
-			if (importPosVec[j].uniqueID == importEntityVec[i].uniqueID)
+			if (importEntityVec[i].uniqueID == importPosVec[j].uniqueID)
 			{
 
 				// calculate the offset of this positional record
