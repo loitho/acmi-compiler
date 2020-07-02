@@ -217,10 +217,10 @@ typedef struct
 typedef struct
 {
 	// Time stamp for this event.
-	float		time;
+	float		time = 0.0;
 
 	// index of feature on tape
-	long 		index;
+	long 		index = 0;
 
 	// data specific to type of event
 	long		newStatus = 0;
@@ -327,7 +327,7 @@ private:
 	void WriteTapeFile(const char *fname, ACMITapeHeader *tapeHdr);
 
 
-	long tempTarget; // for missile lock.
+	long tempTarget = 0; // for missile lock.
 	
 	/*Converted list to vector*/
 	std::vector<ACMIEntityData> importEntityVec;				// List of entities
