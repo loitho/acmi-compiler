@@ -27,11 +27,29 @@
 
 #define MonoPrint  printf
 
+
+
+
 bool compare_uniq_id(ACMIRawPositionData i, ACMIRawPositionData j)
 {
 	return (i.uniqueID < j.uniqueID);
 }
 
+// https://stackoverflow.com/questions/21675846/c11-using-stdequal-range-with-custom-comparison-function
+// Because equal_range checks both "int < foreign type" and "foreign type < int"
+// We need a checking function that can accept both types at both places
+struct comp
+{
+	bool operator() (const ACMIRawPositionData& a, const int& b) const
+	{
+		return a.uniqueID < b;
+	}
+
+	bool operator() (const int& a, const ACMIRawPositionData& b) const
+	{
+		return a < b.uniqueID;
+	}
+};
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -413,7 +431,16 @@ bool ACMITape::Import(const char *inFltFile, const char *outTapeFileName)
 
 	MonoPrint("(1.5/5) ACMITape Import: sorting array Entities ....\n");
 	t = clock();
-	//std::stable_sort(importPosVec.begin(), importPosVec.end(), compare_uniq_id);
+	std::stable_sort(importPosVec.begin(), importPosVec.end(), compare_uniq_id);
+	std::pair<std::vector<ACMIRawPositionData>::iterator, std::vector<ACMIRawPositionData>::iterator> bounds;
+	//std::pair<ACMIRawPositionData*, ACMIRawPositionData*> bounds;
+	bounds = std::equal_range(importPosVec.begin(), importPosVec.end(), 20, comp());
+	int ii = bounds.first - importPosVec.begin();
+	int jj = bounds.second - importPosVec.begin();
+
+
+	//https://www.fluentcpp.com/2017/01/16/how-to-stdfind-something-efficiently-with-the-stl/
+
 	t = clock() - t;
 	MonoPrint("(1.5/5) ACMITape Import: sorting array Entities \t took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
 
