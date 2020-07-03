@@ -677,14 +677,15 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 		int prevPosVec = -1;
 		std::pair<std::vector<ACMIRawPositionData>::iterator, std::vector<ACMIRawPositionData>::iterator> bounds;
 
-		bounds = std::equal_range(importPosVec.begin(), importPosVec.end(), i, comp());
+		// We're looking for the range in importPosVec in wich the uniqueID of importEntityVec is the same as importPosVec
+		bounds = std::equal_range(importPosVec.begin(), importPosVec.end(), importEntityVec[i].uniqueID, comp());
 		int start = bounds.first - importPosVec.begin();
 		int stop = bounds.second - importPosVec.begin();
 
 
 		//std::for_each(importPosVec.begin(), importPosVec.end(), [&, j = 0](ACMIRawPositionData &CurrentimportPosVec) mutable
-		//for (int j = start; j < stop; j++)
-		for (int j = 0; j < importPosVecSize; j++)
+		for (int j = start; j < stop; j++)
+		//for (int j = 0; j < importPosVecSize; j++)
 		{
 
 			// check the id to see if this position belongs to the entity
@@ -718,7 +719,10 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 				prevPosVec = j;
 
 			} //end of if
-
+			else 
+			{
+				MonoPrint("MISMATCHED");
+			}
 		} // end for position loop
 
 	}); // end for threaded entity loop
