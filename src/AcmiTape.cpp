@@ -148,6 +148,16 @@ bool ACMITape::Import(const char *inFltFile, const char *outTapeFileName)
 	MonoPrint("(1/5) ACMITape Import: Reading Raw Data ....\n");
 	t = clock();
 
+	//https://stackoverflow.com/questions/6525650/benefits-of-using-reserve-in-a-vector-c
+/*
+	int importEntityVecSize = importEntityVec.size();		// importNumEnt
+	int importPosVecSize = importPosVec.size();				// importNumPos
+	int importFeatVecSize = importFeatVec.size();			// importNumFeat
+	int importEntEventVecSize = importEntEventVec.size();	// importNumEntEvents
+	int importFeatEventVecSize = importFeatEventVec.size();	// importNumFeatEvents
+	int importEventVecSize = importEventVec.size();			// importNumEvents
+*/
+
 	while( fread(&hdr, sizeof( ACMIRecHeader ), 1, flightFile ) )
 	{
 		
