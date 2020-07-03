@@ -688,6 +688,7 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 		std::pair<std::vector<ACMIRawPositionData>::iterator, std::vector<ACMIRawPositionData>::iterator> bounds;
 
 		// We're looking for the range in importPosVec in wich the uniqueID of importEntityVec is the same as importPosVec
+		// This implies that the importPosVec vector is sorted 
 		bounds = std::equal_range(importPosVec.begin(), importPosVec.end(), importEntityVec[i].uniqueID, comp());
 		int start = bounds.first - importPosVec.begin();
 		int stop = bounds.second - importPosVec.begin();
@@ -760,12 +761,17 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 		int prevPosVec = -1;
 
 		/* can't thread that because we need to parse the vector in order*/
+		std::pair<std::vector<ACMIRawPositionData>::iterator, std::vector<ACMIRawPositionData>::iterator> bounds;
 
+		// We're looking for the range in importPosVec in wich the uniqueID of importEntityVec is the same as importPosVec
+		bounds = std::equal_range(importPosVec.begin(), importPosVec.end(), importFeatVec[i].uniqueID, comp());
+		int start = bounds.first - importPosVec.begin();
+		int stop = bounds.second - importPosVec.begin();
 
-		for (int j = 0; j < importPosVecSize; j++)
+		for (int j = start; j < stop; j++)
 		{
 			// check the id to see if this position belongs to the entity
-			if (importPosVec[j].uniqueID == importFeatVec[i].uniqueID)
+			if (importFeatVec[i].uniqueID == importPosVec[j].uniqueID)
 			{
 				// calculate the offset of this positional record
 				currOffset = tapeHdr->timelineBlockOffset +
@@ -793,7 +799,10 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 				prevOffset = currOffset;
 				prevPosVec = j;
 			} // End of if 
-
+			else
+			{
+				MonoPrint("MISMATCHED PAR 2");
+			}
 		} // end for position loop
 
 
@@ -805,7 +814,7 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 		{
 
 			// check the id to see if this event belongs to the entity
-			if (importFeatEventVec[j].uniqueID == importFeatVec[i].uniqueID)
+			if (importFeatVec[i].uniqueID == importFeatEventVec[j].uniqueID)
 			{
 				importFeatEventVec[j].data.index = i;
 			}
