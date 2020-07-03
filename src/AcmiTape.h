@@ -113,27 +113,27 @@ typedef struct
 		// Positional data.
 		struct posTag
 		{
-			float		x;
-			float		y;
-			float		z;
-			float		pitch;
-			float		roll;
-			float		yaw;
-			long	    radarTarget;
+			float		x = 0.0;
+			float		y = 0.0;
+			float		z = 0.0;
+			float		pitch = 0.0;
+			float		roll = 0.0;
+			float		yaw = 0.0;
+			long	    radarTarget = 0;
 		} posData;
 		// switch change
 		struct switchTag
 		{
-			int			switchNum;
-			int			switchVal;
-			int			prevSwitchVal;
+			int			switchNum = 0;
+			int			switchVal = 0;
+			int			prevSwitchVal = 0;
 		} switchData;
 		// DOF change
 		struct dofTag
 		{
-			int			DOFNum;
-			float		DOFVal;
-			float		prevDOFVal;
+			int			DOFNum = 0;
+			float		DOFVal = 0.0;
+			float		prevDOFVal = 0.0;
 		} dofData;
 	};
 

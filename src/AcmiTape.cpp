@@ -760,10 +760,10 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader *tapeHdr)
 		importFeatVec[i].firstPositionDataOffset = 0;
 		int prevPosVec = -1;
 
-		/* can't thread that because we need to parse the vector in order*/
 		std::pair<std::vector<ACMIRawPositionData>::iterator, std::vector<ACMIRawPositionData>::iterator> bounds;
 
 		// We're looking for the range in importPosVec in wich the uniqueID of importEntityVec is the same as importPosVec
+		// "For each Feature (the par_for above) we want to find every ImportPos related to said Feature 
 		bounds = std::equal_range(importPosVec.begin(), importPosVec.end(), importFeatVec[i].uniqueID, comp());
 		int start = bounds.first - importPosVec.begin();
 		int stop = bounds.second - importPosVec.begin();
@@ -875,6 +875,11 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader *tapeHdr)
 	int importFeatVecSize = importFeatVec.size(); // importNumFeat
 	int importEntEventVecSize = importEntEventVec.size(); // importNumEntEvents
 
+	// Very important to have a sorted vector, otherwise we might miss some data
+	std::stable_sort(importEntEventVec.begin(), importEntEventVec.end(), compare_uniq_id);
+
+
+
 	/*  Now threadded 
 	** Reason we do not need mutex is the outer loop get a different entity each time
 	** and the inner loop is only going to link together the position that are owned by the entity
@@ -889,15 +894,23 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader *tapeHdr)
 
 		int prevPosVec = -1;
 
+		std::pair<std::vector<ACMIRawPositionData>::iterator, std::vector<ACMIRawPositionData>::iterator> bounds;
+
+		// We're looking for the range in importPosVec in wich the uniqueID of importEntityVec is the same as importPosVec
+		// "For each Feature (the par_for above) we want to find every ImportPos related to said Feature 
+		bounds = std::equal_range(importEntEventVec.begin(), importEntEventVec.end(), importEntityVec[i].uniqueID, comp());
+		int start = bounds.first - importEntEventVec.begin();
+		int stop = bounds.second - importEntEventVec.begin();
+
 		/* 
 		** for (int j = 0; j < importEntEventVecSize; j++)
 		** https://stackoverflow.com/questions/3752019/how-to-get-the-index-of-a-value-in-a-vector-using-for-each
 		** j is a loop index for for_each
 		*/
-		std::for_each(importEntEventVec.begin(), importEntEventVec.end(), [&, j = 0](ACMIRawPositionData &CurrentimportEntEventVec) mutable 
+		std::for_each(bounds.first, bounds.second, [&, j = start](ACMIRawPositionData &CurrentimportEntEventVec) mutable
 		{
 
-			if (CurrentimportEntEventVec.uniqueID == importEntityVec[i].uniqueID)
+			if (importEntityVec[i].uniqueID == CurrentimportEntEventVec.uniqueID)
 			{
 
 				// calculate the offset of this positional record
@@ -927,6 +940,10 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader *tapeHdr)
 				prevPosVec = j;
 
 			} //end of if
+			else
+			{
+					MonoPrint("MISMATCHED Entity threading");
+			}
 			++j;
 		});
 
