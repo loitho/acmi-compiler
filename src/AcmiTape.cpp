@@ -586,19 +586,19 @@ void ACMITape::ParseEntities(void)
 			// Not needed anymore since the importPosVec is ordered
 			// Only one entity of type Feature exist with a uniq ID
 			// As the Feature position doesn't change
-			for (i = 0; (i < importFeatVec.size()) && (importFeatVec[i].uniqueID != importPosVec[count].uniqueID); i++)
-			{
-			}
+			//for (i = 0; (i < importFeatVec.size()) && (importFeatVec[i].uniqueID != importPosVec[count].uniqueID); i++)
+			//{
+			//}
 
-			MonoPrint("i : %d\n", i);
+			//MonoPrint("i : %d\n", i);
 			//if (!binary_search(importFeatVec.begin(), importFeatVec.end(), importPosVec[count].uniqueID, comparison))
 			//	MonoPrint("Not Found");
 
 
 			// create new import entity record if none exist
-			if (i == importFeatVec.size())
-			{
-				MonoPrint("adding entity\n");
+			//if (i == importFeatVec.size())
+			//{
+				//MonoPrint("adding entity\n");
 				ACMIEntityData importEntityInfo;
 				importEntityInfo.count = 0;
 
@@ -610,20 +610,25 @@ void ACMITape::ParseEntities(void)
 				importEntityInfo.slot = importPosVec[count].slot;
 
 				importFeatVec.push_back(importEntityInfo);
-			}
+			//}
 		}
 		else
 		{
 			// not a feature
 
 			// look for existing entity
-			for (i = 0; i < importEntityVec.size() && importPosVec[count].uniqueID != importEntityVec[i].uniqueID; i++)
-			{
-			}
+		//	for (i = 0; i < importEntityVec.size() && importPosVec[count].uniqueID != importEntityVec[i].uniqueID; i++)
+		//	{
+		//	}
+			// Because importPosVec is ordered, the back of entity vec will always be the highest found uniqueID
 
+			//MonoPrint("i : %d\n", i);
+			if (importEntityVec.size() == 0 || (importEntityVec.back().uniqueID != importPosVec[count].uniqueID))
+			//{
 			// create new import entity record
-			if (i == importEntityVec.size())
+			//if (i == importEntityVec.size())
 			{
+			//	MonoPrint("adding entity\n");
 				ACMIEntityData* importEntityInfo = new ACMIEntityData;
 				importEntityInfo->count = 0;
 
