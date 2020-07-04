@@ -578,7 +578,8 @@ void ACMITape::ParseEntities(void)
 	for (int count = 0; count < importPosVecSize; count++)
 	{
 		// if feature
-		// Only Features have only 1 position each
+		// Features have only 1 Position each
+		// That means their uniqueID will only appear once in importPosVec
 		if (importPosVec[count].flags & ENTITY_FLAG_FEATURE)
 		{
 			
@@ -678,6 +679,7 @@ void ACMITape::ParseEntities(void)
 	}
 	MonoPrint(" Parsing: Counting Entities ended....\n");
 }
+
 
 
 /*
@@ -917,8 +919,9 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader* tapeHdr)
 
 			std::pair<std::vector<ACMIRawPositionData>::iterator, std::vector<ACMIRawPositionData>::iterator> bounds;
 
-			// We're looking for the range in importPosVec in wich the uniqueID of importEntityVec is the same as importPosVec
-			// "For each Feature (the par_for above) we want to find every ImportPos related to said Feature 
+			// We're looking for the range in importEntEventVec in wich the uniqueID of importEntityVec is the same as importEntEventVec
+			// "For each Entity (the par_for above) we want to find every EntityEvent related to said Entity
+			// importEntEventVec is sorted, equal_range gives us the first and last position of the chosen uniqueID
 			bounds = std::equal_range(importEntEventVec.begin(), importEntEventVec.end(), importEntityVec[i].uniqueID, comp());
 			int start = bounds.first - importEntEventVec.begin();
 			int stop = bounds.second - importEntEventVec.begin();
