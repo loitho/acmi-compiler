@@ -104,8 +104,8 @@ enum
 typedef struct
 {
 	// Time stamp for the positional data
-	float		time;
-	BYTE		type;
+	float		time = 0.0;
+	BYTE		type = 0;
 
 	// dereference based on type
 	union
@@ -173,7 +173,7 @@ typedef struct
 {
 	// type of event this is
 	BYTE		eventType;
-	long 		index;
+	long 		index = -42;
 
 	// Time stamp for this event.
 	float		time = 0;

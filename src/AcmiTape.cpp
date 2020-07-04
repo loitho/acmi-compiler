@@ -15,6 +15,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <filesystem>
 
 #include "AcmiTape.h"
 #include "threading.h"
@@ -47,6 +48,13 @@ private:
 bool compare_uniq_id(ACMIRawPositionData i, ACMIRawPositionData j)
 {
 	return (i.uniqueID < j.uniqueID);
+}
+
+long GetFileSize(std::string filename)
+{
+	struct stat stat_buf;
+	int rc = stat(filename.c_str(), &stat_buf);
+	return rc == 0 ? stat_buf.st_size : -1;
 }
 
 // https://stackoverflow.com/questions/21675846/c11-using-stdequal-range-with-custom-comparison-function
@@ -109,12 +117,6 @@ bool ACMITape::Import(const char *inFltFile, const char *outTapeFileName)
 	const ACMIFeatEventImportData	Emptyfedata;
 	ACMIFeatEventImportData			fedata;
 
-	float
-		begTime,
-		endTime;
-
-	
-
 	ACMITapeHeader tapeHdr;
 	ACMIRecHeader  hdr;
 	ACMIGenPositionData genpos;
@@ -126,10 +128,12 @@ bool ACMITape::Import(const char *inFltFile, const char *outTapeFileName)
 	ACMIDOFData dd;
 	ACMIFeatureStatusData fs;
 		
-
 	// this value comes from tod type record
 	tapeHdr.todOffset =  0.0f;
-
+	float begTime = -1.0;
+	float endTime = 0.0;
+	
+	long filesize = GetFileSize(inFltFile);
 
 	// Load flight file for positional data.
 	flightFile = fopen(inFltFile, "rb");
@@ -140,23 +144,24 @@ bool ACMITape::Import(const char *inFltFile, const char *outTapeFileName)
 		return false;
 	}
 
-	begTime = -1.0;
-	endTime = 0.0;
-	//OutputDebugString("TEST-DEBUG\n");
 	clock_t t;
 
 	MonoPrint("(1/5) ACMITape Import: Reading Raw Data ....\n");
 	t = clock();
 
 	//https://stackoverflow.com/questions/6525650/benefits-of-using-reserve-in-a-vector-c
-/*
-	int importEntityVecSize = importEntityVec.size();		// importNumEnt
-	int importPosVecSize = importPosVec.size();				// importNumPos
-	int importFeatVecSize = importFeatVec.size();			// importNumFeat
-	int importEntEventVecSize = importEntEventVec.size();	// importNumEntEvents
-	int importFeatEventVecSize = importFeatEventVec.size();	// importNumFeatEvents
-	int importEventVecSize = importEventVec.size();			// importNumEvents
-*/
+	// Reserving space in memory for faster ingest
+
+	// Factor is the ratio of vector reservation to file
+	// Smaller mean more reservation
+	int factor = 30;
+    importEntEventVec.reserve(filesize / factor);	// importNumEntEvents
+	importPosVec.reserve(filesize / (factor * 5));		// importNumPos
+	importEntityVec.reserve(5000);		// importNumEnt
+	importFeatVec.reserve(5000);		// importNumFeat
+	importEventVec.reserve(2000);		// importNumEvents
+	importFeatEventVec.reserve(2000);	// importNumFeatEvents
+	
 
 	while( fread(&hdr, sizeof( ACMIRecHeader ), 1, flightFile ) )
 	{
@@ -453,22 +458,27 @@ bool ACMITape::Import(const char *inFltFile, const char *outTapeFileName)
 	MonoPrint("(1/5) ACMITape Import: Reading Raw Data \t took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
 
 
-	MonoPrint("(1.5/5) ACMITape Import: sorting array Entities ....\n");
+
+	MonoPrint("(1.5/5) ACMITape Import: sorting arrays ....\n");
 	t = clock();
+	//importEntEventVec.shrink_to_fit();
+	//importPosVec.shrink_to_fit();
+	//importEntityVec.shrink_to_fit();
+	//importFeatVec.shrink_to_fit();
+	//importEventVec.shrink_to_fit();
+	//importFeatEventVec.shrink_to_fit();
 	// Stable sort instead of simple sort to prevent entities with the same ID to be misordered 
 	// As we want to keep the order at wich they were written to the file 
+	// Very important to have a sorted vector, otherwise we might miss some data
 	std::stable_sort(importPosVec.begin(), importPosVec.end(), compare_uniq_id);
-	std::pair<std::vector<ACMIRawPositionData>::iterator, std::vector<ACMIRawPositionData>::iterator> bounds;
-	Range<std::vector<ACMIRawPositionData>> range3 = std::equal_range(importPosVec.begin(), importPosVec.end(), 20, comp());
+	std::stable_sort(importEntEventVec.begin(), importEntEventVec.end(), compare_uniq_id);
 
-	//std::pair<ACMIRawPositionData*, ACMIRawPositionData*> bounds;
-	bounds = std::equal_range(importPosVec.begin(), importPosVec.end(), 20, comp());
-	int start = bounds.first - importPosVec.begin();
-	int stop = bounds.second - importPosVec.begin();
-	int test = range3.begin() - importPosVec.begin();
+	//std::pair<std::vector<ACMIRawPositionData>::iterator, std::vector<ACMIRawPositionData>::iterator> bounds;
+	//Range<std::vector<ACMIRawPositionData>> range3 = std::equal_range(importPosVec.begin(), importPosVec.end(), 20, comp());
+	//int test = range3.begin() - importPosVec.begin();
 
 	t = clock() - t;
-	MonoPrint("(1.5/5) ACMITape Import: sorting array Entities \t took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
+	MonoPrint("(1.5/5) ACMITape Import: sorting arrays \t took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
 
 	
 	// build the importEntityList
@@ -874,11 +884,6 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader *tapeHdr)
 	int importPosVecSize = importPosVec.size(); // importNumPos
 	int importFeatVecSize = importFeatVec.size(); // importNumFeat
 	int importEntEventVecSize = importEntEventVec.size(); // importNumEntEvents
-
-	// Very important to have a sorted vector, otherwise we might miss some data
-	std::stable_sort(importEntEventVec.begin(), importEntEventVec.end(), compare_uniq_id);
-
-
 
 	/*  Now threadded 
 	** Reason we do not need mutex is the outer loop get a different entity each time
