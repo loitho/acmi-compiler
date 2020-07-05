@@ -50,10 +50,10 @@ enum
 // this struct is common thru all record types as a record header
 //
 #pragma pack (push, pack1, 1)
-typedef struct 
+typedef struct ACMIRecHeader
 {
-	BYTE		type;		// one of the ennumerated types
-	float		time;		// time stamp
+	BYTE		type = 0;		// one of the ennumerated types
+	float		time = 0.0;		// time stamp
 } ACMIRecHeader;
 #pragma pack (pop, pack1)
 
@@ -62,11 +62,11 @@ typedef struct
 // General position data
 //
 #pragma pack (push, pack1, 1)
-typedef struct 
+typedef struct ACMIGenPositionData
 {
 	int		type = 0;			// base type for creating simbase object
 	long	uniqueID = 0;		// identifier of instance
-	float	x = 0;
+	float	x = 0.0;
 	float	y = 0;
 	float	z = 0;
 	float	yaw = 0;
@@ -80,7 +80,7 @@ typedef struct
 // General position data
 //
 #pragma pack (push, pack1, 1)
-typedef struct 
+typedef struct ACMIFeaturePositionData
 {
 	int		type = 0;			// base type for creating simbase object
 	long	uniqueID = 0;		// identifier of instance
@@ -100,27 +100,27 @@ typedef struct
 ** ACMI Text event (strings parsed from event file)
 ** Which we don't have, so this is never used
 */
-#pragma pack (push, pack1, 1)
-typedef struct
-{
-	long	   intTime;
-	_TCHAR timeStr[20];
-	_TCHAR msgStr[100];
-} ACMITextEvent;
-#pragma pack (pop, pack1)
+//#pragma pack (push, pack1, 1)
+//typedef struct
+//{
+//	long	   intTime;
+//	_TCHAR timeStr[20];
+//	_TCHAR msgStr[100];
+//} ACMITextEvent;
+//#pragma pack (pop, pack1)
 
 //
 // ACMISwitchData
 // General position data
 //
 #pragma pack (push, pack1, 1)
-typedef struct 
+typedef struct ACMISwitchData
 {
-	int		type;			// base type for creating simbase object
-	long	uniqueID;		// identifier of instance
-	int		switchNum;
-	int		switchVal;
-	int		prevSwitchVal;
+	int		type = 0;			// base type for creating simbase object
+	long	uniqueID = 0;		// identifier of instance
+	int		switchNum = 0;
+	int		switchVal = 0;
+	int		prevSwitchVal = 0;
 } ACMISwitchData;
 #pragma pack (pop, pack1)
 
@@ -129,11 +129,11 @@ typedef struct
 // Feature status change data
 //
 #pragma pack (push, pack1, 1)
-typedef struct 
+typedef struct ACMIFeatureStatusData
 {
-	long	uniqueID;		// identifier of instance
-	int		newStatus;
-	int		prevStatus;
+	long	uniqueID = 0;		// identifier of instance
+	int		newStatus = 0;
+	int		prevStatus = 0;
 } ACMIFeatureStatusData;
 #pragma pack (pop, pack1)
 
@@ -142,13 +142,13 @@ typedef struct
 // General position data
 //
 #pragma pack (push, pack1, 1)
-typedef struct 
+typedef struct ACMIDOFData
 {
-	int		type;			// base type for creating simbase object
-	long	uniqueID;		// identifier of instance
-	int		DOFNum;
-	float	DOFVal;
-	float	prevDOFVal;
+	int		type = 0;			// base type for creating simbase object
+	long	uniqueID = 0;		// identifier of instance
+	int		DOFNum = 0;
+	float	DOFVal = 0.0;
+	float	prevDOFVal = 0.0;
 } ACMIDOFData;
 #pragma pack (pop, pack1)
 
@@ -157,15 +157,15 @@ typedef struct
 // Starting pos and velocity of tracer rounds
 //
 #pragma pack (push, pack1, 1)
-typedef struct 
+typedef struct ACMITracerStartData
 {
 	// initial values
-	float	x;
-	float	y;
-	float	z;
-	float	dx;
-	float	dy;
-	float 	dz;
+	float	x = 0.0;
+	float	y = 0.0;
+	float	z = 0.0;
+	float	dx = 0.0;
+	float	dy = 0.0;
+	float 	dz = 0.0;
 } ACMITracerStartData;
 #pragma pack (pop, pack1)
 
@@ -174,14 +174,14 @@ typedef struct
 // Starting pos of a staionay special sfx
 //
 #pragma pack (push, pack1, 1)
-typedef struct 
+typedef struct ACMIStationarySfxData
 {
-	int		type;		// sfx type
-	float	x;			// position
-	float	y;
-	float	z;
-	float	timeToLive;
-	float	scale;
+	int		type = 0;		// sfx type
+	float	x = 0.0;			// position
+	float	y = 0.0;
+	float	z = 0.0;
+	float	timeToLive = 0.0;
+	float	scale = 0.0;
 } ACMIStationarySfxData;
 #pragma pack (pop, pack1)
 
@@ -190,67 +190,67 @@ typedef struct
 // Starting pos of a staionay special sfx
 //
 #pragma pack (push, pack1, 1)
-typedef struct 
+typedef struct ACMIMovingSfxData
 {
-	int		type;		// sfx type
-	int		user;		// misc data
-	int		flags;
-	float	x;			// position
-	float	y;
-	float	z;
-	float	dx;			// vector
-	float	dy;
-	float	dz;
-	float	timeToLive;
-	float	scale;
+	int		type = 0;		// sfx type
+	int		user = 0;		// misc data
+	int		flags = 0;
+	float	x = 0.0;		// position
+	float	y = 0.0;
+	float	z = 0.0;
+	float	dx = 0.0;		// vector
+	float	dy = 0.0;
+	float	dz = 0.0;
+	float	timeToLive = 0.0;
+	float	scale = 0.0;
 } ACMIMovingSfxData;
 #pragma pack (pop, pack1)
 
 // these are the actual I/O records
 #pragma pack (push, pack1, 1)
 
-typedef struct 
+typedef struct ACMIMovingSfxRecord
 {
-	ACMIRecHeader				hdr;
+	ACMIRecHeader			hdr;
 	ACMIMovingSfxData		data;
 } ACMIMovingSfxRecord;
 
-typedef struct 
+typedef struct ACMIStationarySfxRecord
 {
 	ACMIRecHeader				hdr;
 	ACMIStationarySfxData		data;
 } ACMIStationarySfxRecord;
 
-typedef struct 
+typedef struct ACMIGenPositionRecord
 {
 	ACMIRecHeader				hdr;
 	ACMIGenPositionData			data;
 } ACMIGenPositionRecord;
 
-typedef struct 
+typedef struct ACMIMissilePositionRecord
 {
 	ACMIRecHeader				hdr;
 	ACMIGenPositionData			data;
 } ACMIMissilePositionRecord;
 
-typedef struct 
+typedef struct ACMITodOffsetRecord
 {
 	ACMIRecHeader				hdr;
 } ACMITodOffsetRecord;
 
-typedef struct 
+typedef struct ACMIChaffPositionRecord
 {
 	ACMIRecHeader				hdr;
 	ACMIGenPositionData			data;
 } ACMIChaffPositionRecord;
 
-typedef struct 
+typedef struct ACMIFlarePositionRecord
 {
 	ACMIRecHeader				hdr;
 	ACMIGenPositionData			data;
 } ACMIFlarePositionRecord;
 
-typedef struct 
+typedef struct ACMIAircraftPositionRecord
 {
 	ACMIRecHeader				hdr;
 	ACMIGenPositionData			data;
@@ -258,34 +258,34 @@ typedef struct
 	
 } ACMIAircraftPositionRecord;
 
-typedef struct 
+typedef struct ACMIFeaturePositionRecord
 {
 	ACMIRecHeader				hdr;
-	ACMIFeaturePositionData			data;
+	ACMIFeaturePositionData		data;
 } ACMIFeaturePositionRecord;
 
-typedef struct 
+typedef struct ACMIFeatureStatusRecord
 {
 	ACMIRecHeader				hdr;
-	ACMIFeatureStatusData			data;
+	ACMIFeatureStatusData		data;
 } ACMIFeatureStatusRecord;
 
-typedef struct 
+typedef struct ACMITracerStartRecord
 {
 	ACMIRecHeader				hdr;
 	ACMITracerStartData			data;
 } ACMITracerStartRecord;
 
-typedef struct 
+typedef struct ACMISwitchRecord
 {
-	ACMIRecHeader				hdr;
-	ACMISwitchData				data;
+	ACMIRecHeader   hdr;
+	ACMISwitchData  data;
 } ACMISwitchRecord;
 
-typedef struct 
+typedef struct ACMIDOFRecord
 {
-	ACMIRecHeader				hdr;
-	ACMIDOFData				data;
+	ACMIRecHeader	hdr;
+	ACMIDOFData		data;
 } ACMIDOFRecord;
 #pragma pack (pop, pack1)
 

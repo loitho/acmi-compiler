@@ -1,7 +1,19 @@
 # ACMI-Compiler
 
-## What is this ?
+### Table of content
+- [What is this ?](#what-is-this--)
+- [What are the requirement ?](#what-are-the-requirement--)
+- [Why should I use this program ?](#why-should-i-use-this-program--)
+- [Download and usage](#cool---how-do-i-use-it--)
+- [Performances](#performances)
+- [Sidenotes](#sidenotes)
+- [Modifications to the original code](#modifications-to-the-original-code)
+- [Things be aware if you want to modify this code](#things-be-aware-if-you-want-to-modify-this-code)
+- [Special thanks](#special-thanks)
+- [Official topic on Benchmarksim](#official-topic-on-benchmarksim)
 
+
+## What is this ?
 
 This program is useful to 
 - Prevent any wait between the end of your flight and the Debriefing.
@@ -13,7 +25,6 @@ The flt file is then deleted and you're left with a .vhs file that you can put i
 
 
 The point of this whole program is to prevent any issue with the ACMI compilation by Falcon by snatching the file from Falcon and allowing you to compile it when *you* want to
-
 
 ## What are the requirement ?
 
@@ -33,15 +44,16 @@ This program solve the problem in 2 different ways:
 
 - The program will "steal" .flt files from falcon and rename them into .flt.tmp that way **Falcon will not compile them and you'll be able to access the debriefing immediately**
 
-
 - The program will wait for your input and then compile the .flt files with all the CPU resources available on your computer
+
+- Also, now the program actually compile faster than BMS 4.34 and 4.33
 
 
 ## Cool ! How do I use it ?
 
-- Download the [**executable**](https://github.com/loitho/acmi-compiler/releases/latest) or [**Direct link**](https://github.com/loitho/acmi-compiler/releases/download/v1.0/acmi-compiler-v1.0.exe)
+- Download the [**Lastest release**](https://github.com/loitho/acmi-compiler/releases/latest) or [**Direct link**](https://github.com/loitho/acmi-compiler/releases/download/v2.0/acmi-compiler-v2.0.exe)
 
-- Move the .exe file to your ACMI folder (by default:  C:\Falcon BMS 4.33 U1\User\Acmi)
+- Move the .exe file to your ACMI folder (by default: *C:\Falcon BMS 4.34\User\Acmi*)
 
 - **Clear the ACMI Folder of any .flt file**
  
@@ -53,11 +65,18 @@ This program solve the problem in 2 different ways:
 
 - You need to keep the CMD window in focus when compiling ACMI, otherwise the compilation will be very long.
 
+## Performances
+
+This picture show the differences in performances between the version 2.0 of the compiler, Falcon BMS 4.34 and the Old compiler version
+
+
+![Speed](speed.png)
+
 ## Sidenotes
 
 - The program doesn't care if the ACMI is still recording while leaving the 3D environment (So if you eject and can't stop the recording, the program will prevent BMS from compiling the file anyway)
 
-- The converter/compiler is 5 to 6 times faster than the standard Falcon converter (at the time of Falcom 4.33 that was true, it's not the case anymore, it's a bit slower).
+- The converter/compiler is 10 to 15 times faster than the standard Falcon converter (BMS 4.34.3)
 
 - Yes, it's technically not a compiler it's more like a .flt to .vhs converter 
 
@@ -72,6 +91,8 @@ So, what did I do ?
 - Added multithreading support 
 - Various code optimization 
 - Added automatic dectection for new .flt files in the ACMI folder
+- Added vector memory reservation for faster file parsing 
+- Sorted the vectors so that we can run binary searches in them
 
 ## Things be aware if you want to modify this code
 
@@ -92,6 +113,9 @@ Thanks to this website for putting me on the path to find some falcon source cod
 https://sites.google.com/site/falcon4sourcecode/
 
 https://github.com/FreeFalcon/freefalcon-central
+
+- Thanks to BibleClinger for putting me on the path to optimize the code even further
+- Thanks to Johku for the big ACMI files
 
 ## Official topic on Benchmarksim
 

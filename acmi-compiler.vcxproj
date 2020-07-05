@@ -130,6 +130,9 @@
     <None Include="acmi-compiler.licenseheader" />
     <None Include="README.md" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="speed.png" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

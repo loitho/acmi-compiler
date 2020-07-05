@@ -1,5 +1,14 @@
 # Changelog
 
+
+#### Version 2.0
+
+
+* More consistent compilation (checksum of the same compiled .flt file should be the same)
+* **Extremely improved compilation time** (10 times faster than BMS)
+* Vector memory reservation
+* Code cleanup
+
 #### Version 1.0
 
 
