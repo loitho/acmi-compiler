@@ -54,4 +54,9 @@
     </None>
     <None Include="acmi-compiler.licenseheader" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="speed.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
 </Project>
