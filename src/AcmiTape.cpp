@@ -2,7 +2,7 @@
 // File created : 2017-9-23
 // 
 //
-// Last update : 2017-11-4
+// Last update : 2020-07-05
 // By loitho
 
 // Originally written by Jim DiZoglio (x257) as ACMIView class
@@ -28,6 +28,13 @@
 
 #define MonoPrint  printf
 
+long GetFileSize(std::string filename)
+{
+	struct stat stat_buf;
+	int rc = stat(filename.c_str(), &stat_buf);
+	return rc == 0 ? stat_buf.st_size : -1;
+}
+
 //https://www.fluentcpp.com/2017/01/16/how-to-stdfind-something-efficiently-with-the-stl/
 template<typename Container>
 class Range
@@ -44,22 +51,21 @@ private:
 	typename Container::iterator m_end;
 };
 
-
+/*
+** Compare uniqueID in ACMIRawPositionData
+** Used by equal_sort
+*/
 bool compare_uniq_id(ACMIRawPositionData i, ACMIRawPositionData j)
 {
 	return (i.uniqueID < j.uniqueID);
 }
 
-long GetFileSize(std::string filename)
-{
-	struct stat stat_buf;
-	int rc = stat(filename.c_str(), &stat_buf);
-	return rc == 0 ? stat_buf.st_size : -1;
-}
 
-// https://stackoverflow.com/questions/21675846/c11-using-stdequal-range-with-custom-comparison-function
-// Because equal_range checks both "int < foreign type" and "foreign type < int"
-// We need a checking function that can accept both types at both places
+/*
+** https://stackoverflow.com/questions/21675846/c11-using-stdequal-range-with-custom-comparison-function
+** Because equal_range checks both "int < foreign type" and "foreign type < int"
+** We need a checking function that can accept both types at both places
+*/
 struct comp
 {
 	bool operator() (const ACMIRawPositionData& a, const int& b) const
@@ -72,11 +78,6 @@ struct comp
 		return a < b.uniqueID;
 	}
 };
-
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 
 
 ACMITape::ACMITape()
@@ -151,17 +152,15 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 
 	//https://stackoverflow.com/questions/6525650/benefits-of-using-reserve-in-a-vector-c
 	// Reserving space in memory for faster ingest
-
 	// Factor is the ratio of vector reservation to file
 	// Smaller mean more reservation
 	int factor = 30;
-	importEntEventVec.reserve(filesize / factor);	// importNumEntEvents
-	importPosVec.reserve(filesize / (factor * 5));		// importNumPos
-	importEntityVec.reserve(5000);		// importNumEnt
-	importFeatVec.reserve(5000);		// importNumFeat
-	importEventVec.reserve(2000);		// importNumEvents
-	importFeatEventVec.reserve(2000);	// importNumFeatEvents
-
+	importEntEventVec.reserve(filesize / factor);
+	importPosVec.reserve(filesize / (factor * 5));
+	importEntityVec.reserve(5000);
+	importFeatVec.reserve(5000); 
+	importEventVec.reserve(2000); 
+	importFeatEventVec.reserve(2000); 
 
 	while (fread(&hdr, sizeof(ACMIRecHeader), 1, flightFile))
 	{
@@ -457,29 +456,17 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 	t = clock() - t;
 	MonoPrint("(1/5) ACMITape Import: Reading Raw Data \t took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
 
-
-
 	MonoPrint("(1.5/5) ACMITape Import: sorting arrays ....\n");
 	t = clock();
-	//importEntEventVec.shrink_to_fit();
-	//importPosVec.shrink_to_fit();
-	//importEntityVec.shrink_to_fit();
-	//importFeatVec.shrink_to_fit();
-	//importEventVec.shrink_to_fit();
-	//importFeatEventVec.shrink_to_fit();
+
 	// Stable sort instead of simple sort to prevent entities with the same ID to be misordered 
 	// As we want to keep the order at wich they were written to the file 
 	// Very important to have a sorted vector, otherwise we might miss some data
 	std::stable_sort(importPosVec.begin(), importPosVec.end(), compare_uniq_id);
 	std::stable_sort(importEntEventVec.begin(), importEntEventVec.end(), compare_uniq_id);
 
-	//std::pair<std::vector<ACMIRawPositionData>::iterator, std::vector<ACMIRawPositionData>::iterator> bounds;
-	//Range<std::vector<ACMIRawPositionData>> range3 = std::equal_range(importPosVec.begin(), importPosVec.end(), 20, comp());
-	//int test = range3.begin() - importPosVec.begin();
-
 	t = clock() - t;
 	MonoPrint("(1.5/5) ACMITape Import: sorting arrays \t took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
-
 
 	// build the importEntityList
 	MonoPrint("(2/5) ACMITape Import: Parsing Entities ....\n");
@@ -487,7 +474,6 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 	ParseEntities();
 	t = clock() - t;
 	MonoPrint("(2/5) ACMITape Import: Parsing Entities \t took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
-
 
 	int importEntityVecSize = importEntityVec.size();		// importNumEnt
 	int importPosVecSize = importPosVec.size();				// importNumPos
@@ -523,10 +509,8 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 	tapeHdr.startTime = begTime;
 
 
-
 	// set up the chain offsets of entity positions
 	MonoPrint("(3/5) ACMITape Import: Threading Positions ....\n");
-
 	t = clock();
 	ThreadEntityPositions(&tapeHdr);
 	t = clock() - t;
@@ -535,7 +519,6 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 
 	// set up the chain offsets of entity events
 	MonoPrint("(4/5) ACMITape Import: Threading Entity Events ....\n");
-
 	t = clock();
 	ThreadEntityEvents(&tapeHdr);
 	t = clock() - t;
@@ -574,71 +557,39 @@ void ACMITape::ParseEntities(void)
 	int	i = 0;
 	int importPosVecSize = importPosVec.size();
 
-
 	for (int count = 0; count < importPosVecSize; count++)
 	{
 		// if feature
 		// Features have only 1 Position each
-		// That means their uniqueID will only appear once in importPosVec
+		// That means their uniqueID will only appear only once in importPosVec
 		if (importPosVec[count].flags & ENTITY_FLAG_FEATURE)
 		{
-			
-			// look for existing entity
-			// Not needed anymore since the importPosVec is ordered
-			// Only one entity of type Feature exist with a uniq ID
-			// As the Feature position doesn't change
-			//for (i = 0; (i < importFeatVec.size()) && (importFeatVec[i].uniqueID != importPosVec[count].uniqueID); i++)
-			//{
-			//}
+			ACMIEntityData importEntityInfo;
 
-			//MonoPrint("i : %d\n", i);
-			//if (!binary_search(importFeatVec.begin(), importFeatVec.end(), importPosVec[count].uniqueID, comparison))
-			//	MonoPrint("Not Found");
+			importEntityInfo.count = 0;
+			importEntityInfo.uniqueID = importPosVec[count].uniqueID;
+			importEntityInfo.type = importPosVec[count].type;
+			importEntityInfo.flags = importPosVec[count].flags;
+			importEntityInfo.leadIndex = importPosVec[count].leadIndex;
+			importEntityInfo.specialFlags = importPosVec[count].specialFlags;
+			importEntityInfo.slot = importPosVec[count].slot;
 
-
-			// create new import entity record if none exist
-			//if (i == importFeatVec.size())
-			//{
-				//MonoPrint("adding entity\n");
-				ACMIEntityData importEntityInfo;
-				importEntityInfo.count = 0;
-
-				importEntityInfo.uniqueID = importPosVec[count].uniqueID;
-				importEntityInfo.type = importPosVec[count].type;
-				importEntityInfo.flags = importPosVec[count].flags;
-				importEntityInfo.leadIndex = importPosVec[count].leadIndex;
-				importEntityInfo.specialFlags = importPosVec[count].specialFlags;
-				importEntityInfo.slot = importPosVec[count].slot;
-
-				importFeatVec.push_back(importEntityInfo);
-			//}
+			importFeatVec.push_back(importEntityInfo);
 		}
 		else
 		{
-			// not a feature
-
-			// look for existing entity
-		//	for (i = 0; i < importEntityVec.size() && importPosVec[count].uniqueID != importEntityVec[i].uniqueID; i++)
-		//	{
-		//	}
-			// Because importPosVec is ordered, the back of entity vec will always be the highest found uniqueID
-
-			//MonoPrint("i : %d\n", i);
+			// Because importPosVec is ordered, the back of Entity vec will always be the highest found uniqueID
+			// First time we see an entity means it can only be a new one
 			if (importEntityVec.size() == 0 || (importEntityVec.back().uniqueID != importPosVec[count].uniqueID))
-			//{
-			// create new import entity record
-			//if (i == importEntityVec.size())
 			{
-			//	MonoPrint("adding entity\n");
 				ACMIEntityData* importEntityInfo = new ACMIEntityData;
-				importEntityInfo->count = 0;
 
+				importEntityInfo->count = 0;
 				importEntityInfo->uniqueID = importPosVec[count].uniqueID;
 				importEntityInfo->type = importPosVec[count].type;
 				importEntityInfo->flags = importPosVec[count].flags;
 
 				importEntityVec.push_back(*importEntityInfo);
-				//importNumEnt++;
 			}
 		}
 	}
@@ -656,7 +607,6 @@ void ACMITape::ParseEntities(void)
 	int entitynum = importEntityVec.size();
 	while (i < entitynum)
 	{
-
 		if (importEntityVec[i].count == 0)
 		{
 			importEntityVec[i].count = 1;
@@ -672,7 +622,6 @@ void ACMITape::ParseEntities(void)
 					objCount++;
 				}
 				j++;
-
 			}
 		}
 		i++;
@@ -707,26 +656,22 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 	// entity and chains them together
 	par_for(0, importEntityVecSize, [&](int i, int cpu)
 		{
-
 			long currOffset;
 			bool foundFirst = false;
 			long prevOffset = 0;
 			importEntityVec[i].firstPositionDataOffset = 0;
 			int prevPosVec = -1;
+
 			std::pair<std::vector<ACMIRawPositionData>::iterator, std::vector<ACMIRawPositionData>::iterator> bounds;
 
 			// We're looking for the range in importPosVec in wich the uniqueID of importEntityVec is the same as importPosVec
-			// This implies that the importPosVec vector is sorted 
+			// This reuire importPosVec to be sorted
 			bounds = std::equal_range(importPosVec.begin(), importPosVec.end(), importEntityVec[i].uniqueID, comp());
 			int start = bounds.first - importPosVec.begin();
 			int stop = bounds.second - importPosVec.begin();
 
-
-			//std::for_each(importPosVec.begin(), importPosVec.end(), [&, j = 0](ACMIRawPositionData &CurrentimportPosVec) mutable
 			for (int j = start; j < stop; j++)
-				//for (int j = 0; j < importPosVecSize; j++)
 			{
-
 				// check the id to see if this position belongs to the entity
 				if (importEntityVec[i].uniqueID == importPosVec[j].uniqueID)
 				{
@@ -763,14 +708,7 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 					MonoPrint("MISMATCHED");
 				}
 			} // end for position loop
-
 		}); // end for threaded entity loop
-
-		// ------------------------------------------------------------------------------------
-		// ------------------------------------------------------------------------------------
-		// ------------------------------------------------------------------------------------
-
-
 
 	t = clock() - t;
 	MonoPrint(" - Thread Entity par_for 1: It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
@@ -791,7 +729,7 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 			std::pair<std::vector<ACMIRawPositionData>::iterator, std::vector<ACMIRawPositionData>::iterator> bounds;
 
 			// We're looking for the range in importPosVec in wich the uniqueID of importEntityVec is the same as importPosVec
-			// "For each Feature (the par_for above) we want to find every ImportPos related to said Feature 
+			// For each Feature (the par_for above) we want to find every ImportPos related to said Feature 
 			bounds = std::equal_range(importPosVec.begin(), importPosVec.end(), importFeatVec[i].uniqueID, comp());
 			int start = bounds.first - importPosVec.begin();
 			int stop = bounds.second - importPosVec.begin();
@@ -837,7 +775,6 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 			// while we're doing the features, for each one, go thru the
 			// feature event list looking for our unique ID in the events
 			// and setting the index value of our feature in the event
-
 			for (int j = 0; j < importFeatEventVecSize; j++)
 			{
 
@@ -848,11 +785,9 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 				}
 			} // end for feature event loop
 
-
 			// now go thru the feature list again and find lead unique ID's and
 			// change them to indices into the list
 			// actually NOW, go through and just make sure they exist... otherwise, clear
-
 			if (importFeatVec[i].leadIndex != -1)
 			{
 				int j;
@@ -875,7 +810,6 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 					importFeatVec[i].leadIndex = -1;
 				}
 			}
-
 		}); // end for feature entity loop
 
 	t = clock() - t;
@@ -889,19 +823,14 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 **		Now, we're going to have to setup the offset pointers to do the
 **		file mapping.  Each entity chains back and forth thru its position
 **		list.
+**	 we run an outer and inner loop.
+**	 the outer loops steps thru each entity
+**	 the inner loop searches each position update for one owned by the
+**	 entity and chains them together
 */
 void ACMITape::ThreadEntityEvents(ACMITapeHeader* tapeHdr)
 {
-	// we run an outer and inner loop here.
-	// the outer loops steps thru each entity
-	// the inner loop searches each position update for one owned by the
-	// entity and chains them together
-
-
-	int importEntityVecSize = importEntityVec.size(); // importNumEnt
-	int importPosVecSize = importPosVec.size(); // importNumPos
-	int importFeatVecSize = importFeatVec.size(); // importNumFeat
-	int importEntEventVecSize = importEntEventVec.size(); // importNumEntEvents
+	int importEntityVecSize = importEntityVec.size();
 
 	/*  Now threadded
 	** Reason we do not need mutex is the outer loop get a different entity each time
@@ -927,16 +856,13 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader* tapeHdr)
 			int stop = bounds.second - importEntEventVec.begin();
 
 			/*
-			** for (int j = 0; j < importEntEventVecSize; j++)
 			** https://stackoverflow.com/questions/3752019/how-to-get-the-index-of-a-value-in-a-vector-using-for-each
 			** j is a loop index for for_each
 			*/
 			std::for_each(bounds.first, bounds.second, [&, j = start](ACMIRawPositionData& CurrentimportEntEventVec) mutable
 				{
-
 					if (importEntityVec[i].uniqueID == CurrentimportEntEventVec.uniqueID)
 					{
-
 						// calculate the offset of this positional record
 						currOffset = tapeHdr->firstEntEventOffset +
 							sizeof(ACMIEntityPositionData) * j;
@@ -970,7 +896,6 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader* tapeHdr)
 					}
 					++j;
 				});
-
 		});// end for threadded entity loop
 }
 
@@ -991,24 +916,20 @@ int CompareEventTrailer(const void* p1, const void* p2)
 		return 0;
 }
 
-
 /*
 ** Description:
 **		At this point importEntityVec and importPosVec should be populated.
 **		Also the entities and positions are now threaded
 **		write out the file
 */
-
 void ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 {
 	FILE* tapeFile;
-
 
 	int importEntityVecSize = importEntityVec.size(); // importNumEnt
 	int importPosVecSize = importPosVec.size(); // importNumPos
 	int importFeatVecSize = importFeatVec.size(); // importNumFeat
 	int importEntEventVecSize = importEntEventVec.size(); // importNumEntEvents
-
 
 	try {
 
@@ -1029,13 +950,10 @@ void ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 		if (!ret)
 			throw std::runtime_error("Error writing to file");
 
-
 		// write out the entities 
 		ret = fwrite(importEntityVec.data(), sizeof(ACMIEntityData) * importEntityVecSize, 1, tapeFile);
 		if (!ret)
 			throw std::runtime_error("Error writing to file");
-
-
 
 		// write out the features
 		ret = fwrite(importFeatVec.data(), sizeof(ACMIEntityData) * importFeatVecSize, 1, tapeFile);
@@ -1143,12 +1061,6 @@ void ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 		return;
 	}
 }
-
-
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 
 
 /*
