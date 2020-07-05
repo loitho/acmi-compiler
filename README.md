@@ -68,7 +68,7 @@ This program solve the problem in 2 different ways:
 ## Performances
 
 This picture show the differences in performances between the version 2.0 of the compiler, Falcon BMS 4.34 and the Old compiler version
-
+Specs:  Ryzen 7 3700X 8 cores / 16 Threads - 32 GB of DDR4 RAM / MX100 SSD
 
 ![Speed](speed.png)
 
