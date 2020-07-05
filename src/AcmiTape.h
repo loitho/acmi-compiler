@@ -31,7 +31,7 @@ typedef unsigned char BYTE;
 // Header for the tape file.
 
 #pragma pack (push, pack1, 1)
-typedef struct 
+typedef struct ACMITapeHeader
 {
 	long		fileID = 0;
 	long		fileSize = 0;
@@ -61,7 +61,7 @@ typedef struct
 // Entity data.
 
 #pragma pack (push, pack1, 1)
-typedef struct 
+typedef struct ACMIEntityData
 {
 	long		uniqueID = 0;
 	long		type = 0;
@@ -101,7 +101,7 @@ enum
 };
 
 #pragma pack (push, pack1, 1)
-typedef struct
+typedef struct ACMIEntityPositionData
 {
 	// Time stamp for the positional data
 	float		time = 0.0;
@@ -150,7 +150,7 @@ typedef struct
 // create a .vhs file (dig that extension), which is the ACMITape playback format.
 // This is the format stored in the flight file.
 
-typedef struct 
+typedef struct ACMIRawPositionData
 {
 	int			type = 0;			// type of object
 	long		uniqueID = 0;		// A unique ID for the object. Many to One correlation to Falcon Entities
@@ -169,10 +169,10 @@ typedef struct
 // Header for event data.
 
 #pragma pack (push, pack1, 1)
-typedef struct
+typedef struct ACMIEventHeader
 {
 	// type of event this is
-	BYTE		eventType;
+	BYTE		eventType = 0;
 	long 		index = -42;
 
 	// Time stamp for this event.
@@ -202,7 +202,7 @@ typedef struct
 //
 
 #pragma pack (push, pack1, 1)
-typedef struct
+typedef struct ACMIEventTrailer
 {
 	float		timeEnd = 0;
 	long 		index = 0;		// into EventHeader
@@ -214,7 +214,7 @@ typedef struct
 // Feature Status Event
 
 #pragma pack (push, pack1, 1)
-typedef struct
+typedef struct ACMIFeatEvent
 {
 	// Time stamp for this event.
 	float		time = 0.0;
@@ -229,7 +229,7 @@ typedef struct
 } ACMIFeatEvent;
 #pragma pack (pop, pack1)
 
-typedef struct
+typedef struct ACMIFeatEventImportData
 {
 	long		uniqueID = 0;
 	ACMIFeatEvent data;
@@ -291,7 +291,7 @@ typedef struct
 
 
 
-typedef struct
+typedef struct ACMIEntityReadHead
 {
 	long			positionDataOffset = 0;
 	long			eventDataOffset = 0;

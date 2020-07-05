@@ -13,6 +13,13 @@
 /* STFU _CRT_SECURE_NO_WARNINGS */
 #pragma warning(disable:4996)
 
+/* 
+** Look, I'm not gonna cast every single size_t of the code into long
+** It serves the sames purpose as to disable the warning
+** It doesn't change the fact that yes data might be lost 
+*/
+#pragma warning(disable:4267)
+
 #include <vector>
 #include <algorithm>
 #include <filesystem>
@@ -316,6 +323,7 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 
 			// fill in data
 			ehdr.eventType = hdr.type;
+			// ehdr.index = static_cast<long>(importEventVec.size());
 			ehdr.index = importEventVec.size();
 			ehdr.time = hdr.time;
 			ehdr.timeEnd = hdr.time + msfx.timeToLive;
@@ -475,12 +483,12 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 	t = clock() - t;
 	MonoPrint("(2/5) ACMITape Import: Parsing Entities \t took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
 
-	int importEntityVecSize = importEntityVec.size();		// importNumEnt
-	int importPosVecSize = importPosVec.size();				// importNumPos
-	int importFeatVecSize = importFeatVec.size();			// importNumFeat
-	int importEntEventVecSize = importEntEventVec.size();	// importNumEntEvents
-	int importFeatEventVecSize = importFeatEventVec.size();	// importNumFeatEvents
-	int importEventVecSize = importEventVec.size();			// importNumEvents
+	size_t importEntityVecSize = importEntityVec.size();		// importNumEnt
+	size_t importPosVecSize = importPosVec.size();				// importNumPos
+	size_t importFeatVecSize = importFeatVec.size();			// importNumFeat
+	size_t importEntEventVecSize = importEntEventVec.size();	// importNumEntEvents
+	size_t importFeatEventVecSize = importFeatEventVec.size();	// importNumFeatEvents
+	size_t importEventVecSize = importEventVec.size();			// importNumEvents
 
 	// setup the tape header
 	tapeHdr.fileID = 'TAPE';
@@ -554,10 +562,9 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 
 void ACMITape::ParseEntities(void)
 {
-	int	i = 0;
-	int importPosVecSize = importPosVec.size();
+	size_t importPosVecSize = importPosVec.size();
 
-	for (int count = 0; count < importPosVecSize; count++)
+	for (size_t count = 0; count < importPosVecSize; count++)
 	{
 		// if feature
 		// Features have only 1 Position each
@@ -602,9 +609,9 @@ void ACMITape::ParseEntities(void)
 	*/
 	int objCount;
 
-	i = 0;
-	int j = 0;
-	int entitynum = importEntityVec.size();
+	size_t i = 0;
+	size_t j = 0;
+	size_t entitynum = importEntityVec.size();
 	while (i < entitynum)
 	{
 		if (importEntityVec[i].count == 0)
@@ -642,11 +649,11 @@ void ACMITape::ParseEntities(void)
 void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 {
 
-	int importEntityVecSize = importEntityVec.size();	// importNumEnt
-	int importPosVecSize = importPosVec.size();			// importNumPos
-	int importFeatVecSize = importFeatVec.size();		// importNumFeat
-	int importEntEventVecSize = importEntEventVec.size(); // importNumEntEvents
-	int importFeatEventVecSize = importFeatEventVec.size();
+	size_t importEntityVecSize = importEntityVec.size();
+	size_t importPosVecSize = importPosVec.size();
+	size_t importFeatVecSize = importFeatVec.size();
+	size_t importEntEventVecSize = importEntEventVec.size();
+	size_t importFeatEventVecSize = importFeatEventVec.size();
 
 	clock_t t = clock();
 
@@ -654,7 +661,7 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 	// the outer loops steps thru each entity
 	// the inner loop searches each position update for one owned by the
 	// entity and chains them together
-	par_for(0, importEntityVecSize, [&](int i, int cpu)
+	par_for(0, importEntityVecSize, [&](size_t i, int cpu)
 		{
 			long currOffset;
 			bool foundFirst = false;
@@ -667,10 +674,10 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 			// We're looking for the range in importPosVec in wich the uniqueID of importEntityVec is the same as importPosVec
 			// This reuire importPosVec to be sorted
 			bounds = std::equal_range(importPosVec.begin(), importPosVec.end(), importEntityVec[i].uniqueID, comp());
-			int start = bounds.first - importPosVec.begin();
-			int stop = bounds.second - importPosVec.begin();
+			size_t start = bounds.first - importPosVec.begin();
+			size_t stop = bounds.second - importPosVec.begin();
 
-			for (int j = start; j < stop; j++)
+			for (size_t j = start; j < stop; j++)
 			{
 				// check the id to see if this position belongs to the entity
 				if (importEntityVec[i].uniqueID == importPosVec[j].uniqueID)
@@ -718,7 +725,7 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 	// the outer loops steps thru each Feature
 	// the inner loop searches each position update for one owned by the
 	// Feature and chains them together
-	par_for(0, importFeatVecSize, [&](int i, int cpu)
+	par_for(0, importFeatVecSize, [&](size_t i, int cpu)
 		{
 			long currOffset;
 			bool foundFirst = false;
@@ -731,10 +738,10 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 			// We're looking for the range in importPosVec in wich the uniqueID of importEntityVec is the same as importPosVec
 			// For each Feature (the par_for above) we want to find every ImportPos related to said Feature 
 			bounds = std::equal_range(importPosVec.begin(), importPosVec.end(), importFeatVec[i].uniqueID, comp());
-			int start = bounds.first - importPosVec.begin();
-			int stop = bounds.second - importPosVec.begin();
+			size_t start = bounds.first - importPosVec.begin();
+			size_t stop = bounds.second - importPosVec.begin();
 
-			for (int j = start; j < stop; j++)
+			for (size_t j = start; j < stop; j++)
 			{
 				// check the id to see if this position belongs to the entity
 				if (importFeatVec[i].uniqueID == importPosVec[j].uniqueID)
@@ -775,7 +782,7 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 			// while we're doing the features, for each one, go thru the
 			// feature event list looking for our unique ID in the events
 			// and setting the index value of our feature in the event
-			for (int j = 0; j < importFeatEventVecSize; j++)
+			for (size_t j = 0; j < importFeatEventVecSize; j++)
 			{
 
 				// check the id to see if this event belongs to the entity
@@ -790,7 +797,7 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 			// actually NOW, go through and just make sure they exist... otherwise, clear
 			if (importFeatVec[i].leadIndex != -1)
 			{
-				int j;
+				size_t j;
 				for (j = 0; j < importFeatVecSize; j++)
 				{
 					// we don't compare ourselves
@@ -830,14 +837,14 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 */
 void ACMITape::ThreadEntityEvents(ACMITapeHeader* tapeHdr)
 {
-	int importEntityVecSize = importEntityVec.size();
+	size_t importEntityVecSize = importEntityVec.size();
 
 	/*  Now threadded
 	** Reason we do not need mutex is the outer loop get a different entity each time
 	** and the inner loop is only going to link together the position that are owned by the entity
 	** So each thread will never try to link data that belongs to another thread
 	*/
-	par_for(0, importEntityVecSize, [&](int i, int cpu)
+	par_for(0, importEntityVecSize, [&](size_t i, int cpu)
 		{
 			long currOffset;
 			bool foundFirst = false;
@@ -852,8 +859,8 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader* tapeHdr)
 			// "For each Entity (the par_for above) we want to find every EntityEvent related to said Entity
 			// importEntEventVec is sorted, equal_range gives us the first and last position of the chosen uniqueID
 			bounds = std::equal_range(importEntEventVec.begin(), importEntEventVec.end(), importEntityVec[i].uniqueID, comp());
-			int start = bounds.first - importEntEventVec.begin();
-			int stop = bounds.second - importEntEventVec.begin();
+			size_t start = bounds.first - importEntEventVec.begin();
+			size_t stop = bounds.second - importEntEventVec.begin();
 
 			/*
 			** https://stackoverflow.com/questions/3752019/how-to-get-the-index-of-a-value-in-a-vector-using-for-each
@@ -926,10 +933,10 @@ void ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 {
 	FILE* tapeFile;
 
-	int importEntityVecSize = importEntityVec.size(); // importNumEnt
-	int importPosVecSize = importPosVec.size(); // importNumPos
-	int importFeatVecSize = importFeatVec.size(); // importNumFeat
-	int importEntEventVecSize = importEntEventVec.size(); // importNumEntEvents
+	size_t importEntityVecSize = importEntityVec.size(); // importNumEnt
+	size_t importPosVecSize = importPosVec.size(); // importNumPos
+	size_t importFeatVecSize = importFeatVec.size(); // importNumFeat
+	size_t importEntEventVecSize = importEntEventVec.size(); // importNumEntEvents
 
 	try {
 
@@ -1003,7 +1010,7 @@ void ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 		// allocate the trailer list
 
 
-		int importEventVecSize = importEventVec.size();
+		size_t importEventVecSize = importEventVec.size();
 		std::vector<ACMIEventTrailer> importEventTrailerVec(importEventVecSize);
 
 		// write out the events 
@@ -1018,7 +1025,7 @@ void ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 				throw std::runtime_error("Error writing to file");
 		} // end for events loop
 
-		int importEventTrailerVecSize = importEventTrailerVec.size();
+		size_t importEventTrailerVecSize = importEventTrailerVec.size();
 
 		/*
 		Using qsort because sort and sort_stable don't output the same exact result
@@ -1036,7 +1043,7 @@ void ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 
 
 		// write out the feature events
-		int importFeatEventVecSize = importFeatEventVec.size();
+		size_t importFeatEventVecSize = importFeatEventVec.size();
 
 		for (i = 0; i < importFeatEventVecSize; i++)
 		{
