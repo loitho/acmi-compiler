@@ -5,7 +5,7 @@
 
 
 * More consistent compilation (checksum of the same compiled .flt file should be the same)
-* **Extremely improved compilation time**
+* **Extremely improved compilation time** (10 times faster than BMS)
 * Vector memory reservation
 * Code cleanup
 

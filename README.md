@@ -32,15 +32,16 @@ This program solve the problem in 2 different ways:
 
 - The program will "steal" .flt files from falcon and rename them into .flt.tmp that way **Falcon will not compile them and you'll be able to access the debriefing immediately**
 
-
 - The program will wait for your input and then compile the .flt files with all the CPU resources available on your computer
+
+- Also, now the program actually compile faster than BMS 4.34 and 4.33
 
 
 ## Cool ! How do I use it ?
 
-- Download the [**executable**](https://github.com/loitho/acmi-compiler/releases/download/v0.2/acmi-compiler-v0.2.exe)
+- Download the [**executable**](https://github.com/loitho/acmi-compiler/releases/download/v2.0/acmi-compiler-v0.2.exe)
 
-- Move the .exe file to your ACMI folder (by default:  C:\Falcon BMS 4.33 U1\User\Acmi)
+- Move the .exe file to your ACMI folder (by default: *C:\Falcon BMS 4.33 U1\User\Acmi*)
 
 - **Clear the ACMI Folder of any .flt file**
  
@@ -56,7 +57,7 @@ This program solve the problem in 2 different ways:
 
 - The program doesn't care if the ACMI is still recording while leaving the 3D environment (So if you eject and can't stop the recording, the program will prevent BMS from compiling the file anyway)
 
-- The converter/compiler is 5 to 6 times faster than the standard Falcon converter (at the time of Falcom 4.33 that was true, it's not the case anymore, it's a bit slower).
+- The converter/compiler is 10 to 15 times faster than the standard Falcon converter (BMS 4.34.3)
 
 - Yes, it's technically not a compiler it's more like a .flt to .vhs converter 
 
@@ -71,6 +72,8 @@ So, what did I do ?
 - Added multithreading support 
 - Various code optimization 
 - Added automatic dectection for new .flt files in the ACMI folder
+- Added vector memory reservation for faster file parsing 
+- Sorted the vectors so that we can run binary searches in them
 
 ## Things be aware if you want to modify this code
 
