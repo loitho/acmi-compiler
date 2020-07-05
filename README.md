@@ -1,16 +1,17 @@
 # ACMI-Compiler
 
 ### Table of content
-- [What is this ?](#What-is-this-?)  
-- [What are the requirement ?](#What-are-the-requirement-?)  
-- [Why should I use this program ?](#Why-should-I-use-this-program-?)  
-- [Download and usage](#Cool-!-How-do-I-use-it-?)
-- [Performances](#Performances)
-- [Sidenotes](#Sidenotes)  
-- [Modifications to the original code](#Modifications-to-the-original-code)  
-- [Things be aware if you want to modify this code](#Things-be-aware-if-you-want-to-modify-this-code)  
-- [Special thanks](#Special-thanks)  
-- [Official topic on Benchmarksim](#Official-topic-on-Benchmarksim)  
+- [What is this ?](#what-is-this--)
+- [What are the requirement ?](#what-are-the-requirement--)
+- [Why should I use this program ?](#why-should-i-use-this-program--)
+- [Download and usage](#cool---how-do-i-use-it--)
+- [Performances](#performances)
+- [Sidenotes](#sidenotes)
+- [Modifications to the original code](#modifications-to-the-original-code)
+- [Things be aware if you want to modify this code](#things-be-aware-if-you-want-to-modify-this-code)
+- [Special thanks](#special-thanks)
+- [Official topic on Benchmarksim](#official-topic-on-benchmarksim)
+
 
 ## What is this ?
 
@@ -66,6 +67,8 @@ This program solve the problem in 2 different ways:
 ## Performances
 
 This picture show the differences in performances between the version 2.0 of the compiler, Falcon BMS 4.34 and the Old compiler version
+
+
 ![Speed](speed.png)
 
 ## Sidenotes
