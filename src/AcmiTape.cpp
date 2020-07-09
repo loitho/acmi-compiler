@@ -35,6 +35,11 @@
 
 #define MonoPrint  printf
 
+#define COLOR_RED "\033[31m"
+#define COLOR_YELLOW "\033[93m"
+#define COLOR_RESET "\033[0m"
+
+
 long GetFileSize(std::string filename)
 {
 	struct stat stat_buf;
@@ -140,6 +145,7 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 	tapeHdr.todOffset = 0.0f;
 	float begTime = -1.0;
 	float endTime = 0.0;
+	bool corrupted = false;
 
 	long filesize = GetFileSize(inFltFile);
 
@@ -151,9 +157,7 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 		MonoPrint("Error opening acmi flight file\n");
 		return false;
 	}
-
 	clock_t t;
-
 	MonoPrint("(1/5) ACMITape Import: Reading Raw Data ....\n");
 	t = clock();
 
@@ -192,7 +196,10 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 			// Read the data
 			if (!fread(&genpos, sizeof(ACMIGenPositionData), 1, flightFile))
 			{
-				return false;
+				corrupted = true;
+				MonoPrint("%s[WARNING] Error reading ACMIGenPositionData\n %s", COLOR_YELLOW, COLOR_RESET);
+				break;
+				//return false;
 			}
 			if (hdr.type == ACMIRecAircraftPosition)
 				fread(&tempTarget, sizeof(tempTarget), 1, flightFile);
@@ -237,7 +244,9 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 			// Read the data
 			if (!fread(&tracer, sizeof(ACMITracerStartData), 1, flightFile))
 			{
-				return false;
+				corrupted = true;
+				MonoPrint("%s[WARNING] Error reading ACMITracerStartData%s\n", COLOR_YELLOW, COLOR_RESET);
+				break;
 			}
 
 			// Allocate a new data node.
@@ -266,7 +275,9 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 			// Read the data
 			if (!fread(&sfx, sizeof(ACMIStationarySfxData), 1, flightFile))
 			{
-				return false;
+				corrupted = true;
+				MonoPrint("%s[WARNING] Error reading ACMIStationarySfxData%s\n", COLOR_YELLOW, COLOR_RESET);
+				break;
 			}
 
 			// clear header
@@ -292,7 +303,9 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 			// Read the data
 			if (!fread(&fs, sizeof(ACMIFeatureStatusData), 1, flightFile))
 			{
-				return false;
+				corrupted = true;
+				MonoPrint("%s[WARNING] Error reading ACMIFeatureStatusData%s\n", COLOR_YELLOW, COLOR_RESET);
+				break;
 			}
 
 			// Clear feature structure.
@@ -315,7 +328,9 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 			// Read the data
 			if (!fread(&msfx, sizeof(ACMIMovingSfxData), 1, flightFile))
 			{
-				return false;
+				corrupted = true;
+				MonoPrint("%s[WARNING] Error reading ACMIMovingSfxData%s\n", COLOR_YELLOW, COLOR_RESET);
+				break;
 			}
 
 			// Clear header structure.
@@ -348,7 +363,9 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 			// Read the data
 			if (!fread(&sd, sizeof(ACMISwitchData), 1, flightFile))
 			{
-				return false;
+				corrupted = true;
+				MonoPrint("%s[WARNING] Error reading ACMISwitchData%s\n", COLOR_YELLOW, COLOR_RESET);
+				break;
 			}
 
 			// Clear positiondata structure.
@@ -375,7 +392,10 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 			// Read the data
 			if (!fread(&dd, sizeof(ACMIDOFData), 1, flightFile))
 			{
-				return false;
+				corrupted = true;
+				MonoPrint("%s[WARNING] Error reading ACMIDOFData%s\n", COLOR_YELLOW, COLOR_RESET);
+				//return false;
+				break;
 			}
 
 			// Clear positiondata structure.
@@ -402,7 +422,9 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 			// Read the data
 			if (!fread(&featpos, sizeof(ACMIFeaturePositionData), 1, flightFile))
 			{
-				return false;
+				corrupted = true;
+				MonoPrint("%s[WARNING] Error reading ACMIFeaturePositionData%s\n", COLOR_YELLOW, COLOR_RESET);
+				break;
 			}
 
 			// Clear positiondata structure.
@@ -435,7 +457,9 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 			// Read the data
 			if (!fread(&import_count, sizeof(long), 1, flightFile))
 			{
-				return false;
+				corrupted = true;
+				MonoPrint("%s[WARNING] Error reading ACMICallsignList%s\n", COLOR_YELLOW, COLOR_RESET);
+				break;
 			}
 			//Import_Callsigns.
 			//Import_Callsigns.reserve(import_count * sizeof(ACMI_CallRec));
@@ -443,7 +467,9 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 
 			if (!fread(Import_Callsigns, import_count * sizeof(ACMI_CallRec), 1, flightFile))
 			{
-				return false;
+				corrupted = true;
+				MonoPrint("%s[WARNING] Error reading Import_Callsigns%s\n", COLOR_YELLOW, COLOR_RESET);
+				break;
 			}
 			break;
 
@@ -463,7 +489,8 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 
 	t = clock() - t;
 	MonoPrint("(1/5) ACMITape Import: Reading Raw Data \t took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
-
+	if (corrupted == true)
+		MonoPrint("%s[WARNING] The .flt was corrupted, you might have data missing ....\n\n%s", COLOR_YELLOW, COLOR_RESET);
 	MonoPrint("(1.5/5) ACMITape Import: sorting arrays ....\n");
 	t = clock();
 
@@ -1071,7 +1098,7 @@ bool ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 	}
 	catch (const std::exception& e)
 	{
-		MonoPrint("\n [ERROR] Error writing new tape file: %s\n\n", e.what());
+		MonoPrint("\n%s[ERROR] Error writing new tape file: %s\n\n%s", COLOR_RED ,e.what(), COLOR_RESET);
 		if (tapeFile)
 			fclose(tapeFile);
 		return false;

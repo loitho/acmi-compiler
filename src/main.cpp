@@ -18,6 +18,9 @@
 
 #include "FolderMonitor.h"
 
+#define COLOR_RED "\033[31m"
+#define COLOR_YELLOW "\033[93m"
+#define COLOR_RESET "\033[0m"
 
 std::string ExePath() {
 	char buffer[MAX_PATH];
@@ -137,7 +140,7 @@ int main(int argc, char* argv[])
 			}
 			else
 			{
-				printf("\n----- /!\\ /!\\  /!\\  ERROR DURING THE CONVERSION SEE ABOVE ERROR  /!\\  /!\\  /!\\ ----- \n Leaving the FLT file alone for debugging purpose \n\n\n");
+				printf("\n%s[ERROR] - ERROR DURING THE CONVERSION SEE ABOVE ERROR \n Leaving the FLT file alone for debugging purpose \n\n\n%s", COLOR_RED, COLOR_RESET);
 			}
 		
 			//printf("It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
