@@ -53,6 +53,9 @@
       <Filter>Git Files</Filter>
     </None>
     <None Include="acmi-compiler.licenseheader" />
+    <None Include="CHANGELOG.md">
+      <Filter>Git Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="speed.png">

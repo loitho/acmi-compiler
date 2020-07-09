@@ -324,7 +324,7 @@ private:
 	void ThreadEntityPositions(ACMITapeHeader *tapeHdr);
 	void ThreadEntityEvents(ACMITapeHeader *tapeHdr);
 	void ImportTextEventList(FILE *fd, ACMITapeHeader *tapeHdr);
-	void WriteTapeFile(const char *fname, ACMITapeHeader *tapeHdr);
+	bool WriteTapeFile(const char *fname, ACMITapeHeader *tapeHdr);
 
 
 	long tempTarget = 0; // for missile lock.

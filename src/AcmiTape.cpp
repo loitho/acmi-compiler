@@ -549,11 +549,13 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 	fclose(flightFile);
 
 	t = clock();
-	WriteTapeFile(outTapeFileName, &tapeHdr);
+
+	bool status;
+	status = WriteTapeFile(outTapeFileName, &tapeHdr);
 	t = clock() - t;
 	MonoPrint("(5/5) ACMITape Import: Writing Tape File took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 
-	return true;
+	return status;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -929,7 +931,7 @@ int CompareEventTrailer(const void* p1, const void* p2)
 **		Also the entities and positions are now threaded
 **		write out the file
 */
-void ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
+bool ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 {
 	FILE* tapeFile;
 
@@ -942,30 +944,37 @@ void ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 
 		int i, j;
 
-		size_t ret;
+		size_t ret = 0;
 
 		tapeFile = fopen(fname, "wb");
 		if (tapeFile == NULL)
 		{
 			MonoPrint("Error opening new tape file\n");
-			return;
+			return false;
 		}
 
 		// write the header
 		//MonoPrint("ACMITapeHeader %d - size : %ld  \n", sizeof(ACMITapeHeader), tapeHdr->fileSize);
 		ret = fwrite(tapeHdr, sizeof(ACMITapeHeader), 1, tapeFile);
+		// !ret => ret != 1  
 		if (!ret)
-			throw std::runtime_error("Error writing to file");
+			throw std::runtime_error("Error writing ACMITapeHeader to file");
 
 		// write out the entities 
-		ret = fwrite(importEntityVec.data(), sizeof(ACMIEntityData) * importEntityVecSize, 1, tapeFile);
-		if (!ret)
-			throw std::runtime_error("Error writing to file");
+		if (importEntityVec.size() != 0)
+		{
+			ret = fwrite(importEntityVec.data(), sizeof(ACMIEntityData) * importEntityVecSize, 1, tapeFile);
+			if (!ret)
+				throw std::runtime_error("Error writing importEntityVec to file");
+		}
 
 		// write out the features
-		ret = fwrite(importFeatVec.data(), sizeof(ACMIEntityData) * importFeatVecSize, 1, tapeFile);
-		if (!ret)
-			throw std::runtime_error("Error writing to file");
+		if (importFeatVec.size() != 0)
+		{
+			ret = fwrite(importFeatVec.data(), sizeof(ACMIEntityData) * importFeatVecSize, 1, tapeFile);
+			if (!ret)
+				throw std::runtime_error("Error writing importFeatVec to file");
+		}
 		// end for entity loop
 
 	   // write out the entitiy positions
@@ -996,7 +1005,7 @@ void ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 
 			ret = fwrite(&importPosVec[i].entityPosData, sizeof(ACMIEntityPositionData), 1, tapeFile);
 			if (!ret)
-				throw std::runtime_error("Error writing to file");
+				throw std::runtime_error("Error writing ACMIEntityPositionData to file");
 		}
 
 		// write out the entitiy events
@@ -1004,7 +1013,7 @@ void ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 		{
 			ret = fwrite(&(importEntEventVec[i].entityPosData), sizeof(ACMIEntityPositionData), 1, tapeFile);
 			if (!ret)
-				throw std::runtime_error("Error writing to file");
+				throw std::runtime_error("Error writing ACMIEntityPositionData to file");
 		}
 
 		// allocate the trailer list
@@ -1022,7 +1031,7 @@ void ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 
 			ret = fwrite(&importEventVec[i], sizeof(ACMIEventHeader), 1, tapeFile);
 			if (!ret)
-				throw std::runtime_error("Error writing to file");
+				throw std::runtime_error("Error writing ACMIEventHeader to file");
 		} // end for events loop
 
 		size_t importEventTrailerVecSize = importEventTrailerVec.size();
@@ -1037,7 +1046,7 @@ void ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 
 			ret = fwrite(importEventTrailerVec.data(), sizeof(ACMIEventTrailer) * importEventTrailerVecSize, 1, tapeFile);
 			if (!ret)
-				throw std::runtime_error("Error writing to file");
+				throw std::runtime_error("Error writing ACMIEventTrailer to file");
 		}
 
 
@@ -1049,7 +1058,7 @@ void ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 		{
 			ret = fwrite(&importFeatEventVec[i].data, sizeof(ACMIFeatEvent), 1, tapeFile);
 			if (!ret)
-				throw std::runtime_error("Error writing to file");
+				throw std::runtime_error("Error writing ACMIFeatEvent to file");
 		}
 
 		// finally import and write out the text events
@@ -1057,15 +1066,15 @@ void ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 
 		// normal exit
 		fclose(tapeFile);
-		return;
+		return true;
 
 	}
 	catch (const std::exception& e)
 	{
-		MonoPrint("Error writing new tape file: %s\n", e.what());
+		MonoPrint("\n [ERROR] Error writing new tape file: %s\n\n", e.what());
 		if (tapeFile)
 			fclose(tapeFile);
-		return;
+		return false;
 	}
 }
 

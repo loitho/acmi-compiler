@@ -51,7 +51,7 @@ This program solve the problem in 2 different ways:
 
 ## Cool ! How do I use it ?
 
-- Download the [**Lastest release**](https://github.com/loitho/acmi-compiler/releases/latest) or [**Direct link**](https://github.com/loitho/acmi-compiler/releases/download/v2.0/acmi-compiler-v2.0.exe)
+- Download the [**Lastest release**](https://github.com/loitho/acmi-compiler/releases/latest) or [**Direct link**](https://github.com/loitho/acmi-compiler/releases/download/v2.1/acmi-compiler-v2.1.exe)
 
 - Move the .exe file to your ACMI folder (by default: *C:\Falcon BMS 4.34\User\Acmi*)
 

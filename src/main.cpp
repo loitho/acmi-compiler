@@ -135,6 +135,10 @@ int main(int argc, char* argv[])
 
 				remove(fltname);
 			}
+			else
+			{
+				printf("\n----- /!\\ /!\\  /!\\  ERROR DURING THE CONVERSION SEE ABOVE ERROR  /!\\  /!\\  /!\\ ----- \n Leaving the FLT file alone for debugging purpose \n\n\n");
+			}
 		
 			//printf("It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 		}

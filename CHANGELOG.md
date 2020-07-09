@@ -1,6 +1,14 @@
 # Changelog
 
 
+
+#### Version 2.1
+
+
+* Fix a bug for very small ACMI where there are no structures around the area recorded area
+* Better display when error occurs
+
+
 #### Version 2.0
 
 
