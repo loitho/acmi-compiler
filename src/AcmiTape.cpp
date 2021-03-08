@@ -935,8 +935,6 @@ bool ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 
 	try {
 
-		int i, j;
-
 		size_t ret = 0;
 
 		tapeFile = fopen(fname, "wb");
@@ -971,14 +969,15 @@ bool ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 		// end for entity loop
 
 	   // write out the entitiy positions
-		for (i = 0; i < importPosVecSize; i++)
+		for (size_t i = 0; i < importPosVecSize; i++)
 		{
 			// we now want to do a "fixup" of the radar targets.  These are
 			// currently in "uniqueIDs" and we want to convert them into
 			// an index into the entity list
 			if (importPosVec[i].entityPosData.posData.radarTarget != -1)
 			{
-				for (j = 0; j < importEntityVecSize; j++)
+				size_t j = 0;
+				for (; j < importEntityVecSize; j++)
 				{
 					if (importPosVec[i].entityPosData.posData.radarTarget == importEntityVec[j].uniqueID)
 					{
@@ -1002,7 +1001,7 @@ bool ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 		}
 
 		// write out the entitiy events
-		for (i = 0; i < importEntEventVecSize; i++)
+		for (size_t i = 0; i < importEntEventVecSize; i++)
 		{
 			ret = fwrite(&(importEntEventVec[i].entityPosData), sizeof(ACMIEntityPositionData), 1, tapeFile);
 			if (!ret)
@@ -1016,7 +1015,7 @@ bool ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 		std::vector<ACMIEventTrailer> importEventTrailerVec(importEventVecSize);
 
 		// write out the events 
-		for (i = 0; i < importEventVecSize; i++)
+		for (size_t i = 0; i < importEventVecSize; i++)
 		{
 			// set the trailer data
 			importEventTrailerVec[i].index = i;
@@ -1047,7 +1046,7 @@ bool ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 		// write out the feature events
 		size_t importFeatEventVecSize = importFeatEventVec.size();
 
-		for (i = 0; i < importFeatEventVecSize; i++)
+		for (size_t i = 0; i < importFeatEventVecSize; i++)
 		{
 			ret = fwrite(&importFeatEventVec[i].data, sizeof(ACMIFeatEvent), 1, tapeFile);
 			if (!ret)
