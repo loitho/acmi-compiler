@@ -20,6 +20,8 @@
 */
 #pragma warning(disable:4267)
 
+#include <chrono>
+#include <cstdio>
 #include <vector>
 #include <algorithm>
 #include <filesystem>
@@ -34,6 +36,7 @@
 #define COLOR_YELLOW "\033[93m"
 #define COLOR_RESET "\033[0m"
 
+using namespace std::chrono;
 
 long GetFileSize(std::string filename)
 {
@@ -69,6 +72,19 @@ struct comp
 		return a < b.uniqueID;
 	}
 };
+
+void PrintStepDuration(const char* step, const steady_clock::time_point& start)
+{
+	const duration<float> elapsed = steady_clock::now() - start;
+	MonoPrint("%s \t took me %f seconds).\n\n", step, elapsed.count());
+}
+
+// Same as above, but with a different message and a single newline.
+void PrintSubStepDuration(const char* step, const steady_clock::time_point& start)
+{
+	const duration<float> elapsed = steady_clock::now() - start;
+	MonoPrint("%s: It took me %f seconds).\n", step, elapsed.count());
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -121,9 +137,8 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 		MonoPrint("Error opening acmi flight file\n");
 		return false;
 	}
-	clock_t t;
 	MonoPrint("(1/5) ACMITape Import: Reading Raw Data ....\n");
-	t = clock();
+	auto t = steady_clock::now();
 
 	//https://stackoverflow.com/questions/6525650/benefits-of-using-reserve-in-a-vector-c
 	// Reserving space in memory for faster ingest
@@ -449,12 +464,11 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 		}
 	}
 
-	t = clock() - t;
-	MonoPrint("(1/5) ACMITape Import: Reading Raw Data \t took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
+	PrintStepDuration("(1/5) ACMITape Import: Reading Raw Data", t);
 	if (corrupted == true)
 		MonoPrint("%s[WARNING] The .flt was corrupted, you might have data missing ....\n\n%s", COLOR_YELLOW, COLOR_RESET);
 	MonoPrint("(1.5/5) ACMITape Import: sorting arrays ....\n");
-	t = clock();
+	t = steady_clock::now();
 
 	// Stable sort instead of simple sort to prevent entities with the same ID to be misordered 
 	// As we want to keep the order at wich they were written to the file 
@@ -462,15 +476,13 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 	std::stable_sort(importPosVec.begin(), importPosVec.end(), compare_uniq_id);
 	std::stable_sort(importEntEventVec.begin(), importEntEventVec.end(), compare_uniq_id);
 
-	t = clock() - t;
-	MonoPrint("(1.5/5) ACMITape Import: sorting arrays \t took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
+	PrintStepDuration("(1.5/5) ACMITape Import: sorting arrays", t);
 
 	// build the importEntityList
 	MonoPrint("(2/5) ACMITape Import: Parsing Entities ....\n");
-	t = clock();
+	t = steady_clock::now();
 	ParseEntities();
-	t = clock() - t;
-	MonoPrint("(2/5) ACMITape Import: Parsing Entities \t took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
+	PrintStepDuration("(2/5) ACMITape Import: Parsing Entities", t);
 
 	size_t importEntityVecSize = importEntityVec.size();		// importNumEnt
 	size_t importPosVecSize = importPosVec.size();				// importNumPos
@@ -508,18 +520,16 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 
 	// set up the chain offsets of entity positions
 	MonoPrint("(3/5) ACMITape Import: Threading Positions ....\n");
-	t = clock();
+	t = steady_clock::now();
 	ThreadEntityPositions(&tapeHdr);
-	t = clock() - t;
-	MonoPrint("(3/5) ACMITape Import: Threading Positions took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
+	PrintStepDuration("(3/5) ACMITape Import: Threading Positions", t);
 
 
 	// set up the chain offsets of entity events
 	MonoPrint("(4/5) ACMITape Import: Threading Entity Events ....\n");
-	t = clock();
+	t = steady_clock::now();
 	ThreadEntityEvents(&tapeHdr);
-	t = clock() - t;
-	MonoPrint("(4/5) ACMITape Import: Threading Entity took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
+	PrintStepDuration("(4/5) ACMITape Import: Threading Entity", t);
 
 
 	// Calculate size of .vhs file.
@@ -537,12 +547,11 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 
 	fclose(flightFile);
 
-	t = clock();
+	t = steady_clock::now();
 
 	bool status;
 	status = WriteTapeFile(outTapeFileName, &tapeHdr);
-	t = clock() - t;
-	MonoPrint("(5/5) ACMITape Import: Writing Tape File took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+	PrintStepDuration("(5/5) ACMITape Import: Writing Tape File", t);
 
 	return status;
 }
@@ -646,7 +655,7 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 	size_t importEntEventVecSize = importEntEventVec.size();
 	size_t importFeatEventVecSize = importFeatEventVec.size();
 
-	clock_t t = clock();
+	auto t = steady_clock::now();
 
 	// we run an outer and inner loop here.
 	// the outer loops steps thru each entity
@@ -708,9 +717,8 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 			} // end for position loop
 		}); // end for threaded entity loop
 
-	t = clock() - t;
-	MonoPrint(" - Thread Entity par_for 1: It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
-	t = clock();
+	PrintSubStepDuration(" - Thread Entity par_for 1", t);
+	t = steady_clock::now();
 
 	// we run an outer and inner loop here.
 	// the outer loops steps thru each Feature
@@ -810,8 +818,7 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 			}
 		}); // end for feature entity loop
 
-	t = clock() - t;
-	MonoPrint(" - Thread Entity par_for 2: It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+	PrintSubStepDuration(" - Thread Entity par_for 2", t);
 }
 
 
