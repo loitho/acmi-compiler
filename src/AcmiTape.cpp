@@ -23,6 +23,7 @@
 #include <vector>
 #include <algorithm>
 #include <filesystem>
+#include <sys/stat.h>
 
 #include "AcmiTape.h"
 #include "threading.h"
