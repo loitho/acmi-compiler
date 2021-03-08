@@ -650,9 +650,7 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 {
 
 	size_t importEntityVecSize = importEntityVec.size();
-	size_t importPosVecSize = importPosVec.size();
 	size_t importFeatVecSize = importFeatVec.size();
-	size_t importEntEventVecSize = importEntEventVec.size();
 	size_t importFeatEventVecSize = importFeatEventVec.size();
 
 	auto t = steady_clock::now();
@@ -858,7 +856,6 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader* tapeHdr)
 			// importEntEventVec is sorted, equal_range gives us the first and last position of the chosen uniqueID
 			bounds = std::equal_range(importEntEventVec.begin(), importEntEventVec.end(), importEntityVec[i].uniqueID, comp());
 			size_t start = bounds.first - importEntEventVec.begin();
-			size_t stop = bounds.second - importEntEventVec.begin();
 
 			/*
 			** https://stackoverflow.com/questions/3752019/how-to-get-the-index-of-a-value-in-a-vector-using-for-each
