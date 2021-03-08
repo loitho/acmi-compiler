@@ -589,14 +589,14 @@ void ACMITape::ParseEntities(void)
 			// First time we see an entity means it can only be a new one
 			if (importEntityVec.size() == 0 || (importEntityVec.back().uniqueID != importPosVec[count].uniqueID))
 			{
-				ACMIEntityData* importEntityInfo = new ACMIEntityData;
+				ACMIEntityData importEntityInfo;
 
-				importEntityInfo->count = 0;
-				importEntityInfo->uniqueID = importPosVec[count].uniqueID;
-				importEntityInfo->type = importPosVec[count].type;
-				importEntityInfo->flags = importPosVec[count].flags;
+				importEntityInfo.count = 0;
+				importEntityInfo.uniqueID = importPosVec[count].uniqueID;
+				importEntityInfo.type = importPosVec[count].type;
+				importEntityInfo.flags = importPosVec[count].flags;
 
-				importEntityVec.push_back(*importEntityInfo);
+				importEntityVec.push_back(importEntityInfo);
 			}
 		}
 	}
