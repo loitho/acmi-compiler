@@ -29,11 +29,11 @@ void par_for(int begin, int end, F fn, int num_cpus = 0) {
 	for (int cpu = 0; cpu != num_cpus; ++cpu) {
 		futures[cpu] = std::async(
 			std::launch::async,
-			[cpu, &idx, end, &fn]() {
+			[&idx, end, &fn]() {
 			for (;;) {
 				int i = idx++;
 				if (i >= end) break;
-				fn(i, cpu);
+				fn(i);
 			}
 		}
 		);

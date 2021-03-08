@@ -659,7 +659,7 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 	// the outer loops steps thru each entity
 	// the inner loop searches each position update for one owned by the
 	// entity and chains them together
-	par_for(0, importEntityVecSize, [&](size_t i, int cpu)
+	par_for(0, importEntityVecSize, [&](size_t i)
 		{
 			long currOffset;
 			bool foundFirst = false;
@@ -722,7 +722,7 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 	// the outer loops steps thru each Feature
 	// the inner loop searches each position update for one owned by the
 	// Feature and chains them together
-	par_for(0, importFeatVecSize, [&](size_t i, int cpu)
+	par_for(0, importFeatVecSize, [&](size_t i)
 		{
 			long currOffset;
 			bool foundFirst = false;
@@ -840,7 +840,7 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader* tapeHdr)
 	** and the inner loop is only going to link together the position that are owned by the entity
 	** So each thread will never try to link data that belongs to another thread
 	*/
-	par_for(0, importEntityVecSize, [&](size_t i, int cpu)
+	par_for(0, importEntityVecSize, [&](size_t i)
 		{
 			long currOffset;
 			bool foundFirst = false;
