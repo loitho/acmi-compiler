@@ -9,6 +9,7 @@
 #include "Acmirec.h"
 
 #include <vector>
+#include <memory>
 
 typedef unsigned char BYTE;
 
@@ -306,10 +307,7 @@ class ACMITape
 public:
 	
 	// Constructors.
-	ACMITape();
-
-	// Destructor.
-	~ACMITape();
+	ACMITape() = default;
 
 	// Import the current positional, event, and sfx data.
 	// The filenames of these files will always be the same 
@@ -338,8 +336,7 @@ private:
 	std::vector<ACMIFeatEventImportData> importFeatEventVec;
 
 
-	//std::vector<ACMI_CallRec> Import_Callsigns;
-	ACMI_CallRec *Import_Callsigns = NULL;
+	std::unique_ptr<ACMI_CallRec[]> Import_Callsigns;
 	long import_count = 0;
 
 

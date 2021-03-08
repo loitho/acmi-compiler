@@ -70,21 +70,6 @@ struct comp
 	}
 };
 
-
-ACMITape::ACMITape()
-{
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-ACMITape::~ACMITape()
-{
-	// Delete Callsigns
-	delete Import_Callsigns;
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -440,11 +425,9 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 				MonoPrint("%s[WARNING] Error reading ACMICallsignList%s\n", COLOR_YELLOW, COLOR_RESET);
 				break;
 			}
-			//Import_Callsigns.
-			//Import_Callsigns.reserve(import_count * sizeof(ACMI_CallRec));
-			Import_Callsigns = new ACMI_CallRec[import_count];
+			Import_Callsigns = std::make_unique<ACMI_CallRec[]>(import_count);
 
-			if (!fread(Import_Callsigns, import_count * sizeof(ACMI_CallRec), 1, flightFile))
+			if (!fread(Import_Callsigns.get(), import_count * sizeof(ACMI_CallRec), 1, flightFile))
 			{
 				corrupted = true;
 				MonoPrint("%s[WARNING] Error reading Import_Callsigns%s\n", COLOR_YELLOW, COLOR_RESET);
@@ -1106,7 +1089,7 @@ void ACMITape::ImportTextEventList(FILE* fd, ACMITapeHeader* tapeHdr)
 		if (!ret)
 			goto error_exit;
 
-		ret = fwrite(Import_Callsigns, import_count * sizeof(ACMI_CallRec), 1, fd);
+		ret = fwrite(Import_Callsigns.get(), import_count * sizeof(ACMI_CallRec), 1, fd);
 		if (!ret)
 			goto error_exit;
 	}
