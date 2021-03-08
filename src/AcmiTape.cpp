@@ -27,12 +27,6 @@
 #include "AcmiTape.h"
 #include "threading.h"
 
-#if _DEBUG
-#define MonoPrint  printf
-#else
-#define MonoPrint  NULL
-#endif 
-
 #define MonoPrint  printf
 
 #define COLOR_RED "\033[31m"
