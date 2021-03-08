@@ -42,22 +42,6 @@ long GetFileSize(std::string filename)
 	return rc == 0 ? stat_buf.st_size : -1;
 }
 
-//https://www.fluentcpp.com/2017/01/16/how-to-stdfind-something-efficiently-with-the-stl/
-template<typename Container>
-class Range
-{
-public:
-	Range(std::pair<typename Container::iterator, typename Container::iterator> range)
-		: m_begin(range.first), m_end(range.second)
-	{}
-	typename Container::iterator begin() { return m_begin; }
-	typename Container::iterator end() { return m_end; }
-
-private:
-	typename Container::iterator m_begin;
-	typename Container::iterator m_end;
-};
-
 /*
 ** Compare uniqueID in ACMIRawPositionData
 ** Used by equal_sort
