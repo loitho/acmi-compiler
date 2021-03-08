@@ -111,7 +111,7 @@ typedef struct ACMIEntityPositionData
 	union
 	{
 		// Positional data.
-		struct posTag
+		struct
 		{
 			float		x = 0.0;
 			float		y = 0.0;
@@ -122,14 +122,14 @@ typedef struct ACMIEntityPositionData
 			long	    radarTarget = 0;
 		} posData;
 		// switch change
-		struct switchTag
+		struct
 		{
 			int			switchNum = 0;
 			int			switchVal = 0;
 			int			prevSwitchVal = 0;
 		} switchData;
 		// DOF change
-		struct dofTag
+		struct
 		{
 			int			DOFNum = 0;
 			float		DOFVal = 0.0;
