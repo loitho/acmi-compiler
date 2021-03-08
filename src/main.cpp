@@ -9,7 +9,7 @@
 #include <iostream>
 #include <time.h>
 
-#include <string>
+#include <cstring>
 
 #include <conio.h>  
 
