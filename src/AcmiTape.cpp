@@ -14,7 +14,7 @@
 #pragma warning(disable:4996)
 
 /* 
-** Look, I'm not gonna cast every single size_t of the code into long
+** Look, I'm not gonna cast every single size_t of the code into int32_t
 ** It serves the sames purpose as to disable the warning
 ** It doesn't change the fact that yes data might be lost 
 */
@@ -38,7 +38,7 @@
 
 using namespace std::chrono;
 
-long GetFileSize(std::string filename)
+int32_t GetFileSize(std::string filename)
 {
 	struct stat stat_buf;
 	int rc = stat(filename.c_str(), &stat_buf);
@@ -127,7 +127,7 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 	float endTime = 0.0;
 	bool corrupted = false;
 
-	long filesize = GetFileSize(inFltFile);
+	int32_t filesize = GetFileSize(inFltFile);
 
 	// Load flight file for positional data.
 	flightFile = fopen(inFltFile, "rb");
@@ -317,7 +317,7 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 
 			// fill in data
 			ehdr.eventType = hdr.type;
-			// ehdr.index = static_cast<long>(importEventVec.size());
+			// ehdr.index = static_cast<int32_t>(importEventVec.size());
 			ehdr.index = importEventVec.size();
 			ehdr.time = hdr.time;
 			ehdr.timeEnd = hdr.time + msfx.timeToLive;
@@ -434,7 +434,7 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 		case ACMICallsignList:
 
 			// Read the data
-			if (!fread(&import_count, sizeof(long), 1, flightFile))
+			if (!fread(&import_count, sizeof(int32_t), 1, flightFile))
 			{
 				corrupted = true;
 				MonoPrint("%s[WARNING] Error reading ACMICallsignList%s\n", COLOR_YELLOW, COLOR_RESET);
@@ -661,9 +661,9 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 	// entity and chains them together
 	par_for(0, importEntityVecSize, [&](size_t i)
 		{
-			long currOffset;
+			int32_t currOffset;
 			bool foundFirst = false;
-			long prevOffset = 0;
+			int32_t prevOffset = 0;
 			importEntityVec[i].firstPositionDataOffset = 0;
 			int prevPosVec = -1;
 
@@ -724,9 +724,9 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 	// Feature and chains them together
 	par_for(0, importFeatVecSize, [&](size_t i)
 		{
-			long currOffset;
+			int32_t currOffset;
 			bool foundFirst = false;
-			long prevOffset = 0;
+			int32_t prevOffset = 0;
 			importFeatVec[i].firstPositionDataOffset = 0;
 			int prevPosVec = -1;
 
@@ -842,9 +842,9 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader* tapeHdr)
 	*/
 	par_for(0, importEntityVecSize, [&](size_t i)
 		{
-			long currOffset;
+			int32_t currOffset;
 			bool foundFirst = false;
-			long prevOffset = 0;
+			int32_t prevOffset = 0;
 			importEntityVec[i].firstEventDataOffset = 0;
 
 			int prevPosVec = -1;
@@ -1088,7 +1088,7 @@ void ACMITape::ImportTextEventList(FILE* fd, ACMITapeHeader* tapeHdr)
 	// write callsign list
 	if (Import_Callsigns)
 	{
-		ret = fwrite(&import_count, sizeof(long), 1, fd);
+		ret = fwrite(&import_count, sizeof(int32_t), 1, fd);
 		if (!ret)
 			goto error_exit;
 

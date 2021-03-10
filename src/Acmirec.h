@@ -11,7 +11,8 @@
 #ifndef _ACMIREC_H_
 #define _ACMIREC_H_
 
-typedef unsigned char BYTE;
+#include <cstdint>
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -51,7 +52,7 @@ enum
 #pragma pack (push, pack1, 1)
 typedef struct ACMIRecHeader
 {
-	BYTE		type = 0;		// one of the ennumerated types
+	uint8_t		type = 0;		// one of the ennumerated types
 	float		time = 0.0;		// time stamp
 } ACMIRecHeader;
 #pragma pack (pop, pack1)
@@ -64,7 +65,7 @@ typedef struct ACMIRecHeader
 typedef struct ACMIGenPositionData
 {
 	int		type = 0;			// base type for creating simbase object
-	long	uniqueID = 0;		// identifier of instance
+	int32_t	uniqueID = 0;		// identifier of instance
 	float	x = 0.0;
 	float	y = 0;
 	float	z = 0;
@@ -82,8 +83,8 @@ typedef struct ACMIGenPositionData
 typedef struct ACMIFeaturePositionData
 {
 	int		type = 0;			// base type for creating simbase object
-	long	uniqueID = 0;		// identifier of instance
-	long	leadUniqueID = 0;	// id of lead component (for bridges. bases etc)
+	int32_t	uniqueID = 0;		// identifier of instance
+	int32_t	leadUniqueID = 0;	// id of lead component (for bridges. bases etc)
 	int		slot = 0;			// slot number in component list
 	int		specialFlags = 0;   // campaign feature flag
 	float	x = 0;
@@ -103,7 +104,7 @@ typedef struct ACMIFeaturePositionData
 typedef struct ACMISwitchData
 {
 	int		type = 0;			// base type for creating simbase object
-	long	uniqueID = 0;		// identifier of instance
+	int32_t	uniqueID = 0;		// identifier of instance
 	int		switchNum = 0;
 	int		switchVal = 0;
 	int		prevSwitchVal = 0;
@@ -117,7 +118,7 @@ typedef struct ACMISwitchData
 #pragma pack (push, pack1, 1)
 typedef struct ACMIFeatureStatusData
 {
-	long	uniqueID = 0;		// identifier of instance
+	int32_t	uniqueID = 0;		// identifier of instance
 	int		newStatus = 0;
 	int		prevStatus = 0;
 } ACMIFeatureStatusData;
@@ -131,7 +132,7 @@ typedef struct ACMIFeatureStatusData
 typedef struct ACMIDOFData
 {
 	int		type = 0;			// base type for creating simbase object
-	long	uniqueID = 0;		// identifier of instance
+	int32_t	uniqueID = 0;		// identifier of instance
 	int		DOFNum = 0;
 	float	DOFVal = 0.0;
 	float	prevDOFVal = 0.0;
@@ -240,7 +241,7 @@ typedef struct ACMIAircraftPositionRecord
 {
 	ACMIRecHeader				hdr;
 	ACMIGenPositionData			data;
-	long						RadarTarget;
+	int32_t						RadarTarget;
 	
 } ACMIAircraftPositionRecord;
 
@@ -287,7 +288,7 @@ typedef struct ACMIDOFRecord
 struct ACMI_CallRec
 {
 	char label[16];
-	long teamColor;
+	int32_t teamColor;
 };
 #pragma pack()
 

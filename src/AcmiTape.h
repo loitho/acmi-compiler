@@ -34,23 +34,23 @@ typedef unsigned char BYTE;
 #pragma pack (push, pack1, 1)
 typedef struct ACMITapeHeader
 {
-	long		fileID = 0;
-	long		fileSize = 0;
-	long		numEntities = 0;
-	long		numFeat = 0;
-	long 		entityBlockOffset = 0;			// 5th
-	long 		featBlockOffset = 0;
-	long		numEntityPositions = 0;
-	long		timelineBlockOffset = 0;
-	long		firstEntEventOffset = 0;
-	long		firstGeneralEventOffset = 0;	// 10th => 40 Bytes
-	long		firstEventTrailerOffset = 0;
-	long		firstTextEventOffset = 0;
-	long		firstFeatEventOffset = 0;
-	long		numEvents = 0;
-	long		numEntEvents = 0;				// 15th => 60 Byte
-	long		numTextEvents = 0;
-	long		numFeatEvents = 0;
+	int32_t		fileID = 0;
+	int32_t		fileSize = 0;
+	int32_t		numEntities = 0;
+	int32_t		numFeat = 0;
+	int32_t 		entityBlockOffset = 0;			// 5th
+	int32_t 		featBlockOffset = 0;
+	int32_t		numEntityPositions = 0;
+	int32_t		timelineBlockOffset = 0;
+	int32_t		firstEntEventOffset = 0;
+	int32_t		firstGeneralEventOffset = 0;	// 10th => 40 Bytes
+	int32_t		firstEventTrailerOffset = 0;
+	int32_t		firstTextEventOffset = 0;
+	int32_t		firstFeatEventOffset = 0;
+	int32_t		numEvents = 0;
+	int32_t		numEntEvents = 0;				// 15th => 60 Byte
+	int32_t		numTextEvents = 0;
+	int32_t		numFeatEvents = 0;
 	float		startTime = 0;
 	float		totPlayTime = 0;
 	float 		todOffset = 0;
@@ -64,10 +64,10 @@ typedef struct ACMITapeHeader
 #pragma pack (push, pack1, 1)
 typedef struct ACMIEntityData
 {
-	long		uniqueID = 0;
-	long		type = 0;
-	long		count = 0;
-	long		flags = 0;
+	int32_t		uniqueID = 0;
+	int32_t		type = 0;
+	int32_t		count = 0;
+	int32_t		flags = 0;
 	
 		#define		ENTITY_FLAG_MISSILE			0x00000001
 		#define		ENTITY_FLAG_FEATURE			0x00000002
@@ -77,14 +77,14 @@ typedef struct ACMIEntityData
 
 	// for features we may need an index to the lead component and
 	// the slot # that was in the camp component list (for bridges, bases...)
-	long		leadIndex = 0;
+	int32_t		leadIndex = 0;
 	int			slot = 0;
 	int			specialFlags = 0;
 
 
 	// Offset from the start of the file to the start of my positional data.
-	long 		firstPositionDataOffset = 0;
-	long 		firstEventDataOffset = 0;
+	int32_t 		firstPositionDataOffset = 0;
+	int32_t 		firstEventDataOffset = 0;
 
 } ACMIEntityData;
 #pragma pack (pop, pack1)
@@ -120,7 +120,7 @@ typedef struct ACMIEntityPositionData
 			float		pitch = 0.0;
 			float		roll = 0.0;
 			float		yaw = 0.0;
-			long	    radarTarget = 0;
+			int32_t	    radarTarget = 0;
 		} posData;
 		// switch change
 		struct
@@ -141,8 +141,8 @@ typedef struct ACMIEntityPositionData
 	// Although position data is a fixed size, we still want
 	// this so that we can organize the data to be friendly for
 	// paging.
-	long		nextPositionUpdateOffset = 0;
-	long		prevPositionUpdateOffset = 0;
+	int32_t		nextPositionUpdateOffset = 0;
+	int32_t		prevPositionUpdateOffset = 0;
 } ACMIEntityPositionData;
 #pragma pack (pop, pack1)
 
@@ -154,12 +154,12 @@ typedef struct ACMIEntityPositionData
 typedef struct ACMIRawPositionData
 {
 	int			type = 0;			// type of object
-	long		uniqueID = 0;		// A unique ID for the object. Many to One correlation to Falcon Entities
+	int32_t		uniqueID = 0;		// A unique ID for the object. Many to One correlation to Falcon Entities
 	int			flags = 0;			// side
 
 	// for features we may need an index to the lead component and
 	// the slot # that was in the camp component list (for bridges, bases...)
-	long		leadIndex = 0;
+	int32_t		leadIndex = 0;
 	int			slot = 0;
 	int			specialFlags = 0;
 	ACMIEntityPositionData entityPosData = {};
@@ -174,16 +174,16 @@ typedef struct ACMIEventHeader
 {
 	// type of event this is
 	BYTE		eventType = 0;
-	long 		index = -42;
+	int32_t 		index = -42;
 
 	// Time stamp for this event.
 	float		time = 0;
 	float		timeEnd = 0;
 
 	// data specific to type of event
-	long		type = 0;
-	long		user = 0;
-	long		flags = 0;
+	int32_t		type = 0;
+	int32_t		user = 0;
+	int32_t		flags = 0;
 	float		scale = 0;
 	float		x = 0;
 	float		y = 0;
@@ -206,7 +206,7 @@ typedef struct ACMIEventHeader
 typedef struct ACMIEventTrailer
 {
 	float		timeEnd = 0;
-	long 		index = 0;		// into EventHeader
+	int32_t 		index = 0;		// into EventHeader
 } ACMIEventTrailer;
 #pragma pack (pop, pack1)
 
@@ -221,18 +221,18 @@ typedef struct ACMIFeatEvent
 	float		time = 0.0;
 
 	// index of feature on tape
-	long 		index = 0;
+	int32_t 		index = 0;
 
 	// data specific to type of event
-	long		newStatus = 0;
-	long		prevStatus = 0;
+	int32_t		newStatus = 0;
+	int32_t		prevStatus = 0;
 
 } ACMIFeatEvent;
 #pragma pack (pop, pack1)
 
 typedef struct ACMIFeatEventImportData
 {
-	long		uniqueID = 0;
+	int32_t		uniqueID = 0;
 	ACMIFeatEvent data;
 } ACMIFeatEventImportData;
 
@@ -252,7 +252,7 @@ typedef struct ACMIFeatEventImportData
 //
 // |                    |                                       |
 // | number of entities |              entities                 |    
-// |  sizeof(long)      | num entities * sizeof(ACMIEntityData) |
+// |  sizeof(int32_t)      | num entities * sizeof(ACMIEntityData) |
 //
 // entity:
 //
@@ -294,8 +294,8 @@ typedef struct ACMIFeatEventImportData
 
 typedef struct ACMIEntityReadHead
 {
-	long			positionDataOffset = 0;
-	long			eventDataOffset = 0;
+	int32_t			positionDataOffset = 0;
+	int32_t			eventDataOffset = 0;
 } ACMIEntityReadHead;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -325,7 +325,7 @@ private:
 	bool WriteTapeFile(const char *fname, ACMITapeHeader *tapeHdr);
 
 
-	long tempTarget = 0; // for missile lock.
+	int32_t tempTarget = 0; // for missile lock.
 	
 	/*Converted list to vector*/
 	std::vector<ACMIEntityData> importEntityVec;				// List of entities
@@ -337,7 +337,7 @@ private:
 
 
 	std::unique_ptr<ACMI_CallRec[]> Import_Callsigns;
-	long import_count = 0;
+	int32_t import_count = 0;
 
 
 };
