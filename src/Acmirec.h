@@ -11,7 +11,6 @@
 #ifndef _ACMIREC_H_
 #define _ACMIREC_H_
 
-#include "tchar.h"
 typedef unsigned char BYTE;
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -95,19 +94,6 @@ typedef struct ACMIFeaturePositionData
 	float 	roll = 0;
 } ACMIFeaturePositionData;
 #pragma pack (pop, pack1)
-
-/*
-** ACMI Text event (strings parsed from event file)
-** Which we don't have, so this is never used
-*/
-//#pragma pack (push, pack1, 1)
-//typedef struct
-//{
-//	long	   intTime;
-//	_TCHAR timeStr[20];
-//	_TCHAR msgStr[100];
-//} ACMITextEvent;
-//#pragma pack (pop, pack1)
 
 //
 // ACMISwitchData
