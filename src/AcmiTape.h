@@ -78,8 +78,8 @@ typedef struct ACMIEntityData
 	// for features we may need an index to the lead component and
 	// the slot # that was in the camp component list (for bridges, bases...)
 	int32_t		leadIndex = 0;
-	int			slot = 0;
-	int			specialFlags = 0;
+	int32_t			slot = 0;
+	int32_t			specialFlags = 0;
 
 
 	// Offset from the start of the file to the start of my positional data.
@@ -125,14 +125,14 @@ typedef struct ACMIEntityPositionData
 		// switch change
 		struct
 		{
-			int			switchNum = 0;
-			int			switchVal = 0;
-			int			prevSwitchVal = 0;
+			int32_t			switchNum = 0;
+			int32_t			switchVal = 0;
+			int32_t			prevSwitchVal = 0;
 		} switchData;
 		// DOF change
 		struct
 		{
-			int			DOFNum = 0;
+			int32_t			DOFNum = 0;
 			float		DOFVal = 0.0;
 			float		prevDOFVal = 0.0;
 		} dofData;
@@ -153,15 +153,15 @@ typedef struct ACMIEntityPositionData
 
 typedef struct ACMIRawPositionData
 {
-	int			type = 0;			// type of object
+	int32_t			type = 0;			// type of object
 	int32_t		uniqueID = 0;		// A unique ID for the object. Many to One correlation to Falcon Entities
-	int			flags = 0;			// side
+	int32_t			flags = 0;			// side
 
 	// for features we may need an index to the lead component and
 	// the slot # that was in the camp component list (for bridges, bases...)
 	int32_t		leadIndex = 0;
-	int			slot = 0;
-	int			specialFlags = 0;
+	int32_t			slot = 0;
+	int32_t			specialFlags = 0;
 	ACMIEntityPositionData entityPosData = {};
 } ACMIRawPositionData;
 

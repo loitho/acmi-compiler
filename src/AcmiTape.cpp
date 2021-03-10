@@ -57,17 +57,17 @@ bool compare_uniq_id(ACMIRawPositionData i, ACMIRawPositionData j)
 
 /*
 ** https://stackoverflow.com/questions/21675846/c11-using-stdequal-range-with-custom-comparison-function
-** Because equal_range checks both "int < foreign type" and "foreign type < int"
+** Because equal_range checks both "int32_t < foreign type" and "foreign type < int32_t"
 ** We need a checking function that can accept both types at both places
 */
 struct comp
 {
-	bool operator() (const ACMIRawPositionData& a, const int& b) const
+	bool operator() (const ACMIRawPositionData& a, const int32_t& b) const
 	{
 		return a.uniqueID < b;
 	}
 
-	bool operator() (const int& a, const ACMIRawPositionData& b) const
+	bool operator() (const int32_t& a, const ACMIRawPositionData& b) const
 	{
 		return a < b.uniqueID;
 	}
@@ -607,7 +607,7 @@ void ACMITape::ParseEntities(void)
 	** I have no Idea if it's really usefull as Tacview doesn't seem to be using those values.
 	** But they were doing that in the original code so *shrug*
 	*/
-	int objCount;
+	int32_t objCount;
 
 	size_t i = 0;
 	size_t j = 0;
@@ -665,7 +665,7 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 			bool foundFirst = false;
 			int32_t prevOffset = 0;
 			importEntityVec[i].firstPositionDataOffset = 0;
-			int prevPosVec = -1;
+			int32_t prevPosVec = -1;
 
 			std::pair<std::vector<ACMIRawPositionData>::iterator, std::vector<ACMIRawPositionData>::iterator> bounds;
 
@@ -728,7 +728,7 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 			bool foundFirst = false;
 			int32_t prevOffset = 0;
 			importFeatVec[i].firstPositionDataOffset = 0;
-			int prevPosVec = -1;
+			int32_t prevPosVec = -1;
 
 			std::pair<std::vector<ACMIRawPositionData>::iterator, std::vector<ACMIRawPositionData>::iterator> bounds;
 
@@ -847,7 +847,7 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader* tapeHdr)
 			int32_t prevOffset = 0;
 			importEntityVec[i].firstEventDataOffset = 0;
 
-			int prevPosVec = -1;
+			int32_t prevPosVec = -1;
 
 			std::pair<std::vector<ACMIRawPositionData>::iterator, std::vector<ACMIRawPositionData>::iterator> bounds;
 

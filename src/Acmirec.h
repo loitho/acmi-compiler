@@ -64,7 +64,7 @@ typedef struct ACMIRecHeader
 #pragma pack (push, pack1, 1)
 typedef struct ACMIGenPositionData
 {
-	int		type = 0;			// base type for creating simbase object
+	int32_t		type = 0;			// base type for creating simbase object
 	int32_t	uniqueID = 0;		// identifier of instance
 	float	x = 0.0;
 	float	y = 0;
@@ -82,11 +82,11 @@ typedef struct ACMIGenPositionData
 #pragma pack (push, pack1, 1)
 typedef struct ACMIFeaturePositionData
 {
-	int		type = 0;			// base type for creating simbase object
+	int32_t		type = 0;			// base type for creating simbase object
 	int32_t	uniqueID = 0;		// identifier of instance
 	int32_t	leadUniqueID = 0;	// id of lead component (for bridges. bases etc)
-	int		slot = 0;			// slot number in component list
-	int		specialFlags = 0;   // campaign feature flag
+	int32_t		slot = 0;			// slot number in component list
+	int32_t		specialFlags = 0;   // campaign feature flag
 	float	x = 0;
 	float	y = 0;
 	float	z = 0;
@@ -103,11 +103,11 @@ typedef struct ACMIFeaturePositionData
 #pragma pack (push, pack1, 1)
 typedef struct ACMISwitchData
 {
-	int		type = 0;			// base type for creating simbase object
+	int32_t		type = 0;			// base type for creating simbase object
 	int32_t	uniqueID = 0;		// identifier of instance
-	int		switchNum = 0;
-	int		switchVal = 0;
-	int		prevSwitchVal = 0;
+	int32_t		switchNum = 0;
+	int32_t		switchVal = 0;
+	int32_t		prevSwitchVal = 0;
 } ACMISwitchData;
 #pragma pack (pop, pack1)
 
@@ -119,8 +119,8 @@ typedef struct ACMISwitchData
 typedef struct ACMIFeatureStatusData
 {
 	int32_t	uniqueID = 0;		// identifier of instance
-	int		newStatus = 0;
-	int		prevStatus = 0;
+	int32_t		newStatus = 0;
+	int32_t		prevStatus = 0;
 } ACMIFeatureStatusData;
 #pragma pack (pop, pack1)
 
@@ -131,9 +131,9 @@ typedef struct ACMIFeatureStatusData
 #pragma pack (push, pack1, 1)
 typedef struct ACMIDOFData
 {
-	int		type = 0;			// base type for creating simbase object
+	int32_t		type = 0;			// base type for creating simbase object
 	int32_t	uniqueID = 0;		// identifier of instance
-	int		DOFNum = 0;
+	int32_t		DOFNum = 0;
 	float	DOFVal = 0.0;
 	float	prevDOFVal = 0.0;
 } ACMIDOFData;
@@ -163,7 +163,7 @@ typedef struct ACMITracerStartData
 #pragma pack (push, pack1, 1)
 typedef struct ACMIStationarySfxData
 {
-	int		type = 0;		// sfx type
+	int32_t		type = 0;		// sfx type
 	float	x = 0.0;			// position
 	float	y = 0.0;
 	float	z = 0.0;
@@ -179,9 +179,9 @@ typedef struct ACMIStationarySfxData
 #pragma pack (push, pack1, 1)
 typedef struct ACMIMovingSfxData
 {
-	int		type = 0;		// sfx type
-	int		user = 0;		// misc data
-	int		flags = 0;
+	int32_t		type = 0;		// sfx type
+	int32_t		user = 0;		// misc data
+	int32_t		flags = 0;
 	float	x = 0.0;		// position
 	float	y = 0.0;
 	float	z = 0.0;
