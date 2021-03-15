@@ -8,10 +8,10 @@
 #include <windows.h>
 #include <iostream>
 #include <time.h>
+#include <conio.h>
 
-#include <string>
-
-#include <conio.h>  
+#include <chrono>
+#include <cstring>
 
 #include "AcmiTape.h"
 #include "threading.h"
@@ -21,6 +21,8 @@
 #define COLOR_RED "\033[31m"
 #define COLOR_YELLOW "\033[93m"
 #define COLOR_RESET "\033[0m"
+
+using namespace std::chrono;
 
 std::string ExePath() {
 	char buffer[MAX_PATH];
@@ -126,15 +128,14 @@ int main(int argc, char* argv[])
 		if (!fp)
 		{
 			ACMITape newtape;
-			clock_t t;
-			t = clock();
+			const auto t = steady_clock::now();
 
 			std::cout << "found file : " << fileName << std::endl;
 			printf("----- Starting conversion ----- \n\n");
 			if (newtape.Import(fltname, fname) == true)
 			{
-				t = clock() - t;
-				printf("\n----- File converted with success in %d clicks (%f seconds). ----- \n\n\n", t, ((float)t) / CLOCKS_PER_SEC);
+				const duration<float> elapsed = steady_clock::now() - t;
+				printf("\n----- File converted with success in %f seconds. ----- \n\n\n", elapsed.count());
 
 				remove(fltname);
 			}

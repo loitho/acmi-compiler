@@ -184,7 +184,6 @@ void FindRenameFile(const std::string &folder)
 
 
 	HANDLE  hFile = INVALID_HANDLE_VALUE;
-	DWORD   dwRetries = 0;
 	BOOL    bSuccess = FALSE;
 	DWORD   dwErr = 0;
 

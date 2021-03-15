@@ -20,18 +20,15 @@
 */
 #pragma warning(disable:4267)
 
+#include <chrono>
+#include <cstdio>
 #include <vector>
 #include <algorithm>
 #include <filesystem>
+#include <sys/stat.h>
 
 #include "AcmiTape.h"
 #include "threading.h"
-
-#if _DEBUG
-#define MonoPrint  printf
-#else
-#define MonoPrint  NULL
-#endif 
 
 #define MonoPrint  printf
 
@@ -39,6 +36,7 @@
 #define COLOR_YELLOW "\033[93m"
 #define COLOR_RESET "\033[0m"
 
+using namespace std::chrono;
 
 long GetFileSize(std::string filename)
 {
@@ -46,22 +44,6 @@ long GetFileSize(std::string filename)
 	int rc = stat(filename.c_str(), &stat_buf);
 	return rc == 0 ? stat_buf.st_size : -1;
 }
-
-//https://www.fluentcpp.com/2017/01/16/how-to-stdfind-something-efficiently-with-the-stl/
-template<typename Container>
-class Range
-{
-public:
-	Range(std::pair<typename Container::iterator, typename Container::iterator> range)
-		: m_begin(range.first), m_end(range.second)
-	{}
-	typename Container::iterator begin() { return m_begin; }
-	typename Container::iterator end() { return m_end; }
-
-private:
-	typename Container::iterator m_begin;
-	typename Container::iterator m_end;
-};
 
 /*
 ** Compare uniqueID in ACMIRawPositionData
@@ -91,19 +73,17 @@ struct comp
 	}
 };
 
-
-ACMITape::ACMITape()
+void PrintStepDuration(const char* step, const steady_clock::time_point& start)
 {
+	const duration<float> elapsed = steady_clock::now() - start;
+	MonoPrint("%s \t took me %f seconds).\n\n", step, elapsed.count());
 }
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-ACMITape::~ACMITape()
+// Same as above, but with a different message and a single newline.
+void PrintSubStepDuration(const char* step, const steady_clock::time_point& start)
 {
-	// Delete Callsigns
-	delete Import_Callsigns;
+	const duration<float> elapsed = steady_clock::now() - start;
+	MonoPrint("%s: It took me %f seconds).\n", step, elapsed.count());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -157,9 +137,8 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 		MonoPrint("Error opening acmi flight file\n");
 		return false;
 	}
-	clock_t t;
 	MonoPrint("(1/5) ACMITape Import: Reading Raw Data ....\n");
-	t = clock();
+	auto t = steady_clock::now();
 
 	//https://stackoverflow.com/questions/6525650/benefits-of-using-reserve-in-a-vector-c
 	// Reserving space in memory for faster ingest
@@ -461,11 +440,9 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 				MonoPrint("%s[WARNING] Error reading ACMICallsignList%s\n", COLOR_YELLOW, COLOR_RESET);
 				break;
 			}
-			//Import_Callsigns.
-			//Import_Callsigns.reserve(import_count * sizeof(ACMI_CallRec));
-			Import_Callsigns = new ACMI_CallRec[import_count];
+			Import_Callsigns = std::make_unique<ACMI_CallRec[]>(import_count);
 
-			if (!fread(Import_Callsigns, import_count * sizeof(ACMI_CallRec), 1, flightFile))
+			if (!fread(Import_Callsigns.get(), import_count * sizeof(ACMI_CallRec), 1, flightFile))
 			{
 				corrupted = true;
 				MonoPrint("%s[WARNING] Error reading Import_Callsigns%s\n", COLOR_YELLOW, COLOR_RESET);
@@ -487,12 +464,11 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 		}
 	}
 
-	t = clock() - t;
-	MonoPrint("(1/5) ACMITape Import: Reading Raw Data \t took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
+	PrintStepDuration("(1/5) ACMITape Import: Reading Raw Data", t);
 	if (corrupted == true)
 		MonoPrint("%s[WARNING] The .flt was corrupted, you might have data missing ....\n\n%s", COLOR_YELLOW, COLOR_RESET);
 	MonoPrint("(1.5/5) ACMITape Import: sorting arrays ....\n");
-	t = clock();
+	t = steady_clock::now();
 
 	// Stable sort instead of simple sort to prevent entities with the same ID to be misordered 
 	// As we want to keep the order at wich they were written to the file 
@@ -500,15 +476,13 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 	std::stable_sort(importPosVec.begin(), importPosVec.end(), compare_uniq_id);
 	std::stable_sort(importEntEventVec.begin(), importEntEventVec.end(), compare_uniq_id);
 
-	t = clock() - t;
-	MonoPrint("(1.5/5) ACMITape Import: sorting arrays \t took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
+	PrintStepDuration("(1.5/5) ACMITape Import: sorting arrays", t);
 
 	// build the importEntityList
 	MonoPrint("(2/5) ACMITape Import: Parsing Entities ....\n");
-	t = clock();
+	t = steady_clock::now();
 	ParseEntities();
-	t = clock() - t;
-	MonoPrint("(2/5) ACMITape Import: Parsing Entities \t took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
+	PrintStepDuration("(2/5) ACMITape Import: Parsing Entities", t);
 
 	size_t importEntityVecSize = importEntityVec.size();		// importNumEnt
 	size_t importPosVecSize = importPosVec.size();				// importNumPos
@@ -546,18 +520,16 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 
 	// set up the chain offsets of entity positions
 	MonoPrint("(3/5) ACMITape Import: Threading Positions ....\n");
-	t = clock();
+	t = steady_clock::now();
 	ThreadEntityPositions(&tapeHdr);
-	t = clock() - t;
-	MonoPrint("(3/5) ACMITape Import: Threading Positions took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
+	PrintStepDuration("(3/5) ACMITape Import: Threading Positions", t);
 
 
 	// set up the chain offsets of entity events
 	MonoPrint("(4/5) ACMITape Import: Threading Entity Events ....\n");
-	t = clock();
+	t = steady_clock::now();
 	ThreadEntityEvents(&tapeHdr);
-	t = clock() - t;
-	MonoPrint("(4/5) ACMITape Import: Threading Entity took me %d clicks (%f seconds).\n\n", t, ((float)t) / CLOCKS_PER_SEC);
+	PrintStepDuration("(4/5) ACMITape Import: Threading Entity", t);
 
 
 	// Calculate size of .vhs file.
@@ -575,12 +547,11 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 
 	fclose(flightFile);
 
-	t = clock();
+	t = steady_clock::now();
 
 	bool status;
 	status = WriteTapeFile(outTapeFileName, &tapeHdr);
-	t = clock() - t;
-	MonoPrint("(5/5) ACMITape Import: Writing Tape File took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+	PrintStepDuration("(5/5) ACMITape Import: Writing Tape File", t);
 
 	return status;
 }
@@ -618,14 +589,14 @@ void ACMITape::ParseEntities(void)
 			// First time we see an entity means it can only be a new one
 			if (importEntityVec.size() == 0 || (importEntityVec.back().uniqueID != importPosVec[count].uniqueID))
 			{
-				ACMIEntityData* importEntityInfo = new ACMIEntityData;
+				ACMIEntityData importEntityInfo;
 
-				importEntityInfo->count = 0;
-				importEntityInfo->uniqueID = importPosVec[count].uniqueID;
-				importEntityInfo->type = importPosVec[count].type;
-				importEntityInfo->flags = importPosVec[count].flags;
+				importEntityInfo.count = 0;
+				importEntityInfo.uniqueID = importPosVec[count].uniqueID;
+				importEntityInfo.type = importPosVec[count].type;
+				importEntityInfo.flags = importPosVec[count].flags;
 
-				importEntityVec.push_back(*importEntityInfo);
+				importEntityVec.push_back(importEntityInfo);
 			}
 		}
 	}
@@ -679,18 +650,16 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 {
 
 	size_t importEntityVecSize = importEntityVec.size();
-	size_t importPosVecSize = importPosVec.size();
 	size_t importFeatVecSize = importFeatVec.size();
-	size_t importEntEventVecSize = importEntEventVec.size();
 	size_t importFeatEventVecSize = importFeatEventVec.size();
 
-	clock_t t = clock();
+	auto t = steady_clock::now();
 
 	// we run an outer and inner loop here.
 	// the outer loops steps thru each entity
 	// the inner loop searches each position update for one owned by the
 	// entity and chains them together
-	par_for(0, importEntityVecSize, [&](size_t i, int cpu)
+	par_for(0, importEntityVecSize, [&](size_t i)
 		{
 			long currOffset;
 			bool foundFirst = false;
@@ -746,15 +715,14 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 			} // end for position loop
 		}); // end for threaded entity loop
 
-	t = clock() - t;
-	MonoPrint(" - Thread Entity par_for 1: It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
-	t = clock();
+	PrintSubStepDuration(" - Thread Entity par_for 1", t);
+	t = steady_clock::now();
 
 	// we run an outer and inner loop here.
 	// the outer loops steps thru each Feature
 	// the inner loop searches each position update for one owned by the
 	// Feature and chains them together
-	par_for(0, importFeatVecSize, [&](size_t i, int cpu)
+	par_for(0, importFeatVecSize, [&](size_t i)
 		{
 			long currOffset;
 			bool foundFirst = false;
@@ -848,8 +816,7 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 			}
 		}); // end for feature entity loop
 
-	t = clock() - t;
-	MonoPrint(" - Thread Entity par_for 2: It took me %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+	PrintSubStepDuration(" - Thread Entity par_for 2", t);
 }
 
 
@@ -873,7 +840,7 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader* tapeHdr)
 	** and the inner loop is only going to link together the position that are owned by the entity
 	** So each thread will never try to link data that belongs to another thread
 	*/
-	par_for(0, importEntityVecSize, [&](size_t i, int cpu)
+	par_for(0, importEntityVecSize, [&](size_t i)
 		{
 			long currOffset;
 			bool foundFirst = false;
@@ -889,7 +856,6 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader* tapeHdr)
 			// importEntEventVec is sorted, equal_range gives us the first and last position of the chosen uniqueID
 			bounds = std::equal_range(importEntEventVec.begin(), importEntEventVec.end(), importEntityVec[i].uniqueID, comp());
 			size_t start = bounds.first - importEntEventVec.begin();
-			size_t stop = bounds.second - importEntEventVec.begin();
 
 			/*
 			** https://stackoverflow.com/questions/3752019/how-to-get-the-index-of-a-value-in-a-vector-using-for-each
@@ -969,8 +935,6 @@ bool ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 
 	try {
 
-		int i, j;
-
 		size_t ret = 0;
 
 		tapeFile = fopen(fname, "wb");
@@ -1005,14 +969,15 @@ bool ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 		// end for entity loop
 
 	   // write out the entitiy positions
-		for (i = 0; i < importPosVecSize; i++)
+		for (size_t i = 0; i < importPosVecSize; i++)
 		{
 			// we now want to do a "fixup" of the radar targets.  These are
 			// currently in "uniqueIDs" and we want to convert them into
 			// an index into the entity list
 			if (importPosVec[i].entityPosData.posData.radarTarget != -1)
 			{
-				for (j = 0; j < importEntityVecSize; j++)
+				size_t j = 0;
+				for (; j < importEntityVecSize; j++)
 				{
 					if (importPosVec[i].entityPosData.posData.radarTarget == importEntityVec[j].uniqueID)
 					{
@@ -1036,7 +1001,7 @@ bool ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 		}
 
 		// write out the entitiy events
-		for (i = 0; i < importEntEventVecSize; i++)
+		for (size_t i = 0; i < importEntEventVecSize; i++)
 		{
 			ret = fwrite(&(importEntEventVec[i].entityPosData), sizeof(ACMIEntityPositionData), 1, tapeFile);
 			if (!ret)
@@ -1050,7 +1015,7 @@ bool ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 		std::vector<ACMIEventTrailer> importEventTrailerVec(importEventVecSize);
 
 		// write out the events 
-		for (i = 0; i < importEventVecSize; i++)
+		for (size_t i = 0; i < importEventVecSize; i++)
 		{
 			// set the trailer data
 			importEventTrailerVec[i].index = i;
@@ -1081,7 +1046,7 @@ bool ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 		// write out the feature events
 		size_t importFeatEventVecSize = importFeatEventVec.size();
 
-		for (i = 0; i < importFeatEventVecSize; i++)
+		for (size_t i = 0; i < importFeatEventVecSize; i++)
 		{
 			ret = fwrite(&importFeatEventVec[i].data, sizeof(ACMIFeatEvent), 1, tapeFile);
 			if (!ret)
@@ -1127,7 +1092,7 @@ void ACMITape::ImportTextEventList(FILE* fd, ACMITapeHeader* tapeHdr)
 		if (!ret)
 			goto error_exit;
 
-		ret = fwrite(Import_Callsigns, import_count * sizeof(ACMI_CallRec), 1, fd);
+		ret = fwrite(Import_Callsigns.get(), import_count * sizeof(ACMI_CallRec), 1, fd);
 		if (!ret)
 			goto error_exit;
 	}

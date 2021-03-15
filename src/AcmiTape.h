@@ -6,9 +6,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // ACMI_CallRec
-#include "acmirec.h"
+#include "Acmirec.h"
 
 #include <vector>
+#include <memory>
 
 typedef unsigned char BYTE;
 
@@ -111,7 +112,7 @@ typedef struct ACMIEntityPositionData
 	union
 	{
 		// Positional data.
-		struct posTag
+		struct
 		{
 			float		x = 0.0;
 			float		y = 0.0;
@@ -122,14 +123,14 @@ typedef struct ACMIEntityPositionData
 			long	    radarTarget = 0;
 		} posData;
 		// switch change
-		struct switchTag
+		struct
 		{
 			int			switchNum = 0;
 			int			switchVal = 0;
 			int			prevSwitchVal = 0;
 		} switchData;
 		// DOF change
-		struct dofTag
+		struct
 		{
 			int			DOFNum = 0;
 			float		DOFVal = 0.0;
@@ -306,10 +307,7 @@ class ACMITape
 public:
 	
 	// Constructors.
-	ACMITape();
-
-	// Destructor.
-	~ACMITape();
+	ACMITape() = default;
 
 	// Import the current positional, event, and sfx data.
 	// The filenames of these files will always be the same 
@@ -338,8 +336,7 @@ private:
 	std::vector<ACMIFeatEventImportData> importFeatEventVec;
 
 
-	//std::vector<ACMI_CallRec> Import_Callsigns;
-	ACMI_CallRec *Import_Callsigns = NULL;
+	std::unique_ptr<ACMI_CallRec[]> Import_Callsigns;
 	long import_count = 0;
 
 
