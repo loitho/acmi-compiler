@@ -287,5 +287,5 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 
-# Compiled CLI executable
-acmi-compiler-cli
+# compiled executable
+acmi-compiler
