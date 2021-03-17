@@ -14,7 +14,7 @@
 #pragma warning(disable:4996)
 
 /* 
-** Look, I'm not gonna cast every single size_t of the code into long
+** Look, I'm not gonna cast every single size_t of the code into int32_t
 ** It serves the sames purpose as to disable the warning
 ** It doesn't change the fact that yes data might be lost 
 */
@@ -38,36 +38,27 @@
 
 using namespace std::chrono;
 
-long GetFileSize(std::string filename)
+int32_t GetFileSize(std::string filename)
 {
 	struct stat stat_buf;
 	int rc = stat(filename.c_str(), &stat_buf);
 	return rc == 0 ? stat_buf.st_size : -1;
 }
 
-/*
-** Compare uniqueID in ACMIRawPositionData
-** Used by equal_sort
-*/
-bool compare_uniq_id(ACMIRawPositionData i, ACMIRawPositionData j)
-{
-	return (i.uniqueID < j.uniqueID);
-}
-
 
 /*
 ** https://stackoverflow.com/questions/21675846/c11-using-stdequal-range-with-custom-comparison-function
-** Because equal_range checks both "int < foreign type" and "foreign type < int"
+** Because equal_range checks both "int32_t < foreign type" and "foreign type < int32_t"
 ** We need a checking function that can accept both types at both places
 */
 struct comp
 {
-	bool operator() (const ACMIRawPositionData& a, const int& b) const
+	bool operator() (const ACMIRawPositionData& a, const int32_t& b) const
 	{
 		return a.uniqueID < b;
 	}
 
-	bool operator() (const int& a, const ACMIRawPositionData& b) const
+	bool operator() (const int32_t& a, const ACMIRawPositionData& b) const
 	{
 		return a < b.uniqueID;
 	}
@@ -127,7 +118,7 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 	float endTime = 0.0;
 	bool corrupted = false;
 
-	long filesize = GetFileSize(inFltFile);
+	int32_t filesize = GetFileSize(inFltFile);
 
 	// Load flight file for positional data.
 	flightFile = fopen(inFltFile, "rb");
@@ -317,7 +308,7 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 
 			// fill in data
 			ehdr.eventType = hdr.type;
-			// ehdr.index = static_cast<long>(importEventVec.size());
+			// ehdr.index = static_cast<int32_t>(importEventVec.size());
 			ehdr.index = importEventVec.size();
 			ehdr.time = hdr.time;
 			ehdr.timeEnd = hdr.time + msfx.timeToLive;
@@ -434,7 +425,7 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 		case ACMICallsignList:
 
 			// Read the data
-			if (!fread(&import_count, sizeof(long), 1, flightFile))
+			if (!fread(&import_count, sizeof(int32_t), 1, flightFile))
 			{
 				corrupted = true;
 				MonoPrint("%s[WARNING] Error reading ACMICallsignList%s\n", COLOR_YELLOW, COLOR_RESET);
@@ -473,6 +464,10 @@ bool ACMITape::Import(const char* inFltFile, const char* outTapeFileName)
 	// Stable sort instead of simple sort to prevent entities with the same ID to be misordered 
 	// As we want to keep the order at wich they were written to the file 
 	// Very important to have a sorted vector, otherwise we might miss some data
+	auto compare_uniq_id = [](const ACMIRawPositionData& i, const ACMIRawPositionData& j) {
+		return i.uniqueID < j.uniqueID;
+	};
+
 	std::stable_sort(importPosVec.begin(), importPosVec.end(), compare_uniq_id);
 	std::stable_sort(importEntEventVec.begin(), importEntEventVec.end(), compare_uniq_id);
 
@@ -607,7 +602,7 @@ void ACMITape::ParseEntities(void)
 	** I have no Idea if it's really usefull as Tacview doesn't seem to be using those values.
 	** But they were doing that in the original code so *shrug*
 	*/
-	int objCount;
+	int32_t objCount;
 
 	size_t i = 0;
 	size_t j = 0;
@@ -661,11 +656,11 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 	// entity and chains them together
 	par_for(0, importEntityVecSize, [&](size_t i)
 		{
-			long currOffset;
+			int32_t currOffset;
 			bool foundFirst = false;
-			long prevOffset = 0;
+			int32_t prevOffset = 0;
 			importEntityVec[i].firstPositionDataOffset = 0;
-			int prevPosVec = -1;
+			int32_t prevPosVec = -1;
 
 			std::pair<std::vector<ACMIRawPositionData>::iterator, std::vector<ACMIRawPositionData>::iterator> bounds;
 
@@ -724,11 +719,11 @@ void ACMITape::ThreadEntityPositions(ACMITapeHeader* tapeHdr)
 	// Feature and chains them together
 	par_for(0, importFeatVecSize, [&](size_t i)
 		{
-			long currOffset;
+			int32_t currOffset;
 			bool foundFirst = false;
-			long prevOffset = 0;
+			int32_t prevOffset = 0;
 			importFeatVec[i].firstPositionDataOffset = 0;
-			int prevPosVec = -1;
+			int32_t prevPosVec = -1;
 
 			std::pair<std::vector<ACMIRawPositionData>::iterator, std::vector<ACMIRawPositionData>::iterator> bounds;
 
@@ -842,12 +837,12 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader* tapeHdr)
 	*/
 	par_for(0, importEntityVecSize, [&](size_t i)
 		{
-			long currOffset;
+			int32_t currOffset;
 			bool foundFirst = false;
-			long prevOffset = 0;
+			int32_t prevOffset = 0;
 			importEntityVec[i].firstEventDataOffset = 0;
 
-			int prevPosVec = -1;
+			int32_t prevPosVec = -1;
 
 			std::pair<std::vector<ACMIRawPositionData>::iterator, std::vector<ACMIRawPositionData>::iterator> bounds;
 
@@ -904,19 +899,6 @@ void ACMITape::ThreadEntityEvents(ACMITapeHeader* tapeHdr)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
-int CompareEventTrailer(const void* p1, const void* p2)
-{
-	ACMIEventTrailer* t1 = (ACMIEventTrailer*)p1;
-	ACMIEventTrailer* t2 = (ACMIEventTrailer*)p2;
-
-	if (t1->timeEnd < t2->timeEnd)
-		return -1;
-	else if (t1->timeEnd > t2->timeEnd)
-		return 1;
-	else
-		return 0;
-}
 
 /*
 ** Description:
@@ -1028,13 +1010,14 @@ bool ACMITape::WriteTapeFile(const char* fname, ACMITapeHeader* tapeHdr)
 
 		size_t importEventTrailerVecSize = importEventTrailerVec.size();
 
-		/*
-		Using qsort because sort and sort_stable don't output the same exact result
-		Don't know if it's a problem I use that for now.
-		*/
 		if (importEventTrailerVecSize > 0)
 		{
-			qsort(&importEventTrailerVec[0], importEventTrailerVec.size(), sizeof(ACMIEventTrailer), CompareEventTrailer);
+			// Sort entires by end time
+			std::stable_sort(importEventTrailerVec.begin(), importEventTrailerVec.end(),
+				[](const ACMIEventTrailer& t1, const ACMIEventTrailer& t2) {
+					return t1.timeEnd < t2.timeEnd;
+			});
+
 
 			ret = fwrite(importEventTrailerVec.data(), sizeof(ACMIEventTrailer) * importEventTrailerVecSize, 1, tapeFile);
 			if (!ret)
@@ -1088,7 +1071,7 @@ void ACMITape::ImportTextEventList(FILE* fd, ACMITapeHeader* tapeHdr)
 	// write callsign list
 	if (Import_Callsigns)
 	{
-		ret = fwrite(&import_count, sizeof(long), 1, fd);
+		ret = fwrite(&import_count, sizeof(int32_t), 1, fd);
 		if (!ret)
 			goto error_exit;
 
