@@ -119,6 +119,7 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="src\Acmirec.h" />
     <ClInclude Include="src\AcmiTape.h" />
     <ClInclude Include="src\FolderMonitor.h" />
@@ -132,7 +133,11 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="ACMI_compiler_logo.ico" />
     <Image Include="speed.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="acmi-compiler.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

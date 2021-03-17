@@ -41,6 +41,9 @@
     <ClInclude Include="src\FolderMonitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore">
@@ -61,5 +64,13 @@
     <Image Include="speed.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="ACMI_compiler_logo.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="acmi-compiler.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
