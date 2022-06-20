@@ -1,5 +1,11 @@
 # ACMI-Compiler
 
+## Deprecation warning 
+This tool still works fine with modern versions of BMS, but you should definitly check out Mrkline implementation. It's Even faster, I highly recommend it.
+
+https://github.com/mrkline/flt2vhs
+
+
 ### Table of content
 - [What is this ?](#what-is-this--)
 - [What are the requirement ?](#what-are-the-requirement--)
